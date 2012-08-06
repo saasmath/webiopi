@@ -1,0 +1,16 @@
+WebIOPi requires RPi.GPIO Python module
+http://pypi.python.org/pypi/RPi.GPIO/
+
+To install the module, you will need python development headers
+On Raspbian, with root user  (or using sudo):
+$ aptitude install python-dev
+
+Then download & install the module :
+$ wget http://pypi.python.org/packages/source/R/RPi.GPIO/RPi.GPIO-0.3.1a.tar.gz
+$ tar xvzf RPi.GPIO-0.3.1a.tar.gz
+$ cd RPi.GPIO-0.3.1a
+$ python setup.py install
+
+To install WebIOPi, just download and extract the archive.
+
+Refer to README.txt for information about WebIOPi usage.
