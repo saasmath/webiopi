@@ -29,17 +29,17 @@ class MODE:
     ALT=2
     
 
-def setGPIODirection(pin, direction):
-    GPIO.setup(pin, direction)
-    GPIO_PINS[pin]["direction"] = direction
-
 def setGPIOValue(pin, value):
     GPIO.output(pin, value)
     GPIO_PINS[pin]["value"] = value
       
+def setGPIODirection(pin, direction):
+    GPIO.setup(pin, direction)
+    GPIO_PINS[pin]["direction"] = direction
+    setGPIOValue(pin, False)
+
 def initGPIO(pin):
     setGPIODirection(pin, GPIO.OUT)
-    setGPIOValue(pin, False)
     GPIO_PINS[pin]["mode"] = MODE.GPIO
 
 def setALT(alt, enable):
