@@ -13,11 +13,15 @@ UART is enabled but unusable for now.
 UART, SPI and I2C support will be added as soon as possible.
 Don't forget that GPIO are 3.3V TTL, don't plug them to 5V !!!
 
+
+WEB APP
+-------
 To use WebIOPi, install it, then open your browser/smartphone to your Pi's IP/hostname.
 Click/Tap the OUT/IN button to change GPIO direction.
 Click/Tap pins to change the GPIO output state.
 
-
+WEB API
+-------
 You can use the API to make your own GUI or WebApp.
 The API is currently limited to 3 features :
 - Retrieve GPIO state/configuration :
