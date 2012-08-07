@@ -1,6 +1,8 @@
 WebIOPi let's you control your Pi's GPIO over a web interface.
 - REST/JSON API
-- Python server side (use RPi.GPIO)
+- Server side available in differents technologies
+	- PHP
+	- Python server side (use RPi.GPIO)
 - Full JavaScript client side (use jQuery)
 - Smartphone compatible
 - Auto-refresh
@@ -11,15 +13,8 @@ UART is enabled but unusable for now.
 UART, SPI and I2C support will be added as soon as possible.
 Don't forget that GPIO are 3.3V TTL, don't plug them to 5V !!!
 
-To use WebIOPi, is very simple : 
-Open a terminal in the directory you extracted WebIOPi, and start the server process with root/sudo : 
-$ python webiopi.py [port]
-or
-$ ./webiopy.py [port]
-where port is the port to bind the HTTP server, default is 80, but maybe used by Apache.
-
-Then point you browser/smartphone to your Pi's IP/hostname.
-Click/Tap the OUT/IN button to change GPIO behaviours.
+To use WebIOPi, install it, then open your browser/smartphone to your Pi's IP/hostname.
+Click/Tap the OUT/IN button to change GPIO direction.
 Click/Tap pins to change the GPIO output state.
 
 
@@ -29,11 +24,11 @@ The API is currently limited to 3 features :
 	HTTP GET /*
 
 - Setup GPIO pin :
-	HTTP POST /GPIO/{pinNumber}/setup/{"IN", "OUT"}
-	Returns new setup : {"IN", "OUT"}
+	HTTP POST /GPIO/{pinNumber}/setup/{"in", "out"}
+	Returns new setup : {"in", "out"}
 	Examples:
-		To set GPIO 0 in INPUT : HTTP POST /GPIO/0/setup/IN
-		To set GPIO 1 in OUTPUT : HTTP POST /GPIO/1/setup/OUT
+		To set GPIO 0 in input : HTTP POST /GPIO/0/setup/out
+		To set GPIO 1 in output : HTTP POST /GPIO/1/setup/out
 
 
 - Change GPIO value :
