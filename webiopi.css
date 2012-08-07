@@ -11,7 +11,7 @@ input {
 	padding: 0 0 0 0;
 }
 
-input.pinsetup {
+input.pindirection {
 	width: 50px;
 	background-color: Gray;
 }

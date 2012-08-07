@@ -29,17 +29,17 @@ class MODE:
     ALT=2
     
 
-def setupGPIO(pin, setup):
-    GPIO.setup(pin, setup)
-    GPIO_PINS[pin]["setup"] = setup
+def setGPIODirection(pin, direction):
+    GPIO.setup(pin, direction)
+    GPIO_PINS[pin]["direction"] = direction
 
-def outputGPIO(pin, value):
+def setGPIOValue(pin, value):
     GPIO.output(pin, value)
     GPIO_PINS[pin]["value"] = value
       
 def initGPIO(pin):
-    setupGPIO(pin, GPIO.OUT)
-    outputGPIO(pin, False)
+    setGPIODirection(pin, GPIO.OUT)
+    setGPIOValue(pin, False)
     GPIO_PINS[pin]["mode"] = MODE.GPIO
 
 def setALT(alt, enable):
@@ -49,8 +49,8 @@ def setALT(alt, enable):
             p["mode"] = MODE.ALT
         else:
             p["mode"] = MODE.GPIO
-            setupGPIO(pin, GPIO.OUT)
-            outputGPIO(pin, False)
+            setGPIODirection(pin, GPIO.OUT)
+            setGPIOValue(pin, False)
     ALT[alt]["enabled"] = enable
             
 def writeJSON(out):
@@ -70,15 +70,15 @@ def writeJSON(out):
         mode = "GPIO"
         if (GPIO_PINS[pin]["mode"] == MODE.ALT):
             mode = "ALT"
-        setup = "OUT"
-        if (GPIO_PINS[pin]["setup"] == GPIO.IN):
-            setup = "IN"
+        direction = "out"
+        if (GPIO_PINS[pin]["direction"] == GPIO.IN):
+            direction = "in"
             GPIO_PINS[pin]["value"] = GPIO.input(pin)
             
         value = 0
         if (GPIO_PINS[pin]["value"] == True):
             value = 1
-        out.write('"%d": {"mode": "%s", "setup": "%s", "value": %d}' % (pin, mode, setup, value))
+        out.write('"%d": {"mode": "%s", "direction": "%s", "value": %d}' % (pin, mode, direction, value))
         first = False
         
     out.write("\n}}")
@@ -121,19 +121,19 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if (mode == "GPIO"):
             if (operation == "value"):
                 if (value == "1"):
-                    outputGPIO(i, True)
+                    setGPIOValue(i, True)
                 else:
-                    outputGPIO(i , False)
+                    setGPIOValue(i , False)
     
                 s.send_response(200)
                 s.send_header("Content-type", "text/plain");
                 s.end_headers()
                 s.wfile.write(value)
-            elif (operation == "setup"):
-                if value == "IN":
-                    setupGPIO(i, GPIO.IN)
+            elif (operation == "direction"):
+                if value == "in":
+                    setGPIODirection(i, GPIO.IN)
                 else:
-                    setupGPIO(i, GPIO.OUT)
+                    setGPIODirection(i, GPIO.OUT)
     
                 s.send_response(200)
                 s.send_header("Content-type", "text/plain");
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BCM)
 
     for i in range(PIN_COUNT):
-        GPIO_PINS.append({"mode": 0, "setup": None, "value": None})
+        GPIO_PINS.append({"mode": 0, "direction": None, "value": None})
 
     setALT("UART", True)
 

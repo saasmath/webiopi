@@ -61,33 +61,33 @@ function init_pinout() {
 	
 }
 
-function updateGPIO(gpio, value) {
+function updateGPIOValue(gpio, value) {
 	GPIO[gpio].value = value;
 	var color = value == 1 ? TYPE.V33.color : TYPE.GND.color;
 	$("#pin"+GPIO[gpio].rpin).css("background-color", color);
 }
 
-function updateGPIOSetup(gpio, value) {
-	GPIO[gpio].setup = value;
-	$("#setup"+GPIO[gpio].rpin).val(value);
+function updateGPIODirection(gpio, direction) {
+	GPIO[gpio].direction = direction;
+	$("#direction"+GPIO[gpio].rpin).val(direction.toUpperCase());
 }
 
-function postGPIO(i) {
+function toggleGPIOValue(i) {
 	var gpio = PINS[i].value;
-	if ((PINS[i].type.value == TYPE.GPIO.value) && (GPIO[gpio].setup=="OUT")) {
+	if ((PINS[i].type.value == TYPE.GPIO.value) && (GPIO[gpio].direction=="out")) {
 		var value = (GPIO[gpio].value == 1) ? 0 : 1;
 		$.post('GPIO/' + PINS[i].value + "/value/" + value, function(data) {
-			updateGPIO(gpio, data)
+			updateGPIOValue(gpio, data);
 		});
 	}
 }
 
-function postGPIOSetup(i) {
+function toggleGPIODirection(i) {
 	if (PINS[i].type.value == TYPE.GPIO.value) {
 		var gpio = PINS[i].value;
-		var value = (GPIO[gpio].setup == "IN") ? "OUT" : "IN";
-		$.post('GPIO/' + PINS[i].value + "/setup/" + value, function(data) {
-			updateGPIOSetup(gpio, data)
+		var value = (GPIO[gpio].direction == "in") ? "out" : "in";
+		$.post('GPIO/' + PINS[i].value + "/direction/" + value, function(data) {
+			updateGPIODirection(gpio, data);
 		});
 	}
 }
@@ -99,7 +99,7 @@ function getPinCell(i) {
 	button.val(i+1);
 	button.css("background-color", PINS[i].type.color);
 	button.bind("click", function(event) {
-		postGPIO(i);
+		toggleGPIOValue(i);
 	});
 	cell.append(button);
 	return cell;
@@ -128,16 +128,16 @@ function getNameCell(i, align) {
 	return cell;
 }
 
-function getSetupCell(i) {
+function getDirectionCell(i) {
 	var cell = $('<td align="center">');
 	if (PINS[i].type.value == TYPE.GPIO.value) {
 		var button = $('<input>');
-		button.attr("id", "setup"+i);
+		button.attr("id", "direction"+i);
 		button.attr("type", "submit");
-		button.addClass("pinsetup");
-		button.val(GPIO[PINS[i].value].setup);
+		button.addClass("pindirection");
+		button.val(GPIO[PINS[i].value].direction);
 		button.bind("click", function(event) {
-			postGPIOSetup(i);
+			toggleGPIODirection(i);
 		});
 		cell.append(button);
 	}
@@ -151,12 +151,12 @@ function setALT(alt, enable) {
 		if (enable) {
 			$("#name"+i).append(alt.name + " " + alt.pins[p].name);
 			$("#pin"+i).css("background-color", alt.color);
-			$("#setup"+i).css("visibility", "hidden");
+			$("#direction"+i).css("visibility", "hidden");
 		}
 		else {
 			$("#name"+i).append(getName(i));
 			$("#pin"+i).css("background-color", TYPE.GPIO.color);
-			$("#setup"+i).css("visibility", "visible");
+			$("#direction"+i).css("visibility", "visible");
 		}
 	}
 	alt.enabled = enable;
@@ -167,14 +167,14 @@ function buildTable() {
 	var table = $("#webiopi > table");
 	for (var i=0; i<26; i++) {
 		var line = 	$('<tr>');
-		line.append(getSetupCell(i))
+		line.append(getDirectionCell(i))
 		line.append(getNameCell(i, "right"))
 		line.append(getPinCell(i));
 
 		i++;
 		line.append(getPinCell(i));
 		line.append(getNameCell(i, "left"))
-		line.append(getSetupCell(i))
+		line.append(getDirectionCell(i))
 
 		table.append(line);
 	}
@@ -188,8 +188,8 @@ function updateUI() {
 		
 		$.each(data["GPIO"], function(gpio, data) {
 		    if (data["mode"] == "GPIO") {
-		    	updateGPIOSetup(gpio, data["setup"]);
-		    	updateGPIO(gpio, data["value"]);
+		    	updateGPIODirection(gpio, data["direction"]);
+		    	updateGPIOValue(gpio, data["value"]);
 		    }
 		});
 	});
