@@ -23,7 +23,7 @@ Click/Tap the OUT/IN button to change GPIO behaviours.
 Click/Tap pins to change the GPIO output state.
 
 
-You can use the API the to make your own GUI or WebApp.
+You can use the API to make your own GUI or WebApp.
 The API is currently limited to 3 features :
 - Retrieve GPIO state/configuration :
 	HTTP GET /*
