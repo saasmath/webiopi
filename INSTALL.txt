@@ -1,4 +1,5 @@
 You have the choice of the install, regards on wich technology you prefer : PHP or Pyhton.
+But don't use different server at the same time, or it may not work correctly.
 
 PHP
 ---
@@ -27,7 +28,7 @@ www-data ALL=(ALL) NOPASSWD: ALL
 
 Exit, save, and confirm changes.
 
-You can now open a browser to http://raspberrypi/webiopi/
+You can now open a browser to http://raspberrypi/webiopi/  (or replace raspberrypi by your Pi's IP)
   
 
 PYTHON
@@ -51,7 +52,7 @@ or
 $ ./webiopy.py [port]
 where port is the port to bind the HTTP server, default is 80, but maybe used by Apache.
 
-You can now open a browser to http://raspberrypi[:port]/
+You can now open a browser to http://raspberrypi[:port]/ (or replace raspberrypi by your Pi's IP)
 
 
 Refer to README.txt for information about WebIOPi usage.
