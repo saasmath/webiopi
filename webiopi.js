@@ -76,7 +76,7 @@ function postGPIO(i) {
 	var gpio = PINS[i].value;
 	if ((PINS[i].type.value == TYPE.GPIO.value) && (GPIO[gpio].setup=="OUT")) {
 		var value = (GPIO[gpio].value == 1) ? 0 : 1;
-		$.post('/GPIO/' + PINS[i].value + "/value/" + value, function(data) {
+		$.post('GPIO/' + PINS[i].value + "/value/" + value, function(data) {
 			updateGPIO(gpio, data)
 		});
 	}
@@ -86,7 +86,7 @@ function postGPIOSetup(i) {
 	if (PINS[i].type.value == TYPE.GPIO.value) {
 		var gpio = PINS[i].value;
 		var value = (GPIO[gpio].setup == "IN") ? "OUT" : "IN";
-		$.post('/GPIO/' + PINS[i].value + "/setup/" + value, function(data) {
+		$.post('GPIO/' + PINS[i].value + "/setup/" + value, function(data) {
 			updateGPIOSetup(gpio, data)
 		});
 	}
@@ -181,7 +181,7 @@ function buildTable() {
 }
 
 function updateUI() {
-	$.getJSON("/*", function(data) {
+	$.getJSON("*", function(data) {
 		setALT(ALT.UART, data["UART"]);
 		setALT(ALT.I2C, data["I2C"]);
 		setALT(ALT.SPI, data["SPI"]);
