@@ -59,7 +59,7 @@ Refer to README.txt for information about WebIOPi usage.
 
 ------------------------------------------------------------------------------
 
-   Copyright 2012 trouch.com
+   Copyright 2012 Eric Ptak - trouch.com
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
