@@ -49,7 +49,7 @@ To install WebIOPi, just download and extract the archive wherever you want.
 To run it, open a terminal in the directory you extracted WebIOPi, and start the server process with root/sudo : 
 $ python webiopi.py [port]
 or
-$ ./webiopy.py [port]
+$ ./webiopi.py [port]
 where port is the port to bind the HTTP server, default is 80, but maybe used by Apache.
 
 You can now open a browser to http://raspberrypi[:port]/ (or replace raspberrypi by your Pi's IP)
