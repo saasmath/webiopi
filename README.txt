@@ -5,7 +5,7 @@ Features :
 - REST/JSON API
 - Server side available in differents technologies
 	- PHP
-	- Python server side (use RPi.GPIO)
+	- Python (use RPi.GPIO)
 - Full JavaScript client side (use jQuery)
 - Smartphone compatible
 - Auto-refresh
@@ -21,7 +21,7 @@ Restrictions :
 
 Web App :
 ---------
-To use WebIOPi, install it, then open your browser/smartphone to your Pi's IP/hostname.
+To use WebIOPi, install it, then open your browser to your Pi's IP/hostname.
 Click/Tap the OUT/IN button to change GPIO direction.
 Click/Tap pins to change the GPIO output state.
 
