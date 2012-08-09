@@ -1,5 +1,7 @@
 You have the choice of the install, regards on wich technology you prefer : PHP or Pyhton.
 But don't use different server at the same time, or it may not work correctly.
+- PHP version is good if you already have Apache/PHP or if you plan to use it, but requires some configuration.
+- Python version is perfect for one time use, or for users who don't want to install and/or modify Apache configuration files.
 
 PHP
 ---
@@ -39,7 +41,7 @@ You will need Python development headers
 On Raspbian, with root user  (or using sudo):
 $ aptitude install python-dev
 
-Then download & install the module :
+Then download & install the GPIO module :
 $ wget http://pypi.python.org/packages/source/R/RPi.GPIO/RPi.GPIO-0.3.1a.tar.gz
 $ tar xvzf RPi.GPIO-0.3.1a.tar.gz
 $ cd RPi.GPIO-0.3.1a

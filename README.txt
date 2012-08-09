@@ -12,11 +12,11 @@ Features :
 
 Restrictions :
 --------------
-- Only support binary GPIOs for now, in both input and output.
+- Only support binary GPIOs, in both input and output.
 - GPIOs 0 and 1 have input pull-up resistor enabled.
 - UART is enabled but unusable for now.
 - UART, SPI and I2C support will be added as soon as possible.
-- Don't forget that GPIO are 3.3V TTL, don't plug them to 5V !!!
+- Don't forget that GPIO are 3.3V, don't plug them to 5V !!!
 
 
 Web App :
