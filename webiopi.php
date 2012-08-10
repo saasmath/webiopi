@@ -37,6 +37,9 @@ function doGET($gpio, $vars) {
 			echo $gpio->getValue($pin);
 		}
 	}
+	else if ($vars[1] == "release") {
+		$gpio->release();
+	}
 	else {
 		sendError(404, "Not Found");
 	}
@@ -94,6 +97,9 @@ function doPOST($gpio, $vars) {
 
 		header("Content-Type: text/plain");
 		print $ret;
+	}
+	else if ($vars[1] == "release") {
+		$gpio->release();
 	}
 	else {
 		sendError(404, "Not Found");
