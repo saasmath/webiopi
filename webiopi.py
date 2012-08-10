@@ -53,6 +53,7 @@ def setGPIODirection(pin, direction):
     GPIO_PINS[pin]["direction"] = direction
     if (direction == GPIO.OUT):
         setGPIOValue(pin, False)
+        
 
 def initGPIO(pin):
     setGPIODirection(pin, GPIO.IN)
@@ -120,6 +121,28 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.send_header("Content-type", "application/json")
             s.end_headers()
             writeJSON(s.wfile)
+        elif (s.path.startswith("/GPIO/")):
+            (root, mode, pin, operation) = s.path.split("/")
+            i = int(pin)
+            s.send_response(200)
+            s.send_header("Content-type", "text/plain");
+            s.end_headers()
+            if (operation == "value"):
+                if (GPIO_PINS[i]["direction"] == GPIO.IN):
+                    GPIO_PINS[i]["value"] = GPIO.input(i)
+                if (GPIO_PINS[i]["value"] == GPIO.HIGH):
+                    s.wfile.write("1")
+                else:
+                    s.wfile.write("0")
+    
+            elif (operation == "direction"):
+                if (GPIO_PINS[i]["direction"] == GPIO.OUT):
+                    s.wfile.write("out")
+                else:
+                    s.wfile.write("in")
+    
+            else:
+                WebPiHandler.sendError(s, 404, "Not Found")
         elif os.path.exists(os.getcwd() + s.path):
             f = open(os.getcwd() + s.path)
             s.send_response(200)
@@ -132,9 +155,9 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             WebPiHandler.sendError(s, 404, "Not Found")
 
     def do_POST(s):
-        (root, mode, pin, operation, value) = s.path.split("/")
-        i = int(pin)
-        if (mode == "GPIO"):
+        if (s.path.startswith("/GPIO/")):
+            (root, mode, pin, operation, value) = s.path.split("/")
+            i = int(pin)
             if (operation == "value"):
                 if (value == "1"):
                     setGPIOValue(i, True)
@@ -155,6 +178,8 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 s.send_header("Content-type", "text/plain");
                 s.end_headers()
                 s.wfile.write(value)
+            else:
+                WebPiHandler.sendError(s, 404, "Not Found")
         else:
             WebPiHandler.sendError(s, 404, "Not Found")
 
