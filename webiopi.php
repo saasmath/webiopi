@@ -26,6 +26,17 @@ function doGET($gpio, $vars) {
 	if ($vars[1] == "*") {
 		writeJSON($gpio);
 	}
+	else if ($vars[1] == "GPIO") {
+		$pin = $vars[2];
+		$cmd = $vars[3];
+		header("Content-Type: text/plain");
+		if ($cmd == "direction") {
+			echo $gpio->getDirection($pin);
+		}
+		else if ($cmd == "value") {
+			echo $gpio->getValue($pin);
+		}
+	}
 	else {
 		sendError(404, "Not Found");
 	}
