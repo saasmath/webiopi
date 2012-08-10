@@ -23,7 +23,11 @@ class GPIO {
 		"SPI" => ["enabled" => false, "pins"=>[7, 8, 9, 10, 11]]
 	];
 	var $GPIO_ROOT = "/sys/class/gpio";
-
+	
+	function sudo($cmd) {
+		return system("sudo sh -c '$cmd'");
+	}
+	
 	function setALT($alt, $enable) {
 		$alt["enabled"] = $enable;
 	}
@@ -37,12 +41,16 @@ class GPIO {
 	}
 
 	function enable($pin) {
-		system("sudo sh -c 'echo $pin > $this->GPIO_ROOT/export'");
-		return $this->isEnabled($pin);
+		$this->sudo("echo $pin > $this->GPIO_ROOT/export");
+		if ($this->isEnabled($pin)) {
+			$this->setDirection($pin, "in");
+			return true;
+		}
+		return false;
 	}
 
 	function disable($pin) {
-		system("sudo sh -c 'echo $pin > $this->GPIO_ROOT/unexport'");
+		$this->sudo("echo $pin > $this->GPIO_ROOT/unexport");
 		return $this->isEnabled($pin);
 	}
 
@@ -56,13 +64,17 @@ class GPIO {
 		
 	}
 	
+	function writeGPIO($pin, $file, $value) {
+		$this->sudo("echo $value > " . $this->getPath($pin, $file));
+		return $this->readGPIO($pin, $file);
+	}
+	
 	function getDirection($pin) {
 		return $this->readGPIO($pin, "direction");
 	}
 
 	function setDirection($pin, $value) {
-		system("sudo sh -c 'echo $value > " . $this->getPath($pin, "direction") . "'");
-		return $this->getDirection($pin);
+		return $this->writeGPIO($pin, "direction", $value);
 	}
 
 	function getValue($pin) {
@@ -70,8 +82,7 @@ class GPIO {
 	}
 
 	function setValue($pin, $value) {
-		system("sudo sh -c 'echo $value > " . $this->getPath($pin, "value") . "'");
-		return $this->getValue($pin);
+		return $this->writeGPIO($pin, "value", $value);
 	}
 
 	function getALTPins() {
@@ -91,7 +102,6 @@ class GPIO {
 		foreach($this->GPIO_AVAILABLE as $pin) {
 			if (!in_array($pin, $alt_pins)) {
 				if ($enable && !$this->isEnabled($pin)) {
-					echo "enabling " . $pin . "</br>";
 					$this->enable($pin);
 				}
 				else if (!$enable && $this->isEnabled($pin)) {
@@ -111,4 +121,20 @@ class GPIO {
 	}
 }
 
+if (isset($_SERVER["SHELL"])) {
+	$gpio = new GPIO();
+	if ($argc == 1) {
+		
+	}
+	else if (($argc == 2) && ($argv[1] == "init")) {
+		$gpio->init();
+	}
+	else if (($argc == 2) && ($argv[1] == "release")) {
+		$gpio->release();
+	}
+	else {
+		echo "usage:\n";
+		echo "php " . $argv['0'] . " [init|release]\n";
+	}
+}
 ?>
