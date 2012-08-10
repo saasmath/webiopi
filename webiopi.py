@@ -51,10 +51,11 @@ def setGPIOValue(pin, value):
 def setGPIODirection(pin, direction):
     GPIO.setup(pin, direction)
     GPIO_PINS[pin]["direction"] = direction
-    setGPIOValue(pin, False)
+    if (direction == GPIO.OUT):
+        setGPIOValue(pin, False)
 
 def initGPIO(pin):
-    setGPIODirection(pin, GPIO.OUT)
+    setGPIODirection(pin, GPIO.IN)
     GPIO_PINS[pin]["mode"] = MODE.GPIO
 
 def setALT(alt, enable):
