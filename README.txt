@@ -1,12 +1,13 @@
 WebIOPi let's you control your Pi's GPIO over a web interface.
+It's useful to start enjoying GPIOs and also to debug some circuits without writing any code.
 
 Features :
 ----------
 - REST/JSON API
-- Server side available in differents technologies
+- Server side available in two technologies
 	- PHP
-	- Python (use RPi.GPIO)
-- Full JavaScript client side (use jQuery)
+	- Python (uses RPi.GPIO)
+- Full JavaScript client side (uses jQuery)
 - Smartphone compatible
 - Auto-refresh
 
@@ -34,11 +35,11 @@ The API is currently limited to 3 features :
 	Returns full GPIO state in JSON
 	{"UART": 1, "I2C": 0, "SPI": 0, "GPIO":{
 "0": {"mode": "GPIO", "direction": "in", "value": 1}, 
-"1": {"mode": "GPIO", "direction": "in", "value": 0}, 
-"4": {"mode": "GPIO", "direction": "out", "value": 1}, 
+"1": {"mode": "GPIO", "direction": "in", "value": 1}, 
+"4": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "7": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "8": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"9": {"mode": "GPIO", "direction": "ou", "value": 0}, 
+"9": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "10": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "11": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "14": {"mode": "ALT", "direction": "out", "value": 0}, 
@@ -51,6 +52,7 @@ The API is currently limited to 3 features :
 "24": {"mode": "GPIO", "direction": "out", "value": 0}, 
 "25": {"mode": "GPIO", "direction": "out", "value": 0}
 }}
+UART=1 means UART is enabled I2C/SPI=0 means I2C/SPIC are disabled 
 
 - Setup GPIO direction :
 	HTTP POST /GPIO/(pinNumber)/direction/("in" or "out")
