@@ -26,6 +26,7 @@ import RPi.GPIO as GPIO
 
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 80
+CONTEXT = "webiopi"
 INDEX_FILE = "webiopi.html"
 
 PIN_COUNT = 26
@@ -119,7 +120,7 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" % (code, message, code, message))
 
     def do_GET(s):
-        if s.path == "/": 
+        if s.path == "/%s/" % CONTEXT: 
             f = open(INDEX_FILE)
             s.send_response(200)
             (type, encoding) = mime.guess_type(INDEX_FILE)
@@ -127,13 +128,13 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.end_headers()
             s.wfile.write(f.read())
             f.close()
-        elif s.path == "/*":
+        elif s.path == "/%s/*" % CONTEXT:
             s.send_response(200)
             s.send_header("Content-type", "application/json")
             s.end_headers()
             writeJSON(s.wfile)
-        elif (s.path.startswith("/GPIO/")):
-            (root, mode, pin, operation) = s.path.split("/")
+        elif (s.path.startswith("/%s/GPIO/" % CONTEXT)):
+            (root, context, mode, pin, operation) = s.path.split("/")
             i = int(pin)
             if not checkGPIOPin(s, pin):
                 return
@@ -160,10 +161,10 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.send_header("Content-type", "text/plain");
             s.wfile.write(value)
 
-        elif os.path.exists(os.getcwd() + s.path):
-            f = open(os.getcwd() + s.path)
+        elif os.path.exists(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")):
+            f = open(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/"))
             s.send_response(200)
-            (type, encoding) = mime.guess_type(s.path)
+            (type, encoding) = mime.guess_type(s.path.replace("/%s/" % CONTEXT, ""))
             s.send_header("Content-type", type);
             s.end_headers()
             s.wfile.write(f.read())
@@ -172,8 +173,8 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             WebPiHandler.sendError(s, 404, "Not Found")
 
     def do_POST(s):
-        if (s.path.startswith("/GPIO/")):
-            (root, mode, pin, operation, value) = s.path.split("/")
+        if (s.path.startswith("/%s/GPIO/" % CONTEXT)):
+            (root, context, mode, pin, operation, value) = s.path.split("/")
             i = int(pin)
             if not checkGPIOPin(s, pin):
                 return
