@@ -59,6 +59,17 @@ def initGPIO(pin):
     setGPIODirection(pin, GPIO.IN)
     GPIO_PINS[pin]["mode"] = MODE.GPIO
 
+def checkGPIOPin(s, pin):
+    i = int(pin)
+    if not (i in GPIO_AVAILABLE):
+        WebPiHandler.sendError(s, 403, "GPIO " + pin + " Not Available")
+        return False
+    if (GPIO_PINS[i]["mode"] != MODE.GPIO):
+        WebPiHandler.sendError(s, 403, "GPIO " + pin + " Disabled")
+        return False
+    return True
+
+
 def setALT(alt, enable):
     for pin in ALT[alt]["pins"]:
         p = GPIO_PINS[pin];
@@ -124,25 +135,31 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif (s.path.startswith("/GPIO/")):
             (root, mode, pin, operation) = s.path.split("/")
             i = int(pin)
-            s.send_response(200)
-            s.send_header("Content-type", "text/plain");
-            s.end_headers()
+            if not checkGPIOPin(s, pin):
+                return
+            value = ""
             if (operation == "value"):
                 if (GPIO_PINS[i]["direction"] == GPIO.IN):
                     GPIO_PINS[i]["value"] = GPIO.input(i)
                 if (GPIO_PINS[i]["value"] == GPIO.HIGH):
-                    s.wfile.write("1")
+                    value = "1"
                 else:
-                    s.wfile.write("0")
+                    value = "0"
     
             elif (operation == "direction"):
                 if (GPIO_PINS[i]["direction"] == GPIO.OUT):
-                    s.wfile.write("out")
+                    value = "out"
                 else:
-                    s.wfile.write("in")
+                    value = "in"
     
             else:
-                WebPiHandler.sendError(s, 404, "Not Found")
+                WebPiHandler.sendError(s, 404, operation + " Not Found")
+                return
+                
+            s.send_response(200)
+            s.send_header("Content-type", "text/plain");
+            s.wfile.write(value)
+
         elif os.path.exists(os.getcwd() + s.path):
             f = open(os.getcwd() + s.path)
             s.send_response(200)
@@ -158,6 +175,9 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if (s.path.startswith("/GPIO/")):
             (root, mode, pin, operation, value) = s.path.split("/")
             i = int(pin)
+            if not checkGPIOPin(s, pin):
+                return
+            
             if (operation == "value"):
                 if (value == "1"):
                     setGPIOValue(i, True)
@@ -179,7 +199,7 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 s.end_headers()
                 s.wfile.write(value)
             else:
-                WebPiHandler.sendError(s, 404, "Not Found")
+                WebPiHandler.sendError(s, 404, operation + " Not Found")
         else:
             WebPiHandler.sendError(s, 404, "Not Found")
 

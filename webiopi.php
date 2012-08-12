@@ -22,26 +22,43 @@ function sendError($code, $message) {
 	exit($message);
 }
 
+function checkGPIOPin($gpio, $pin) {
+	if (!in_array($pin, $gpio->GPIO_AVAILABLE)) {
+		senderror(403, "GPIO $pin Not Available");
+	}
+	if (in_array($pin, $gpio->getALTPins())) {
+		senderror(403, "GPIO $pin Disabled");
+	}
+}
+
 function doGET($gpio, $vars) {
 	if ($vars[1] == "*") {
 		writeJSON($gpio);
 	}
 	else if ($vars[1] == "GPIO") {
+		if (count($vars) != 4) {
+			sendError(400, "Bad Request");
+		}
 		$pin = $vars[2];
 		$cmd = $vars[3];
-		header("Content-Type: text/plain");
+		checkGPIOPin($gpio, $pin);
 		if ($cmd == "direction") {
-			echo $gpio->getDirection($pin);
+			$ret = $gpio->getDirection($pin);
 		}
 		else if ($cmd == "value") {
-			echo $gpio->getValue($pin);
+			$ret = $gpio->getValue($pin);
 		}
+		else {
+			sendError(404, $cmd . " Not Found");
+		}
+		header("Content-type: text/plain");
+		echo $ret;
 	}
 	else if ($vars[1] == "release") {
 		$gpio->release();
 	}
 	else {
-		sendError(404, "Not Found");
+		sendError(404, $vars[1] . " Not Found");
 	}
 }
 
@@ -49,7 +66,7 @@ function writeJSON($gpio) {
 	$pins = $gpio->GPIO_AVAILABLE;
 	$alt = $gpio->getALTPins();
 
-	header("Content-Type: application/json");
+	header("Content-type: application/json");
 	echo '{"UART": 1, "I2C": 0, "SPI": 0, "GPIO":{'. "\n";
 
 	$first = true;
@@ -84,7 +101,8 @@ function doPOST($gpio, $vars) {
 		$cmd = $vars[3];
 		$val = $vars[4];
 		$ret = "";
-
+		checkGPIOPin($gpio, $pin);
+		
 		if ($cmd == "direction") {
 			$ret = $gpio->setDirection($pin, $val);
 		}
@@ -92,17 +110,17 @@ function doPOST($gpio, $vars) {
 			$ret = $gpio->setValue($pin, $val);
 		}
 		else {
-			sendError(400, "Bad Request");
+			sendError(404, $cmd . " Not Found");
 		}
 
-		header("Content-Type: text/plain");
+		header("Content-type: text/plain");
 		print $ret;
 	}
 	else if ($vars[1] == "release") {
 		$gpio->release();
 	}
 	else {
-		sendError(404, "Not Found");
+		sendError(404, $vars[1] . " Not Found");
 	}
 }
 
