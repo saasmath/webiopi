@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+	<title>WebIOPi | DEMO</title>
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="webiopi.js"></script>
+	<link rel="stylesheet" type="text/css" href="demo.css" />
+	<script type="text/javascript">
+	$(document).ready(function() {
+		postDirection(15, "in");
+		setPinLabel(15, "8")
+		postDirection(19, "in");
+		setPinLabel(19, "4");
+		postDirection(21, "in");
+		setPinLabel(21, "2");
+		postDirection(23, "in");
+		setPinLabel(23, "1");
+
+		postDirection(3, "in");
+		setPinLabel(3, "SW");
+
+		postDirection(26, "out");
+		postValue(26, 1);
+		setPinLabel(26, "LED");
+	});
+	</script>
+</head>
+<body>
+<div align="center">
+	<div id="webiopi"></div>
+</div>
+</body>
+</html>

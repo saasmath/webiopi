@@ -1,78 +1,26 @@
-WebIOPi let's you control your Pi's GPIO over a web interface.
-It's useful to start enjoying GPIOs and also to debug some circuits without writing any code.
+=Features=
+  * Full JavaScript client side (uses [http://jquery.com jQuery])
+  * [WEBAPI REST/JSON API]
+  * Server side available in two technologies
+    * PHP 
+    * Python (uses [http://pypi.python.org/pypi/RPi.GPIO/ RPi.GPIO])
+  * Smartphone compatible
+  * Auto-refresh
 
-Features :
-----------
-- REST/JSON API
-- Server side available in two technologies
-	- PHP
-	- Python (uses RPi.GPIO)
-- Full JavaScript client side (uses jQuery)
-- Smartphone compatible
-- Auto-refresh
+=Restrictions=
+  * Only support binary GPIOs, in both input and output.
+  * GPIOs 0 and 1 have input pull-up resistor enabled.
+  * UART is enabled but unusable for now.
+  * UART, SPI and I2C support will be added as soon as possible.
+  * Don't forget that GPIO support only 3.3V, don't plug them to 5V !!!
 
-Restrictions :
---------------
-- Only support binary GPIOs, in both input and output.
-- GPIOs 0 and 1 have input pull-up resistor enabled.
-- UART is enabled but unusable for now.
-- UART, SPI and I2C support will be added as soon as possible.
-- Don't forget that GPIO are 3.3V, don't plug them to 5V !!!
+=Usage=
+If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost[:port]/webiopi/
 
+If your Raspberry Pi is connected to your network, yo can open a browser to http://raspberrypi[:port]/webiopi/ with any device of your network. Replace raspberrypi by its IP if DNS doesn't work.
 
-Web App :
----------
-To use WebIOPi, install it, then open your browser to your Pi's IP/hostname.
-Click/Tap the OUT/IN button to change GPIO direction.
-Click/Tap pins to change the GPIO output state.
-
-Web API :
----------
-You can use the API to make your own GUI or WebApp.
-The API is currently limited to 3 features :
-- Retrieve GPIO state/configuration :
-	HTTP GET /*
-	Returns full GPIO state in JSON
-	{"UART": 1, "I2C": 0, "SPI": 0, "GPIO":{
-"0": {"mode": "GPIO", "direction": "in", "value": 1}, 
-"1": {"mode": "GPIO", "direction": "in", "value": 1}, 
-"4": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"7": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"8": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"9": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"10": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"11": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"14": {"mode": "ALT", "direction": "out", "value": 0}, 
-"15": {"mode": "ALT", "direction": "out", "value": 0}, 
-"17": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"18": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"21": {"mode": "GPIO", "direction": "out", "value": }, 
-"22": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"23": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"24": {"mode": "GPIO", "direction": "out", "value": 0}, 
-"25": {"mode": "GPIO", "direction": "out", "value": 0}
-}}
-UART=1 means UART is enabled I2C/SPI=0 means I2C/SPIC are disabled 
-
-- Setup GPIO direction :
-	HTTP POST /GPIO/(pinNumber)/direction/("in" or "out")
-	Returns new direction : "in" or "out"
-	Examples:
-		To set GPIO 0 in input : HTTP POST /GPIO/0/direction/in
-			Returns "in"
-		To set GPIO 1 in output : HTTP POST /GPIO/1/direction/out
-			Returns "out"
-
-
-- Change GPIO value :
-	HTTP POST /GPIO/(pinNumber)/value/(0 or 1)
-	Returns new value : 0 or 1
-	Examples:
-		To raise GPIO 0 : HTTP POST /GPIO/0/value/1
-			Returns 1
-		To fall GPIO 1 : HTTP POST /GPIO/1/value/0
-			Return 0
-
+  * Click/Tap the OUT/IN button to change GPIO direction.
+  * Click/Tap pins to change the GPIO output state.
 
 ------------------------------------------------------------------------------
 
