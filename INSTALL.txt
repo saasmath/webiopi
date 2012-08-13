@@ -1,21 +1,23 @@
-You have the choice of the install, regards on wich technology you prefer : PHP or Pyhton.
-But don't use different server at the same time, or it may not work correctly.
+You have the choice of the install, depending on your need and which technology you prefer : PHP or Pyhton.
+
+Don't use different server at the same time, or it may not work correctly.
   * PHP version is good if you already have Apache/PHP or if you plan to use it, but requires some configuration.
-  * Python version is perfect for one time use,  or for users who don't want to install and/or modify Apache configuration files.
+  * Python version is perfect for one time use,  or for users who don't want to install Apache and/or modify its configuration.
+
 
 =PHP=
 Requires Apache2 and PHP5 on your Pi, and also some tweaks.
 
-First install required packages. On Raspbian, using sudo (or root user) :
+First install required packages. On Raspbian, open a terminal :
 {{{
-# sudo aptitude install apache2 php5
+$ sudo aptitude install apache2 php5
 }}}
 
 In order to work, WebIOPi requires to allow .htaccess :
 {{{
-# sudo nano /etc/apache2/sites-enabled/000-default
+$ sudo nano /etc/apache2/sites-enabled/000-default
 }}}
-Find the "<Directory /var/www>" section and change the line "AllowOverride None" to "AllowOverride All" :
+Find the <Directory /var/www/> section and change the line "AllowOverride None" to "AllowOverride All" :
 {{{
 ﻿  <Directory /var/www/>
 ﻿  ﻿  Options Indexes FollowSymLinks MultiViews
@@ -27,40 +29,62 @@ Find the "<Directory /var/www>" section and change the line "AllowOverride None"
 ﻿  
 You will also need to add Apache's user (www-data) to the sudoers :
 {{{
-# sudo visudo
+$ sudo visudo
 }}}
 then add the following line at the end of file :
 {{{
 www-data ALL=(ALL) NOPASSWD: ALL
 }}}
 
-Exit, save, and confirm changes.
-
-FInally, download and extract WebIOPi to /var/www to enjoy WebIOPi.
-
-=PYTHON=
-Requires [http://pypi.python.org/pypi/RPi.GPIO/ RPi.GPIO] module. You will also need Python development headers.
-
-On Raspbian, with sudo or root user :
+Exit, save, confirm changes, and restart Apache :
 {{{
-# sudo aptitude install python-dev
+$ sudo /etc/init.d/apache2 restart
 }}}
 
-Then download, extract the GPIO module and open a terminal where you extracted it :
+Now, download and extract WebIOPi :
 {{{
-# sudo python setup.py install
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
+$ tar xvzf WebIOPi-0.2.tar.gz
 }}}
-
-Finally, extract the WebIOPi archive and open a terminal where you extracted it :
+Finally, move extracted files or create a symbolic link :
 {{{
-# sudo python webiopi.py [port]
+$ sudo mv webiopi /var/www
 or
-# sudo ./webiopi.py [port]
+$ sudo ln -s webiopi /var/www/webiopi
 }}}
-where port is the port to bind the HTTP server, default is 80, but maybe used by Apache.
 
 You're done, and ready to enjoy WebIOPi !
 
+=PYTHON=
+You will need Python development headers. On Raspbian, open a terminal :
+{{{
+$ sudo aptitude install python-dev
+}}}
+
+Then download, and install [http://pypi.python.org/pypi/RPi.GPIO/ RPi.GPIO] module :
+{{{
+$ wget http://raspberry-gpio-python.googlecode.com/files/RPi.GPIO-0.3.1a.tar.gz
+$ tar xvzf RPi.GPIO-0.3.1a.tar.gz
+$ cd RPi.GPIO-0.3.1a
+$ sudo python setup.py install
+}}}
+
+Now download and extract WebIOPi :
+{{{
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
+$ tar xvzf WebIOPi-0.2.tar.gz
+$ cd webiopi
+}}}
+
+Finally, run the python script :
+{{{
+$ sudo python webiopi.py [port]
+or
+$ sudo ./webiopi.py [port]
+}}}
+where port is the port to bind the HTTP server, default is 80, but maybe used.
+
+You're done, and ready to enjoy WebIOPi !
 ------------------------------------------------------------------------------
 
    Copyright 2012 Eric Ptak - trouch.com

@@ -1,5 +1,6 @@
 =Features=
-  * Full JavaScript client side (uses [http://jquery.com jQuery])
+  * HTML / Javascript / CSS client side (uses [http://jquery.com jQuery])
+  * Easy UI customization
   * [WEBAPI REST/JSON API]
   * Server side available in two technologies
     * PHP 
