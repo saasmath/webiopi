@@ -11,14 +11,53 @@ input {
 	padding: 0 0 0 0;
 }
 
-input.pindirection {
+.DNC {
+	background-color: Gray;
+}
+
+.GND {
+	background-color: Black;
+}
+
+.V33 {
+	background-color: Orange;
+}
+
+.V50 {
+	background-color: Red;
+}
+
+.GPIO_LOW {
+	background-color: Black;
+}
+
+.GPIO_HIGH {
+	background-color: Orange;
+}
+
+.UART {
+	background-color: DarkBlue;
+}
+
+.SPI {
+	background-color: Purple;
+}
+
+.I2C {
+	background-color: LightBlue;
+}
+
+.pinDirection_Enabled {
 	width: 50px;
 	background-color: Gray;
 }
 
-div.pinname {
+.pinDirection_Disabled {
+	visibility: hidden;
+}
+
+.pinName {
 	font-size: 12pt;
 	font-weight: bold;
 	width: 75px;
 }
-

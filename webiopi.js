@@ -17,26 +17,26 @@
 var PIN_COUNT = 26;
 
 var TYPE = {
-	NONE: {value: 0, color: "Gray"},
-	GND: {value: 1, color: "Black"},
-	V33: {value: 2, color: "Orange"},
-	V50: {value: 3, color: "Red"},
-	GPIO: {value: 4, color: "Black"}
+	DNC: {value: 0, style: "DNC"},
+	GND: {value: 1, style: "GND"},
+	V33: {value: 2, style: "V33"},
+	V50: {value: 3, style: "V50"},
+	GPIO: {value: 4, style: "GPIO"}
 };
 
 var ALT = {
-	UART: {name: "UART", color: "DarkBlue", enabled: false, pins: []},
-	I2C: {name: "I2C", color: "LightBlue", enabled: false, pins: []},
-	SPI: {name: "SPI", color: "Purple", enabled: false, pins: []}
+	UART: {name: "UART", style: "UART", enabled: false, pins: []},
+	I2C: {name: "I2C", style: "I2C", enabled: false, pins: []},
+	SPI: {name: "SPI", style: "SPI", enabled: false, pins: []}
 };
 
-var PINS = Array(PIN_COUNT);
+var PINS = Array(PIN_COUNT+1);
 var GPIO = Array(PIN_COUNT);
 
-function MAP(pin_number, pin_type, pin_value) {
-	PINS[pin_number-1] = {type: pin_type, value: pin_value};
+function MAP(pin, pin_type, pin_value) {
+	PINS[pin] = {type: pin_type, value: pin_value};
 	if (pin_type.value == TYPE.GPIO.value) {
-		GPIO[pin_value].rpin = pin_number-1;
+		GPIO[pin_value].rpin = pin;
 	}
 }
 
@@ -50,18 +50,18 @@ function init_pinout() {
 	}
 
 	MAP(1, TYPE.V33, "3.3V");	MAP(2, TYPE.V50, "5V");
-	MAP(3, TYPE.GPIO, 0);		MAP(4, TYPE.NONE, "--");
+	MAP(3, TYPE.GPIO, 0);		MAP(4, TYPE.DNC, "--");
 	MAP(5, TYPE.GPIO, 1);		MAP(6, TYPE.GND, "GROUND");
 	MAP(7, TYPE.GPIO, 4);		MAP(8, TYPE.GPIO, 14);
-	MAP(9, TYPE.NONE, "--");	MAP(10, TYPE.GPIO, 15);
+	MAP(9, TYPE.DNC, "--");	MAP(10, TYPE.GPIO, 15);
 	MAP(11, TYPE.GPIO, 17);		MAP(12, TYPE.GPIO, 18);
-	MAP(13, TYPE.GPIO, 21);		MAP(14, TYPE.NONE, "--");
+	MAP(13, TYPE.GPIO, 21);		MAP(14, TYPE.DNC, "--");
 	MAP(15, TYPE.GPIO, 22);		MAP(16, TYPE.GPIO, 23);
-	MAP(17, TYPE.NONE, "--");	MAP(18, TYPE.GPIO, 24);
-	MAP(19, TYPE.GPIO, 10);		MAP(20, TYPE.NONE, "--");
+	MAP(17, TYPE.DNC, "--");	MAP(18, TYPE.GPIO, 24);
+	MAP(19, TYPE.GPIO, 10);		MAP(20, TYPE.DNC, "--");
 	MAP(21, TYPE.GPIO, 9);		MAP(22, TYPE.GPIO, 25);
 	MAP(23, TYPE.GPIO, 11);		MAP(24, TYPE.GPIO, 8);
-	MAP(25, TYPE.NONE, "--");	MAP(26, TYPE.GPIO, 7);
+	MAP(25, TYPE.DNC, "--");	MAP(26, TYPE.GPIO, 7);
 
 	MAP_ALT(ALT.UART, 8, 14, "TX");
 	MAP_ALT(ALT.UART, 10, 15, "RX");
@@ -79,8 +79,8 @@ function init_pinout() {
 
 function updateGPIOValue(gpio, value) {
 	GPIO[gpio].value = value;
-	var color = value == 1 ? TYPE.V33.color : TYPE.GND.color;
-	$("#pin"+GPIO[gpio].rpin).css("background-color", color);
+	var style = (value == 1) ? "GPIO_HIGH" : "GPIO_LOW";
+	$("#pin"+GPIO[gpio].rpin).attr("class", style);
 }
 
 function updateGPIODirection(gpio, direction) {
@@ -88,72 +88,94 @@ function updateGPIODirection(gpio, direction) {
 	$("#direction"+GPIO[gpio].rpin).val(direction.toUpperCase());
 }
 
-function toggleGPIOValue(i) {
-	var gpio = PINS[i].value;
-	if ((PINS[i].type.value == TYPE.GPIO.value) && (GPIO[gpio].direction=="out")) {
+function postGPIOValue(gpio, value) {
+	$.post('GPIO/' + gpio + "/value/" + value, function(data) {
+		updateGPIOValue(gpio, data);
+	});
+}
+
+function postValue(pin, value) {
+	if (PINS[pin].type.value == TYPE.GPIO.value) {
+		var gpio = PINS[pin].value;
+		postGPIOValue(gpio, value);
+	}
+}
+
+function toggleValue(pin) {
+	var gpio = PINS[pin].value;
+	if ((PINS[pin].type.value == TYPE.GPIO.value) && (GPIO[gpio].direction=="out")) {
 		var value = (GPIO[gpio].value == 1) ? 0 : 1;
-		$.post('GPIO/' + PINS[i].value + "/value/" + value, function(data) {
-			updateGPIOValue(gpio, data);
-		});
+		postGPIOValue(gpio, value);
 	}
 }
 
-function toggleGPIODirection(i) {
-	if (PINS[i].type.value == TYPE.GPIO.value) {
-		var gpio = PINS[i].value;
+function postGPIODirection(gpio, value) {
+	$.post('GPIO/' + gpio + "/direction/" + value, function(data) {
+		updateGPIODirection(gpio, data);
+	});
+}
+
+function postDirection(pin, value) {
+	if (PINS[pin].type.value == TYPE.GPIO.value) {
+		var gpio = PINS[pin].value;
+		postGPIODirection(gpio, value);
+	}
+}
+
+function toggleDirection(pin) {
+	if (PINS[pin].type.value == TYPE.GPIO.value) {
+		var gpio = PINS[pin].value;
 		var value = (GPIO[gpio].direction == "in") ? "out" : "in";
-		$.post('GPIO/' + PINS[i].value + "/direction/" + value, function(data) {
-			updateGPIODirection(gpio, data);
-		});
+		postGPIODirection(gpio, value)
 	}
 }
 
-function getPinCell(i) {
+function getPinCell(pin) {
 	var cell = $('<td align="center">');
 	var button = $('<input type="submit">');
-	button.attr("id", "pin"+i);
-	button.val(i+1);
-	button.css("background-color", PINS[i].type.color);
+	button.attr("id", "pin"+pin);
+	button.val(pin);
+	button.attr("class", PINS[pin].type.style);
 	button.bind("click", function(event) {
-		toggleGPIOValue(i);
+		toggleValue(pin);
 	});
 	cell.append(button);
 	return cell;
 }
 
-function getName(i) {
-	if (PINS[i].type.value != TYPE.GPIO.value) {
-		return PINS[i].value;
+function getName(pin) {
+	if (PINS[pin].type.value != TYPE.GPIO.value) {
+		return PINS[pin].value;
 	}
 	else {
-		return "GPIO " + PINS[i].value;
+		return "GPIO " + PINS[pin].value;
 	}
 }
 
-function getNameCell(i, align) {
+function getNameCell(pin, align) {
 	var cell = $('<td>');
 	cell.attr("align", align);
 	
 	var div = $('<div>');
-	div.attr("id", "name"+i);
-	div.addClass("pinname");
-	div.append(getName(i));
+	div.attr("id", "name"+pin);
+	div.attr("class", "pinName");
+	div.append(getName(pin));
 	
 	cell.append(div);
 
 	return cell;
 }
 
-function getDirectionCell(i) {
+function getDirectionCell(pin) {
 	var cell = $('<td align="center">');
-	if (PINS[i].type.value == TYPE.GPIO.value) {
+	if (PINS[pin].type.value == TYPE.GPIO.value) {
 		var button = $('<input>');
-		button.attr("id", "direction"+i);
+		button.attr("id", "direction"+pin);
 		button.attr("type", "submit");
-		button.addClass("pindirection");
-		button.val(GPIO[PINS[i].value].direction);
+		button.attr("class", "pinDirection_Enabled");
+		button.val(GPIO[PINS[pin].value].direction);
 		button.bind("click", function(event) {
-			toggleGPIODirection(i);
+			toggleDirection(pin);
 		});
 		cell.append(button);
 	}
@@ -162,17 +184,17 @@ function getDirectionCell(i) {
 
 function setALT(alt, enable) {
 	for (var p in alt.pins) {
-		i = alt.pins[p].pin-1;
-		$("#name"+i).empty();
+		pin = alt.pins[p].pin;
+		$("#name"+pin).empty();
 		if (enable) {
-			$("#name"+i).append(alt.name + " " + alt.pins[p].name);
-			$("#pin"+i).css("background-color", alt.color);
-			$("#direction"+i).css("visibility", "hidden");
+			$("#name"+pin).append(alt.name + " " + alt.pins[p].name);
+			$("#pin"+pin).attr("class", alt.style);
+			$("#direction"+pin).attr("class", "pinDirection_Disabled");
 		}
 		else {
-			$("#name"+i).append(getName(i));
-			$("#pin"+i).css("background-color", TYPE.GPIO.color);
-			$("#direction"+i).css("visibility", "visible");
+			$("#name"+pin).append(getName(pin));
+			$("#pin"+pin).attr("class", TYPE.GPIO.style);
+			$("#direction"+pin).attr("class", "pinDirection_Enabled");
 		}
 	}
 	alt.enabled = enable;
@@ -181,16 +203,16 @@ function setALT(alt, enable) {
 function buildTable() {
 	$("#webiopi").append($('<table>'));
 	var table = $("#webiopi > table");
-	for (var i=0; i<26; i++) {
+	for (var pin=1; pin<=26; pin++) {
 		var line = 	$('<tr>');
-		line.append(getDirectionCell(i))
-		line.append(getNameCell(i, "right"))
-		line.append(getPinCell(i));
+		line.append(getDirectionCell(pin))
+		line.append(getNameCell(pin, "right"))
+		line.append(getPinCell(pin));
 
-		i++;
-		line.append(getPinCell(i));
-		line.append(getNameCell(i, "left"))
-		line.append(getDirectionCell(i))
+		pin++;
+		line.append(getPinCell(pin));
+		line.append(getNameCell(pin, "left"))
+		line.append(getDirectionCell(pin))
 
 		table.append(line);
 	}
