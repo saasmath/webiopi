@@ -2,55 +2,14 @@
 
 input {
 	-webkit-appearance: none;
-	font-size: 14pt;
-	font-weight: bold;
 	color: white;
 	border: black 3px solid;
-	width: 40px;
-	height: 30px;
 	padding: 0 0 0 0;
 	visibility: hidden;
-}
-
-.DNC {
-	background-color: Gray;
-}
-
-.GND {
-	background-color: Black;
-}
-
-.V33 {
-	background-color: Orange;
-}
-
-.V50 {
-	background-color: Red;
-}
-
-.GPIO_LOW {
-	background-color: Black;
-}
-
-.GPIO_HIGH {
-	background-color: Orange;
-}
-
-.UART {
-	background-color: DarkBlue;
-}
-
-.SPI {
-	background-color: Purple;
-}
-
-.I2C {
-	background-color: LightBlue;
+	position: absolute;
 }
 
 .pinDirection_Enabled {
-	width: 50px;
-	background-color: Gray;
 	visibility: hidden;
 }
 
@@ -59,66 +18,75 @@ input {
 }
 
 .pinName {
-	font-size: 12pt;
-	font-weight: bold;
-	width: 75px;
 	visibility: hidden;
 }
 
 
 #pin15 {
 	visibility: visible;
-	position: absolute;
 	top: 20px;
 	left: 20px;
 	width: 30px;
 	height: 30px;
+	font-size: 14pt;
+	font-weight: bold;
 }
 
 #pin19 {
 	visibility: visible;
-	position: absolute;
 	top: 20px;
 	left: 50px;
 	width: 30px;
 	height: 30px;
+	font-size: 14pt;
+	font-weight: bold;
 }
 
 #pin21 {
 	visibility: visible;
-	position: absolute;
 	top: 20px;
 	left: 80px;
 	width: 30px;
 	height: 30px;
+	font-size: 14pt;
+	font-weight: bold;
 }
 
 #pin23 {
 	visibility: visible;
-	position: absolute;
 	top: 20px;
 	left: 110px;
 	width: 30px;
 	height: 30px;
+	font-size: 14pt;
+	font-weight: bold;
 }
 
 #pin3 {
 	visibility: visible;
-	position: absolute;
-	top: 60px;
+	top: 70px;
 	left: 20px;
-	width: 100px;
+	width: 80px;
 	height: 80px;
 	font-size: 24pt;
+	font-weight: bold;
 }
 
 #pin26 {
 	visibility: visible;
-	position: absolute;
-	top: 160px;
+	top: 170px;
 	left: 20px;
-	width: 100px;
+	width: 80px;
 	height: 80px;
 	font-size: 24pt;
+	font-weight: bold;
+	color: black;
 }
 
+#pin26.LOW {
+	background-color: white;
+}
+
+#pin26.HIGH {
+	background-color: red;
+}

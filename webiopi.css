@@ -27,11 +27,11 @@ input {
 	background-color: Red;
 }
 
-.GPIO_LOW {
+.LOW {
 	background-color: Black;
 }
 
-.GPIO_HIGH {
+.HIGH {
 	background-color: Orange;
 }
 

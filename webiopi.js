@@ -83,7 +83,7 @@ function setPinLabel(pin, label) {
 
 function updateGPIOValue(gpio, value) {
 	GPIO[gpio].value = value;
-	var style = (value == 1) ? "GPIO_HIGH" : "GPIO_LOW";
+	var style = (value == 1) ? "HIGH" : "LOW";
 	$("#pin"+GPIO[gpio].rpin).attr("class", style);
 }
 
