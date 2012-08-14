@@ -77,10 +77,10 @@ In your HTML file, replace the title, and add a link to your CSS. You also have 
 <link rel="stylesheet" type="text/css" href="mypage.css" />
 <script type="text/javascript">
 $(document).ready(function() {
-	postDirection(3, "in"); // set RPi pin 3 (GPIO 0) to input
+	setPinDirection(3, "in"); // set RPi pin 3 (GPIO 0) to input
 	setPinLabel(3, "SW");  // change the label
 
-	postDirection(26, "out"); // set RPi pin 3 (GPIO 7) to output
+	setPinDirection(26, "out"); // set RPi pin 3 (GPIO 7) to output
 	setPinLabel(26, "LED");  // change the label
 });
 </script>

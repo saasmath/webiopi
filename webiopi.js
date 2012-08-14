@@ -92,16 +92,16 @@ function updateGPIODirection(gpio, direction) {
 	$("#direction"+GPIO[gpio].rpin).val(direction.toUpperCase());
 }
 
-function postGPIOValue(gpio, value) {
+function setGPIOValue(gpio, value) {
 	$.post('GPIO/' + gpio + "/value/" + value, function(data) {
 		updateGPIOValue(gpio, data);
 	});
 }
 
-function postValue(pin, value) {
+function setPinValue(pin, value) {
 	if (PINS[pin].type.value == TYPE.GPIO.value) {
 		var gpio = PINS[pin].value;
-		postGPIOValue(gpio, value);
+		setGPIOValue(gpio, value);
 	}
 }
 
@@ -109,20 +109,20 @@ function toggleValue(pin) {
 	var gpio = PINS[pin].value;
 	if ((PINS[pin].type.value == TYPE.GPIO.value) && (GPIO[gpio].direction=="out")) {
 		var value = (GPIO[gpio].value == 1) ? 0 : 1;
-		postGPIOValue(gpio, value);
+		setGPIOValue(gpio, value);
 	}
 }
 
-function postGPIODirection(gpio, value) {
+function setGPIODirection(gpio, value) {
 	$.post('GPIO/' + gpio + "/direction/" + value, function(data) {
 		updateGPIODirection(gpio, data);
 	});
 }
 
-function postDirection(pin, value) {
+function setPinDirection(pin, value) {
 	if (PINS[pin].type.value == TYPE.GPIO.value) {
 		var gpio = PINS[pin].value;
-		postGPIODirection(gpio, value);
+		setGPIODirection(gpio, value);
 	}
 }
 
@@ -130,7 +130,7 @@ function toggleDirection(pin) {
 	if (PINS[pin].type.value == TYPE.GPIO.value) {
 		var gpio = PINS[pin].value;
 		var value = (GPIO[gpio].direction == "in") ? "out" : "in";
-		postGPIODirection(gpio, value)
+		setGPIODirection(gpio, value)
 	}
 }
 
