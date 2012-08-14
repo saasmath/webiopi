@@ -3,7 +3,7 @@ WebIOPi UI customization is easy but requires some CSS knowledge. The basic tech
 Before starting, copy webiopi.html to mypage.html and create a new blank mypage.css
 
 =CSS naming=
-All the UI is included in a single div, with the id webiopi. This box then contains a 6 cols  13 rows table. Each cell has a single control.
+All the UI is included in a single div, with the id webiopi. This box then contains a 6 cols `` 13 rows table. Each cell has a single control.
 
 RPi pins buttons are html inputs (type=submit), and inherit the input CSS style. Their id are from pin1 to pin26. There is also two classes for both low and high states, and also somes for non GPIO pins :
    .LOW : GPIO in low state
