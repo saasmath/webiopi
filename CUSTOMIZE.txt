@@ -1,6 +1,6 @@
 WebIOPi UI customization is easy but requires some CSS knowledge. The basic technic is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
 
-<font color="red>*Before starting, copy webiopi.html to mypage.html and create a new blank mypage.css*
+*Before starting, copy webiopi.html to mypage.html and create a new blank mypage.css*
 
 =CSS naming=
 All the *UI* is included in a single div, with the *id _webiopi_*. This box then contains a 6 columns / 13 rows table. Each cell has a single control.
