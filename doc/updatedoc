@@ -1,0 +1,16 @@
+#!/bin/sh
+for file in $*
+	do
+	echo "Downloading $file...\n"
+	wget http://webiopi.googlecode.com/svn/wiki/$file.wiki
+	echo "Processing $file...\n"
+	mv $file.wiki $file.txt
+	sed -i 's/<font color="red">//g' $file.txt
+	sed -i 's/<\/font>//g' $file.txt
+	sed -i 's/[_*]//g' $file.txt
+	sed -i '/{{{/d' $file.txt
+	sed -i '/}}}/d' $file.txt
+	cat LICENSE.footer >> $file.txt
+	echo "$file OK\n"
+	done
+	
