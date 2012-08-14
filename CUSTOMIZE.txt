@@ -1,30 +1,30 @@
 WebIOPi UI customization is easy but requires some CSS knowledge. The basic technic is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
 
-*Before starting, copy webiopi.html to mypage.html and create a new blank mypage.css*
+Before starting, copy webiopi.html to mypage.html and create a new blank mypage.css
 
 =CSS naming=
-All the *UI* is included in a single div, with the *id _webiopi_*. This box then contains a 6 columns / 13 rows table. Each cell has a single control.
+All the UI is included in a single div, with the id webiopi. This box then contains a 6 columns / 13 rows table. Each cell has a single control.
 
-RPi pins *buttons* are html inputs (type=submit), and inherit the _input_ CSS style. Their *id are from _pin1_ to _pin26_*. There is also two classes for both low and high states, and also somes for non GPIO pins :
-  * *.LOW* : GPIO in low state
-  * *.HIGH* : GPIO in high state
-  * .DNC : Do not connect
-  * .GND : Ground
-  * .V33 : 3.3V
-  * .V50 : 5.0V
-  * .UART
-  * .SPI
-  * .I2C
+RPi pins buttons are html inputs (type=submit), and inherit the input CSS style. Their id are from pin1 to pin26. There is also two classes for both low and high states, and also somes for non GPIO pins :
+   .LOW : GPIO in low state
+   .HIGH : GPIO in high state
+   .DNC : Do not connect
+   .GND : Ground
+   .V33 : 3.3V
+   .V50 : 5.0V
+   .UART
+   .SPI
+   .I2C
 
-RPi pins *direction buttons* are also html inputs, with *id from _direction1_ to _direction26_*. Two classes are also used :
-  * .pinDirection_Enabled : Direction button for enabled GPIOs
-  * .pinDirection_Disabled : Direction button for disabled GPIOs
+RPi pins direction buttons are also html inputs, with id from direction1 to direction26. Two classes are also used :
+   .pinDirectionEnabled : Direction button for enabled GPIOs
+   .pinDirectionDisabled : Direction button for disabled GPIOs
 
-RPi pins *descriptions* are made of html div, *id from _name1_ to _name26_*, with a single class :
-  * .pinName : Name on the left/right of each pin
+RPi pins descriptions are made of html div, id from name1 to name26, with a single class :
+   .pinName : Name on the left/right of each pin
 
 =Example=
-To hide all controls open your CSS file, override and add "visibility: hidden" to the _#webiopi_ selector. Then set absolute positionning and any property that will be shared between all _input_ controls : solid border, no padding, white text color and no webkit appearance.
+To hide all controls open your CSS file, override and add "visibility: hidden" to the #webiopi selector. Then set absolute positionning and any property that will be shared between all input controls : solid border, no padding, white text color and no webkit appearance.
 #webiopi {
         visibility: hidden;
 }

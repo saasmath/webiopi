@@ -1,11 +1,11 @@
-  * Parallel BUS helper (client, servers)
-  * Background service (python server)
-  * PHP Extension to use registers (php server)
-  * UART/SPI/I2C support (client, servers)
-  * Interrupts (servers)
-  * Long-polling/Bayeux/Cometd and/or WebSocket (client, servers)
-  * Web oscilloscope (client, may be servers)
-  * Java server version ?
+   Parallel BUS helper (client, servers)
+   Background service (python server)
+   PHP Extension to use registers (php server)
+   UART/SPI/I2C support (client, servers)
+   Interrupts (servers)
+   Long-polling/Bayeux/Cometd and/or WebSocket (client, servers)
+   Web oscilloscope (client, may be servers)
+   Java server version ?
 
 ------------------------------------------------------------------------------
 
