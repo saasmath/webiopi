@@ -1,5 +1,6 @@
 You have the choice of the install, depending on your need and which technology you prefer : PHP or Pyhton.
-Don't use different server at the same time, or it may not work correctly.
+
+*Don't use different server at the same time, or it may not work correctly.*
   * PHP version is good if you already have Apache/PHP on your Pi or if you plan to use it, but requires some configuration.
   * Python version is perfect for one time use,  or for users who don't want to install Apache and/or modify its configuration.
 
