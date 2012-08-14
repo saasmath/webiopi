@@ -50,10 +50,11 @@ def setGPIOValue(pin, value):
     GPIO_PINS[pin]["value"] = value
       
 def setGPIODirection(pin, direction):
-    GPIO.setup(pin, direction)
-    GPIO_PINS[pin]["direction"] = direction
-    if (direction == GPIO.OUT):
-        setGPIOValue(pin, False)
+    if GPIO_PINS[pin]["direction"] != direction:
+        GPIO.setup(pin, direction)
+        GPIO_PINS[pin]["direction"] = direction
+        if (direction == GPIO.OUT):
+            setGPIOValue(pin, False)
         
 
 def initGPIO(pin):

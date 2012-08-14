@@ -100,11 +100,13 @@ function doPOST($gpio, $vars) {
 		$pin = $vars[2];
 		$cmd = $vars[3];
 		$val = $vars[4];
-		$ret = "";
+		$ret = $val;
 		checkGPIOPin($gpio, $pin);
 		
 		if ($cmd == "direction") {
-			$ret = $gpio->setDirection($pin, $val);
+			if ($gpio->getDirection($pin) != $val) {
+				$ret = $gpio->setDirection($pin, $val);
+			}
 		}
 		else if ($cmd == "value") {
 			$ret = $gpio->setValue($pin, $val);
