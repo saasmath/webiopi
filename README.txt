@@ -31,6 +31,8 @@ You can even add a port redirection on your router (and/or use IPv6) to control 
   * Click/Tap the OUT/IN button to change GPIO direction.
   * Click/Tap pins to change the GPIO output state.
 
+http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome.png
+
 ------------------------------------------------------------------------------
 
    Copyright 2012 Eric Ptak - trouch.com
@@ -46,5 +48,4 @@ You can even add a port redirection on your router (and/or use IPv6) to control 
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 
