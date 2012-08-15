@@ -1,0 +1,42 @@
+@CHARSET "UTF-8";
+
+#webiopi {
+	visibility: hidden;
+}
+
+input {
+	-webkit-appearance: none;
+	color: white;
+	border: black 3px solid;
+	padding: 0 0 0 0;
+	position: absolute;
+}
+
+#pin3 {
+	visibility: visible;
+	top: 20px;
+	left: 20px;
+	width: 80px;
+	height: 80px;
+	font-size: 24pt;
+	font-weight: bold;
+}
+
+#pin26 {
+	visibility: visible;
+	top: 120px;
+	left: 20px;
+	width: 80px;
+	height: 80px;
+	font-size: 24pt;
+	font-weight: bold;
+	color: black;
+}
+
+#pin26.LOW {
+	background-color: white;
+}
+
+#pin26.HIGH {
+	background-color: red;
+}
