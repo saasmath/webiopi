@@ -12,71 +12,70 @@ input {
 	position: absolute;
 }
 
-#pin15 {
-	visibility: visible;
-	top: 20px;
-	left: 20px;
-	width: 30px;
-	height: 30px;
-	font-size: 14pt;
-	font-weight: bold;
-}
-
-#pin19 {
-	visibility: visible;
-	top: 20px;
-	left: 50px;
-	width: 30px;
-	height: 30px;
-	font-size: 14pt;
-	font-weight: bold;
-}
-
-#pin21 {
-	visibility: visible;
-	top: 20px;
-	left: 80px;
-	width: 30px;
-	height: 30px;
-	font-size: 14pt;
-	font-weight: bold;
-}
-
-#pin23 {
-	visibility: visible;
-	top: 20px;
-	left: 110px;
-	width: 30px;
-	height: 30px;
-	font-size: 14pt;
-	font-weight: bold;
-}
-
 #pin3 {
 	visibility: visible;
-	top: 70px;
+	top: 20px;
 	left: 20px;
 	width: 120px;
-	height: 80px;
-	font-size: 24pt;
-	font-weight: bold;
+	height: 100px;
+	border: none;
+}
+
+#pin3.LOW {
+	background: transparent url('./demo/door-closed.gif') no-repeat center center;
+}
+
+#pin3.HIGH {
+	background: transparent url('./demo/door-open.gif') no-repeat center center;
 }
 
 #pin26 {
 	visibility: visible;
-	top: 170px;
+	top: 140px;
 	left: 20px;
 	width: 120px;
-	height: 80px;
-	font-size: 24pt;
-	font-weight: bold;
-	color: black;
+	height: 130px;
+	border: none;
 }
 
 #pin26.LOW {
-	background-color: white;
+	background: transparent url('./demo/light-off.png') no-repeat center center;
 }
 
 #pin26.HIGH {
-	background-color: red;
+	background: transparent url('./demo/light-on.png') no-repeat center center;
+}
+
+#pin16 {
+	visibility: visible;
+	top: 290px;
+	left: 20px;
+	width: 82px;
+	height: 82px;
+	border: none;
+}
+
+#pin16.LOW {
+	background: transparent url('./demo/engine-off.png') no-repeat center center;
+}
+
+#pin16.HIGH {
+	background: transparent url('./demo/engine-on.png') no-repeat center center;
+}
+
+#pin18 {
+	visibility: visible;
+	top: 290px;
+	left: 120px;
+	width: 80px;
+	height: 82px;
+	border: none;
+}
+
+#pin18.LOW {
+	background: transparent url('./demo/turn-ccw.png') no-repeat center center;
+}
+
+#pin18.HIGH {
+	background: transparent url('./demo/turn-cw.png') no-repeat center center;
 }
