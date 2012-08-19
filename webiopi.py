@@ -19,6 +19,8 @@ import os
 import sys
 import time
 import threading
+import errno
+import socket
 import BaseHTTPServer
 import mimetypes as mime
 import RPi.GPIO as GPIO
@@ -238,7 +240,14 @@ if __name__ == '__main__':
     
     if len(args)  == 2:
         port = int(args[1])
+    
+    try:
+        startServer(host, port)
+        initGPIOs()
+        print time.asctime(), "WebIOPi Stopped"
+    except socket.error, e:
+        if (e[0] == errno.EADDRINUSE):
+            print "Address already in use, try another port"
+        else:
+            print "Unknown socket error %d" % e[0]
 
-    initGPIOs()
-    startServer(host, port)
-    print time.asctime(), "WebIOPi Stopped"
