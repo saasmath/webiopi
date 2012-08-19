@@ -16,22 +16,22 @@ input {
 	visibility: visible;
 	top: 20px;
 	left: 20px;
-	width: 120px;
-	height: 100px;
+	width: 128px;
+	height: 128px;
 	border: none;
 }
 
 #pin3.LOW {
-	background: transparent url('./demo/door-closed.gif') no-repeat center center;
+	background: transparent url('./demo/box-closed.png') no-repeat center center;
 }
 
 #pin3.HIGH {
-	background: transparent url('./demo/door-open.gif') no-repeat center center;
+	background: transparent url('./demo/box-open.png') no-repeat center center;
 }
 
 #pin26 {
 	visibility: visible;
-	top: 140px;
+	top: 170px;
 	left: 20px;
 	width: 120px;
 	height: 130px;
@@ -48,7 +48,7 @@ input {
 
 #pin16 {
 	visibility: visible;
-	top: 290px;
+	top: 320px;
 	left: 20px;
 	width: 82px;
 	height: 82px;
@@ -65,7 +65,7 @@ input {
 
 #pin18 {
 	visibility: visible;
-	top: 290px;
+	top: 320px;
 	left: 120px;
 	width: 80px;
 	height: 82px;
