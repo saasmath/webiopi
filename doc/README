@@ -3,8 +3,9 @@
    HTML / Javascript / CSS client side
    Easily [CUSTOMIZE] UI
    REST/JSON [WEBAPI]
-   Server side available in two technologies
-     PHP 
+   Server side available in several technologies
+     PHP/Apache
+     PHP/lighttpd
      Python
    Smartphone compatible
    Auto-refresh

@@ -1,14 +1,17 @@
-You have the choice of the install, depending on your need and which technology you prefer : PHP or Pyhton.
+You have the choice of the install, depending on your need and which technology you prefer : PHP/Apache, PHP/lighttpd or Pyhton.
 
 Don't use different server at the same time, or it may not work correctly.
-   PHP version is good if you already have Apache/PHP on your Pi or if you plan to use it, but requires some configuration.
-   Python version is perfect for one time use,  or for users who don't want to install Apache and/or modify its configuration.
+   [#PHP/Apache PHP/Apache] version is good if you already have PHP/Apache on your Pi or if you plan to use it, but requires some common configuration.
+   [#PHP/lighttpd PHP/lighttpd] version allows you to use a lighter HTTP server, but requires more specific configuration.
+   [#Python Python] version is perfect for one time use,  or for users who don't want to install 
+a web server and/or modify its configuration.
 
-=PHP=
-First install required packages. On Raspbian, open a terminal :
+=PHP/Apache=
+If you don't already have Apache and PHP, install required packages first. On Raspbian, open a terminal :
 $ sudo aptitude install apache2 php5
 
-In order to work, WebIOPi requires to allow .htaccess :
+In order to work, WebIOPi requires rewrite module and configuration overriding (.htaccess) :
+$ sudo a2enmod rewrite
 $ sudo nano /etc/apache2/sites-enabled/000-default
 Find the <Directory /var/www/> section and change the line "AllowOverride None" to "AllowOverride All" :
 ﻿  <Directory /var/www/>
@@ -35,6 +38,44 @@ or
 $ sudo ln -s webiopi /var/www/webiopi
 
 You're done, and ready to enjoy WebIOPi !
+
+=PHP/lighttpd=
+If you don't already have lighttpd and PHP, install required packages first :
+$ sudo aptitude install lighttpd php5-cgi
+
+Now, download and extract WebIOPi :
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
+$ tar xvzf WebIOPi-0.2.tar.gz
+Then move extracted files or create a symbolic link :
+$ sudo mv webiopi /var/www
+or
+$ sudo ln -s webiopi /var/www/webiopi
+
+You will need to add the lighttpd user (www-data) to the sudoers :
+$ sudo visudo
+then add the following line at the end of file :
+www-data ALL=(ALL) NOPASSWD: ALL
+
+We will now enable PHP in lighttpd and setup url rewriting :
+$ sudo nano /etc/lighttpd/lighttpd.conf
+then add following lines at the end of file :
+server.modules += ("modrewrite", "modfastcgi")
+
+fastcgi.server = ( ".php" => ((
+        "bin-path" => "/usr/bin/php-cgi",
+        "socket" => "/tmp/php.socket"
+)))
+
+url.rewrite += (
+        "^/webiopi/(.)\.(.+)$" => "$0",
+        "^/webiopi/(.+)$" => "/webiopi/webiopi.php"
+)
+
+
+Finally restart lighttpd :
+$ sudo /etc/init.d/lighttpd restart
+You're done, and ready to enjoy WebIOPi !
+
 
 =PYTHON=
 You will need Python development headers. On Raspbian, open a terminal :
