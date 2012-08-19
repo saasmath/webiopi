@@ -122,10 +122,17 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         s.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" % (code, message, code, message))
 
     def do_GET(s):
-        if s.path == "/%s/" % CONTEXT: 
-            f = open(INDEX_FILE)
+        if not s.path.startswith("/%s/" % CONTEXT):
+            WebPiHandler.sendError(s, 404, "Not Found")
+        elif os.path.exists(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")):
+            path = os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")
+            if (os.path.isdir(path)):
+                path += INDEX_FILE;
+                if not os.path.exists(path):
+                    WebPiHandler.sendError(s, 403, "Not Authorized")
+            f = open(path);
             s.send_response(200)
-            (type, encoding) = mime.guess_type(INDEX_FILE)
+            (type, encoding) = mime.guess_type(s.path.replace("/%s/" % CONTEXT, ""))
             s.send_header("Content-type", type);
             s.end_headers()
             s.wfile.write(f.read())
@@ -163,14 +170,6 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.send_header("Content-type", "text/plain");
             s.wfile.write(value)
 
-        elif os.path.exists(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")):
-            f = open(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/"))
-            s.send_response(200)
-            (type, encoding) = mime.guess_type(s.path.replace("/%s/" % CONTEXT, ""))
-            s.send_header("Content-type", type);
-            s.end_headers()
-            s.wfile.write(f.read())
-            f.close()
         else:
             WebPiHandler.sendError(s, 404, "Not Found")
 
