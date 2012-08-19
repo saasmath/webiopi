@@ -1,18 +1,17 @@
 #!/bin/sh
 for file in $*
 	do
-	echo "Downloading $file...\n"
-	wget http://webiopi.googlecode.com/svn/wiki/$file.wiki
-	echo "Processing $file...\n"
-	mv $file.wiki $file
-	sed -i 's/<font color="red">//g' $file
-	sed -i 's/<\/font>//g' $file
-	sed -i 's/<pre>//g' $file
-	sed -i 's/<\/pre>//g' $file
-	sed -i 's/[_*]//g' $file
-	sed -i '/{{{/d' $file
-	sed -i '/}}}/d' $file
-	cat LICENSE.footer >> $file
+	echo "Downloading $file...\n" 
+	wget http://webiopi.googlecode.com/svn/wiki/$file.wiki &&
+	echo "Processing $file...\n" &&
+	mv $file.wiki $file &&
+	sed -i 's/<font color="red">//g' $file &&
+	sed -i 's/<\/font>//g' $file &&
+	sed -i 's/<pre>//g' $file &&
+	sed -i 's/<\/pre>//g' $file &&
+	sed -i 's/[_*]//g' $file &&
+	sed -i '/{{{/d' $file &&
+	sed -i '/}}}/d' $file &&
 	echo "$file OK\n"
 	done
 	
