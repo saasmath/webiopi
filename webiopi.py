@@ -242,8 +242,8 @@ if __name__ == '__main__':
         port = int(args[1])
     
     try:
-        startServer(host, port)
         initGPIOs()
+        startServer(host, port)
         print time.asctime(), "WebIOPi Stopped"
     except socket.error, e:
         if (e[0] == errno.EADDRINUSE):
