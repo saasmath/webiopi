@@ -28,7 +28,7 @@ HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 80
 
 CONTEXT = "webiopi"
-INDEX_FILE = "webiopi.html"
+INDEX_FILE = "index.html"
 
 PIN_COUNT = 26
 GPIO_PINS = []

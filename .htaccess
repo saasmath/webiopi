@@ -1,6 +1,3 @@
-Options -Indexes
-DirectoryIndex webiopi.html
-
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
