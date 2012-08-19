@@ -122,7 +122,6 @@ class GPIO {
 }
 
 if (isset($_SERVER["SHELL"]) && !isset($_SERVER["GATEWAY_INTERFACE"])) {
-	print_r($_SERVER);
 	$gpio = new GPIO();
 	if ($argc == 1) {
 		
