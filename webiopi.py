@@ -23,6 +23,7 @@ import BaseHTTPServer
 import mimetypes as mime
 import RPi.GPIO as GPIO
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 80
@@ -39,6 +40,7 @@ ALT = {
     "SPI": {"enabled": False, "pins": [7, 8, 9, 10, 11]},
     "UART": {"enabled": False, "pins": [14, 15]}
 }
+
 
 class MODE:
     DISABLED=0
@@ -124,8 +126,8 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(s):
         if not s.path.startswith("/%s/" % CONTEXT):
             WebPiHandler.sendError(s, 404, "Not Found")
-        elif os.path.exists(os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")):
-            path = os.getcwd() + s.path.replace("/%s/" % CONTEXT, "/")
+        elif os.path.exists(SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/")):
+            path = SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/")
             if (os.path.isdir(path)):
                 path += INDEX_FILE;
                 if not os.path.exists(path):
