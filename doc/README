@@ -26,6 +26,8 @@ You can even fully customize the UI with few CSS modifications.
    UART, SPI and I2C support will be added as soon as possible.
    Don't forget that GPIO support only 3.3V, don't plug them to 5V !!!
 
+Check the [ROADMAP] for the upcoming features
+
 =Usage=
 First of all, follow [INSTALL] instructions.
 

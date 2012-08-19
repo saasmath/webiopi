@@ -55,9 +55,9 @@ $ sudo visudo
 then add the following line at the end of file :
 www-data ALL=(ALL) NOPASSWD: ALL
 
-We will now enable PHP in lighttpd and setup url rewriting :
+We will now enable PHP and modrewrite in lighttpd:
 $ sudo nano /etc/lighttpd/lighttpd.conf
-then add following lines at the end of file :
+Add following lines at the end of file :
 server.modules += ("modrewrite", "modfastcgi")
 
 fastcgi.server = ( ".php" => ((
@@ -65,6 +65,7 @@ fastcgi.server = ( ".php" => ((
         "socket" => "/tmp/php.socket"
 )))
 
+Then add the following lines to set WebIOPi's rewrite rules :
 url.rewrite += (
         "^/webiopi/(.)\.(.+)$" => "$0",
         "^/webiopi/(.+)$" => "/webiopi/webiopi.php"
