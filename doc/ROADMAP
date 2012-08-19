@@ -1,5 +1,4 @@
    Parallel BUS helper (client, servers)
-   Background service (python server)
    PHP Extension to use registers (php server)
    UART/SPI/I2C support (client, servers)
    Interrupts (servers)

@@ -98,4 +98,21 @@ or
 $ sudo ./webiopi.py [port]
 where port is the port to bind the HTTP server, default is 80, but maybe used.
 
-You're done, and ready to enjoy WebIOPi !
+You're done, and ready to enjoy WebIOPi ! But the server and GPIO state will be lost when you'll stop the script (CTRL-C) or close the terminal session.
+
+You can also run it or install it as a daemon, using the provided webiopi.init.sample file :
+$ sudo cp webiopi.init.sample /etc/init.d/webiopi
+
+Then change WEBIOPIHOME and WEBIOPIPORT variables according to the path you installed it, and to the port you want to use :
+$ sudo nano /etc/init.d/webiopi
+And changes variables next to the Author line.
+WEBIOPIHOME=/var/www/webiopi
+WEBIOPIPORT=80
+
+You can now start/stop the Python version of WebIOPi as a service :
+$ sudo /etc/init.d/webiopi start
+and
+$ sudo /etc/init.d/webiopi stop
+
+You can even start WebIOPi at boot :
+$ sudo update-rc.d webiopi defaults
