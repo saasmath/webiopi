@@ -15,5 +15,5 @@ for file in $*
 	echo "$file OK" ||
 	echo "$file not on wiki"
 	done
-
+echo "Uploading change on SVN..."
 svn commit -m "updated doc from wiki"
