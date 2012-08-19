@@ -4,8 +4,7 @@ It's useful to start enjoying GPIOs and also to debug some circuits without writ
 
 It also allows to control your Pi's GPIOs over Internet, so it's a good starting point for home remote control.
 
-You can even fully customize the UI with few CSS modifications.
-
+You can even fully customize the included UI with few CSS modifications or use the REST API to build your own WebApp.
 
 =Features=
    Support binary GPIOs, in both input and output.
