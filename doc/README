@@ -1,3 +1,12 @@
+WebIOPi is a bundled server and client web app which allow you to control the GPIOs of your Raspberry Pi with any browser.
+
+It's useful to start enjoying GPIOs and also to debug some circuits without writing any line of code.
+
+It also allows to control your Pi's GPIOs over Internet, so it's a good starting point for home remote control.
+
+You can even fully customize the UI with few CSS modifications.
+
+
 =Features=
    Support binary GPIOs, in both input and output.
    HTML / Javascript / CSS client side
@@ -20,12 +29,9 @@
 =Usage=
 First of all, follow [INSTALL] instructions.
 
-If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost/webiopi/
+If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost/webiopi/ Don't forget to add :port right after localhost if you use a different port.
 
-Don't forget to add :port right after raspberrypi/IP if you use a different port.
-
-If your Raspberry Pi is connected to your network, yo can open a browser to http://raspberrypi/webiopi/ with any device of your network. 
-Replace raspberrypi by its IP if DNS don't find raspberrypi.
+If your Raspberry Pi is connected to your network, yo can open a browser to http://raspberrypi/webiopi/ with any device of your network. Replace raspberrypi by its IP if DNS don't find raspberrypi. Don't forget to add :port right after raspberrypi/IP if you use a different port.
 
 You can even add a port redirection on your router (and/or use IPv6) to control your GPIOs over Internet !
 
