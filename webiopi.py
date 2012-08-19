@@ -26,6 +26,7 @@ import RPi.GPIO as GPIO
 
 HOST_NAME = '0.0.0.0'
 PORT_NUMBER = 80
+
 CONTEXT = "webiopi"
 INDEX_FILE = "webiopi.html"
 
@@ -204,12 +205,8 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 WebPiHandler.sendError(s, 404, operation + " Not Found")
         else:
             WebPiHandler.sendError(s, 404, "Not Found")
-
-if __name__ == '__main__':
-    args = sys.argv
-    if len(args)  == 2:
-        PORT_NUMBER = int(args[1])
-
+            
+def initGPIOs():
     GPIO.setmode(GPIO.BCM)
 
     for i in range(PIN_COUNT):
@@ -220,14 +217,27 @@ if __name__ == '__main__':
     for pin in GPIO_AVAILABLE:
         if GPIO_PINS[pin]["mode"] != MODE.ALT:
             initGPIO(pin)
-
+            
+def startServer(host, port):
     server_class = BaseHTTPServer.HTTPServer
-    httpd = server_class((HOST_NAME, PORT_NUMBER), WebPiHandler)
-    print time.asctime(), "WebIOPi Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
+    httpd = server_class((host, port), WebPiHandler)
+    print time.asctime(), "WebIOPi Started at %s:%s" % (host, port)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         running = False
         pass
     httpd.server_close()
-    print time.asctime(), "WebIOPi Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
+
+if __name__ == '__main__':
+    port = PORT_NUMBER
+    host = HOST_NAME
+
+    args = sys.argv
+    
+    if len(args)  == 2:
+        port = int(args[1])
+
+    initGPIOs()
+    startServer(host, port)
+    print time.asctime(), "WebIOPi Stopped"
