@@ -22,11 +22,11 @@ input {
 }
 
 #pin3.LOW {
-	background: transparent url('./demo/box-closed.png') no-repeat center center;
+	background: transparent url('box-closed.png') no-repeat center center;
 }
 
 #pin3.HIGH {
-	background: transparent url('./demo/box-open.png') no-repeat center center;
+	background: transparent url('box-open.png') no-repeat center center;
 }
 
 #pin26 {
@@ -39,11 +39,11 @@ input {
 }
 
 #pin26.LOW {
-	background: transparent url('./demo/light-off.png') no-repeat center center;
+	background: transparent url('light-off.png') no-repeat center center;
 }
 
 #pin26.HIGH {
-	background: transparent url('./demo/light-on.png') no-repeat center center;
+	background: transparent url('light-on.png') no-repeat center center;
 }
 
 #pin16 {
@@ -56,11 +56,11 @@ input {
 }
 
 #pin16.LOW {
-	background: transparent url('./demo/engine-off.png') no-repeat center center;
+	background: transparent url('engine-off.png') no-repeat center center;
 }
 
 #pin16.HIGH {
-	background: transparent url('./demo/engine-on.png') no-repeat center center;
+	background: transparent url('engine-on.png') no-repeat center center;
 }
 
 #pin18 {
@@ -73,9 +73,9 @@ input {
 }
 
 #pin18.LOW {
-	background: transparent url('./demo/turn-ccw.png') no-repeat center center;
+	background: transparent url('turn-ccw.png') no-repeat center center;
 }
 
 #pin18.HIGH {
-	background: transparent url('./demo/turn-cw.png') no-repeat center center;
+	background: transparent url('turn-cw.png') no-repeat center center;
 }
