@@ -1,4 +1,4 @@
-WebIOPi is a web application which allow you to control your Raspberry Pi's GPIO. Just install it on your Pi, and use any browser from your network.
+WebIOPi is a web application which allows you to control your Raspberry Pi's GPIO. Just install it on your Pi, and use any browser from your network. Click/tap the in/out buttons to change GPIO direction, and click/tap on each output pin square to change their state. 
 
 It's useful to start enjoying GPIOs and also to debug some circuits without writing any line of code.
 
@@ -9,7 +9,7 @@ You can even fully customize the included UI with few CSS modifications or use t
 WebIOPi has been developed on a Raspbian wheezy, but should work on others distribs.
 
 =Features=
-   Support binary GPIOs, in both input and output.
+   Supports binary GPIOs, in both input and output.
    HTML / Javascript / CSS client side
    Easily [CUSTOMIZE] UI
    REST/JSON [WEBAPI]
@@ -25,7 +25,7 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
    UART is enabled but unusable for now.
      GPIOs 14 and 15 are disabled
    UART, SPI and I2C support will be added as soon as possible.
-   Don't forget that GPIO support only 3.3V, don't plug them to 5V !!!
+   Don't forget that GPIOs support only 3.3V, don't plug them to 5V !!!
 
 Check the [ROADMAP] for the upcoming features
 
