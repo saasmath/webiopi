@@ -39,7 +39,7 @@ $ sudo ln -s webiopi /var/www/webiopi
 You're done, and ready to enjoy WebIOPi !
 
 =PHP/lighttpd=
-If you don't already have lighttpd and PHP, install required packages first :
+If you don't already have lighttpd and PHP, install required packages first. On Raspbian, open a terminal :
 $ sudo aptitude install lighttpd php5-cgi
 
 Now, download and extract WebIOPi :
@@ -101,7 +101,7 @@ where port is the port to bind the HTTP server, default is 80, but maybe used.
 You're done, and ready to enjoy WebIOPi ! But the server and GPIO state will be lost when you'll stop the script (CTRL-C) or close the terminal session.
 
 You can also run it or install it as a daemon, using the provided webiopi.init.sample file :
-$ sudo cp webiopi.init.sample /etc/init.d/webiopi
+$ sudo cp webiopi.py.init /etc/init.d/webiopi
 
 Then change WEBIOPIHOME and WEBIOPIPORT variables according to the path you installed it, and to the port you want to use :
 $ sudo nano /etc/init.d/webiopi

@@ -87,6 +87,8 @@ $(document).ready(function() {
 });
 </script>
 
-Then open a browser by appending mypage.html to the usual URL (http://raspberrypi/webiopi/mypage.html) and you will see 2 big controls.
+Then open a browser by appending mypage.html to the usual URL (http://raspberrypi/webiopi/mypage.html) and you will see 2 big controls :
+   The first one allows you to see the input state on the RPi pin 3 : connect it to the ground (using a switch), and the control will become black.
+   The second, will allow you to control a led on RPi pin 26, connected in serial with a resistor to the ground.
 
 http://trouch.com/wp-content/uploads/2012/08/webiopi-mypage.png
