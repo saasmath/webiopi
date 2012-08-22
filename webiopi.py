@@ -129,11 +129,17 @@ class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if not s.path.startswith("/%s/" % CONTEXT):
             WebPiHandler.sendError(s, 404, "Not Found")
         elif os.path.exists(SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/")):
-            path = SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/")
+            path = os.path.realpath(SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/"))
+            if not path.startswith(SCRIPT_DIR):
+                WebPiHandler.sendError(s, 403, "Not Authorized")
+                return
+                
             if (os.path.isdir(path)):
-                path += INDEX_FILE;
+                path += os.sep + INDEX_FILE;
                 if not os.path.exists(path):
                     WebPiHandler.sendError(s, 403, "Not Authorized")
+                    return
+                
             f = open(path);
             s.send_response(200)
             (type, encoding) = mime.guess_type(s.path.replace("/%s/" % CONTEXT, ""))
