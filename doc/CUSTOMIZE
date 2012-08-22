@@ -92,3 +92,5 @@ Then open a browser by appending mypage.html to the usual URL (http://raspberryp
    The second, will allow you to control a led on RPi pin 26, connected in serial with a resistor to the ground.
 
 http://trouch.com/wp-content/uploads/2012/08/webiopi-mypage.png
+
+http://trouch.com/wp-content/uploads/2012/08/WebIOPi-demo.png

@@ -1,5 +1,6 @@
    Parallel BUS helper (client, servers)
    PHP Extension to use registers (php server)
+   Remove sudoer need (php server)
    UART/SPI/I2C support (client, servers)
    Interrupts (servers)
    Long-polling/Bayeux/Cometd and/or WebSocket (client, servers)
