@@ -4,7 +4,7 @@
 
 ==trunk==
    Fixed security issue in the Python server
-   Removed a language feature available with PHP >= 5.4 to allow lower PHP version 
+   Allow PHP5 < 5.4
 
 ==0.2 (08/21/12)==
    Initial release
