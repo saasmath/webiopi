@@ -16,12 +16,12 @@
 */
 
 class GPIO {
-	var $GPIO_AVAILABLE = [0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25];
-	var $ALT = [
-		"UART" =>["enabled" => true, "pins"=>[14, 15]],
-		"I2C" => ["enabled" => false, "pins"=>[0, 1]],
-		"SPI" => ["enabled" => false, "pins"=>[7, 8, 9, 10, 11]]
-	];
+	var $GPIO_AVAILABLE = array(0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25);
+	var $ALT = array(
+		"UART" => array("enabled" => true, "pins"=> array(14, 15)),
+		"I2C" => array("enabled" => false, "pins"=> array(0, 1)),
+		"SPI" => array("enabled" => false, "pins"=> array(7, 8, 9, 10, 11))
+	);
 	var $GPIO_ROOT = "/sys/class/gpio";
 	
 	function sudo($cmd) {
