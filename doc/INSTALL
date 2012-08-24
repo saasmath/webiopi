@@ -20,7 +20,7 @@ Find the <Directory /var/www/> section and change the line "AllowOverride None" 
     Order allow,deny
     allow from all
 </Directory>
-﻿  
+
 You will also need to add Apache's user (www-data) to the sudoers :
 $ sudo visudo
 then add the following line at the end of file :
