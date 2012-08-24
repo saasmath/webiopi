@@ -14,12 +14,12 @@ In order to work, WebIOPi requires rewrite module and configuration overriding (
 $ sudo a2enmod rewrite
 $ sudo nano /etc/apache2/sites-enabled/000-default
 Find the <Directory /var/www/> section and change the line "AllowOverride None" to "AllowOverride All" :
-﻿<Directory /var/www/>
-﻿    Options Indexes FollowSymLinks MultiViews
+<Directory /var/www/>
+    Options Indexes FollowSymLinks MultiViews
     AllowOverride All
     Order allow,deny
     allow from all
-﻿</Directory>
+</Directory>
 ﻿  
 You will also need to add Apache's user (www-data) to the sudoers :
 $ sudo visudo
