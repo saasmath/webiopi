@@ -1,9 +1,10 @@
-You have the choice of the install, depending on your need and which technology you prefer : PHP/Apache, PHP/lighttpd or Pyhton.
+You have the choice of the install, depending on your need and which technology you prefer : PHP/Apache, PHP/lighttpd or Python. Python version is standalone as it serves HTTP.
 
 Don't use different server at the same time, or it may not work correctly.
    [#PHP/Apache PHP/Apache] version is good if you already have PHP/Apache on your Pi or if you plan to use it, but requires some common configuration.
    [#PHP/lighttpd PHP/lighttpd] version allows you to use a lighter HTTP server, but requires more specific configuration.
    [#PYTHON Python] version is perfect for one time use,  or for users who don't want to install a web server and/or modify its configuration.
+PHP version requires to add the Apache/lighttpd's user (www-data) in the sudoers. Use Python version if you don't want to to this, but it requires to run as root too.
 
 =PHP/Apache=
 If you don't already have Apache and PHP, install required packages first. On Raspbian, open a terminal :
