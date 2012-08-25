@@ -166,12 +166,15 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         relativePath = self.path.replace(self.server.context, "")
         fullPath = SCRIPT_DIR + os.sep + relativePath 
+
         if self.path == "/":
             self.send_response(301)
             self.send_header("Location", self.server.context);
             self.end_headers()
+
         elif not self.path.startswith(self.server.context):
             self.sendError(404, "Not Found")
+
         elif os.path.exists(fullPath):
             realpath = os.path.realpath(fullPath)
             if not realpath.startswith(SCRIPT_DIR):
@@ -191,11 +194,13 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(f.read())
             f.close()
+
         elif relativePath == "*":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.server.gpio.writeJSON(self.wfile)
+
         elif (relativePath.startswith("GPIO/")):
             (mode, pin, operation) = relativePath.split("/")
             i = int(pin)
@@ -241,6 +246,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
                 self.wfile.write(value)
+
             elif (operation == "direction"):
                 if value == "in":
                     self.server.gpio.setDirection(i, GPIO.IN)
@@ -254,9 +260,9 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
                 self.wfile.write(value)
-            else:
+            else: # operation unknown
                 self.sendError(404, operation + " Not Found")
-        else:
+        else: # path unknowns
             self.sendError(404, "Not Found")
             
 def main(argv):
@@ -270,16 +276,18 @@ def main(argv):
     
     try:
         server = WebIOPiServer((host, port), WebIOPiHandler, context, index)
-        print time.asctime(), "WebIOPi Started at http://%s:%s%s" % (host, port, context)
+        print time.asctime(), "%s Started at http://%s:%s%s" % (SERVER_VERSION, host, port, context)
         server.serve_forever()
+
     except socket.error, e:
         if (e[0] == errno.EADDRINUSE):
             print "Address already in use, try another port"
         else:
             print "Unknown socket error %d" % e[0]
+
     except KeyboardInterrupt:
         server.server_close()
-        print time.asctime(), "WebIOPi Stopped"
+        print time.asctime(), SERVER_VERSION, "Stopped"
 
 if __name__ == "__main__":
     main(sys.argv)
