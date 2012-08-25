@@ -152,13 +152,13 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" 
                          % (code, message, code, message))
    
-    def checkGPIOPin(self, pin):
-        i = int(pin)
+    def checkGPIO(self, gpio):
+        i = int(gpio)
         if not self.server.gpio.isAvailable(i):
-            self.sendError(403, "GPIO " + pin + " Not Available")
+            self.sendError(403, "GPIO " + gpio + " Not Available")
             return False
         if not self.server.gpio.isEnabled(i):
-            self.sendError(403, "GPIO " + pin + " Disabled")
+            self.sendError(403, "GPIO " + gpio + " Disabled")
             return False
         return True
 
@@ -199,7 +199,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif (relativePath.startswith("GPIO/")):
             (mode, pin, operation) = relativePath.split("/")
             i = int(pin)
-            if not self.checkGPIOPin(pin):
+            if not self.checkGPIO(pin):
                 return
             value = ""
             if (operation == "value"):
@@ -225,7 +225,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if (relativePath.startswith("GPIO/")):
             (mode, pin, operation, value) = relativePath.split("/")
             i = int(pin)
-            if not self.checkGPIOPin(pin):
+            if not self.checkGPIO(pin):
                 return
             
             if (operation == "value"):
