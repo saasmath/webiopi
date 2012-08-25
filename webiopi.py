@@ -146,19 +146,13 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def version_string(self):
         return SERVER_VERSION + ' ' + self.sys_version
         
-    def sendError(self, code, message):
-        self.send_response(code)
-        self.end_headers()
-        self.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" 
-                         % (code, message, code, message))
-   
     def checkGPIO(self, gpio):
         i = int(gpio)
         if not self.server.gpio.isAvailable(i):
-            self.sendError(403, "GPIO " + gpio + " Not Available")
+            self.send_error(403, "GPIO " + gpio + " Not Available")
             return False
         if not self.server.gpio.isEnabled(i):
-            self.sendError(403, "GPIO " + gpio + " Disabled")
+            self.send_error(403, "GPIO " + gpio + " Disabled")
             return False
         return True
 
@@ -173,18 +167,18 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
 
         elif not self.path.startswith(self.server.context):
-            self.sendError(404, "Not Found")
+            self.send_error(404, "Not Found")
 
         elif os.path.exists(fullPath):
             realpath = os.path.realpath(fullPath)
             if not realpath.startswith(SCRIPT_DIR):
-                self.sendError(403, "Not Authorized")
+                self.send_error(403, "Not Authorized")
                 return
                 
             if (os.path.isdir(realpath)):
                 realpath += os.sep + self.server.index;
                 if not os.path.exists(realpath):
-                    self.sendError(403, "Not Authorized")
+                    self.send_error(403, "Not Authorized")
                     return
                 
             (type, encoding) = mime.guess_type(realpath)
@@ -214,7 +208,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 value = self.server.gpio.getDirection(i)
     
             else:
-                self.sendError(404, operation + " Not Found")
+                self.send_error(404, operation + " Not Found")
                 return
                 
             self.send_response(200)
@@ -223,7 +217,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(value)
 
         else:
-            self.sendError(404, "Not Found")
+            self.send_error(404, "Not Found")
 
     def do_POST(self):
         relativePath = self.path.replace(self.server.context, "")
@@ -239,7 +233,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 elif (value == "1"):
                     self.server.gpio.setValue(i , True)
                 else:
-                    self.sendError(400, "Bad Value")
+                    self.send_error(400, "Bad Value")
                     return
     
                 self.send_response(200)
@@ -253,7 +247,7 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 elif value == "out":
                     self.server.gpio.setDirection(i, GPIO.OUT)
                 else:
-                    self.sendError(400, "Bad Direction")
+                    self.send_error(400, "Bad Direction")
                     return
     
                 self.send_response(200)
@@ -261,9 +255,9 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(value)
             else: # operation unknown
-                self.sendError(404, operation + " Not Found")
+                self.send_error(404, operation + " Not Found")
         else: # path unknowns
-            self.sendError(404, "Not Found")
+            self.send_error(404, "Not Found")
             
 def main(argv):
     host = '0.0.0.0'
