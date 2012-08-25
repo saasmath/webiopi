@@ -23,237 +23,263 @@ import errno
 import socket
 import BaseHTTPServer
 import mimetypes as mime
-import RPi.GPIO as GPIO
+import RPi.GPIO
 
+VERSION = '0.2.1'
+
+SERVER_VERSION = 'WebIOPi/' + VERSION 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-HOST_NAME = '0.0.0.0'
-PORT_NUMBER = 80
-
-CONTEXT = "webiopi"
-INDEX_FILE = "index.html"
-
-PIN_COUNT = 26
-GPIO_PINS = []
-GPIO_AVAILABLE = [0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25]
-
-ALT = {
-    "I2C": {"enabled": False, "pins": [0, 1]},
-    "SPI": {"enabled": False, "pins": [7, 8, 9, 10, 11]},
-    "UART": {"enabled": False, "pins": [14, 15]}
-}
-
-
-class MODE:
+class GPIO:
     DISABLED=0
-    GPIO=1
+    ENABLED=1
     ALT=2
-    
-
-def setGPIOValue(pin, value):
-    GPIO.output(pin, value)
-    GPIO_PINS[pin]["value"] = value
-      
-def setGPIODirection(pin, direction):
-    if GPIO_PINS[pin]["direction"] != direction:
-        GPIO.setup(pin, direction)
-        GPIO_PINS[pin]["direction"] = direction
-        if (direction == GPIO.OUT):
-            setGPIOValue(pin, False)
         
+    IN = RPi.GPIO.IN
+    OUT = RPi.GPIO.OUT
+    
+    LOW = RPi.GPIO.LOW
+    HIGH = RPi.GPIO.HIGH
 
-def initGPIO(pin):
-    setGPIODirection(pin, GPIO.IN)
-    GPIO_PINS[pin]["mode"] = MODE.GPIO
+    GPIO_PINS = []
+    GPIO_AVAILABLE = [0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25]
+    ALT = {
+        "I2C": {"enabled": False, "pins": [0, 1]},
+        "SPI": {"enabled": False, "pins": [7, 8, 9, 10, 11]},
+        "UART": {"enabled": False, "pins": [14, 15]}
+    }
+    
+    def __init__(self):
+        RPi.GPIO.setmode(RPi.GPIO.BCM)
+        
+        for i in range(self.GPIO_AVAILABLE[len(self.GPIO_AVAILABLE)-1]+1):
+            self.GPIO_PINS.append({"mode": 0, "direction": None, "value": None})
+    
+        self.setALT("UART", True)
+    
+        for pin in self.GPIO_AVAILABLE:
+            if self.GPIO_PINS[pin]["mode"] != GPIO.ALT:
+                self.GPIO_PINS[pin]["mode"] = GPIO.ENABLED
+                self.setDirection(pin, GPIO.IN)
 
-def checkGPIOPin(s, pin):
-    i = int(pin)
-    if not (i in GPIO_AVAILABLE):
-        WebPiHandler.sendError(s, 403, "GPIO " + pin + " Not Available")
-        return False
-    if (GPIO_PINS[i]["mode"] != MODE.GPIO):
-        WebPiHandler.sendError(s, 403, "GPIO " + pin + " Disabled")
-        return False
-    return True
-
-
-def setALT(alt, enable):
-    for pin in ALT[alt]["pins"]:
-        p = GPIO_PINS[pin];
-        if enable:
-            p["mode"] = MODE.ALT
+    def isAvailable(self, gpio):
+        return gpio in self.GPIO_AVAILABLE
+    
+    def isEnabled(self, gpio):
+        return self.GPIO_PINS[gpio]["mode"] == GPIO.ENABLED
+    
+    def setValue(self, pin, value):
+        RPi.GPIO.output(pin, value)
+        self.GPIO_PINS[pin]["value"] = value
+    
+    def getValue(self, pin):
+        if (self.GPIO_PINS[pin]["direction"] == GPIO.IN):
+            self.GPIO_PINS[pin]["value"] = RPi.GPIO.input(pin)
+        if (self.GPIO_PINS[pin]["value"] == GPIO.HIGH):
+            return 1
         else:
-            p["mode"] = MODE.GPIO
-            setGPIODirection(pin, GPIO.OUT)
-            setGPIOValue(pin, False)
-    ALT[alt]["enabled"] = enable
+            return 0
+        
+    def setDirection(self, pin, direction):
+        if self.GPIO_PINS[pin]["direction"] != direction:
+            RPi.GPIO.setup(pin, direction)
+            self.GPIO_PINS[pin]["direction"] = direction
+            if (direction == GPIO.OUT):
+                self.setValue(pin, False)
+                
+    def getDirection(self, pin):
+        if self.GPIO_PINS[pin]["direction"] == GPIO.IN:
+            return "in"
+        else:
+            return "out"
             
-def writeJSON(out):
-    out.write("{")
-    first = True
-    for (alt, value) in ALT.items():
-        if not first:
-            out.write (", ")
-        out.write('"%s": %d' % (alt, value["enabled"]))
-        first = False
-    
-    out.write(', "GPIO":{\n')
-    first = True
-    for pin in GPIO_AVAILABLE:
-        if not first:
-            out.write (", \n")
-        mode = "GPIO"
-        if (GPIO_PINS[pin]["mode"] == MODE.ALT):
-            mode = "ALT"
-        direction = "out"
-        if (GPIO_PINS[pin]["direction"] == GPIO.IN):
-            direction = "in"
-            GPIO_PINS[pin]["value"] = GPIO.input(pin)
-            
-        value = 0
-        if (GPIO_PINS[pin]["value"] == True):
-            value = 1
-        out.write('"%d": {"mode": "%s", "direction": "%s", "value": %d}' % (pin, mode, direction, value))
-        first = False
+    def setALT(self, alt, enable):
+        for pin in self.ALT[alt]["pins"]:
+            p = self.GPIO_PINS[pin];
+            if enable:
+                p["mode"] = GPIO.ALT
+            else:
+                p["mode"] = GPIO.ENABLED
+                self.setDirection(pin, GPIO.OUT)
+                self.setValue(pin, False)
+        self.ALT[alt]["enabled"] = enable
+                
+    def writeJSON(self, out):
+        out.write("{")
+        first = True
+        for (alt, value) in self.ALT.items():
+            if not first:
+                out.write (", ")
+            out.write('"%s": %d' % (alt, value["enabled"]))
+            first = False
         
-    out.write("\n}}")
-        
-class WebPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-        
-    def sendError(s, code, message):
-        s.send_response(code)
-        s.end_headers()
-        s.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" % (code, message, code, message))
+        out.write(', "GPIO":{\n')
+        first = True
+        for pin in self.GPIO_AVAILABLE:
+            if not first:
+                out.write (", \n")
 
-    def do_GET(s):
-        if not s.path.startswith("/%s/" % CONTEXT):
-            WebPiHandler.sendError(s, 404, "Not Found")
-        elif os.path.exists(SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/")):
-            path = os.path.realpath(SCRIPT_DIR + s.path.replace("/%s/" % CONTEXT, "/"))
-            if not path.startswith(SCRIPT_DIR):
-                WebPiHandler.sendError(s, 403, "Not Authorized")
+            mode = "GPIO"
+            direction = "out"
+            value = 0
+
+            if (self.GPIO_PINS[pin]["mode"] == GPIO.ALT):
+                mode = "ALT"
+            else:
+                direction = self.getDirection(pin)
+                value = self.getValue(pin)
+                
+            out.write('"%d": {"mode": "%s", "direction": "%s", "value": %d}' % (pin, mode, direction, value))
+            first = False
+            
+        out.write("\n}}")
+                
+                
+class WebIOPiServer(BaseHTTPServer.HTTPServer):
+    def __init__(self, binding, handler, context, index):
+        BaseHTTPServer.HTTPServer.__init__(self, binding, handler)
+        self.context = context
+        self.index = index
+        self.gpio = GPIO()
+            
+class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    def version_string(self):
+        return SERVER_VERSION + ' ' + self.sys_version
+        
+    def sendError(self, code, message):
+        self.send_response(code)
+        self.end_headers()
+        self.wfile.write("<html><head><title>%d - %s</title></head><body><h1>%d - %s</h1></body></html>" 
+                         % (code, message, code, message))
+   
+    def checkGPIOPin(self, pin):
+        i = int(pin)
+        if not self.server.gpio.isAvailable(i):
+            self.sendError(403, "GPIO " + pin + " Not Available")
+            return False
+        if not self.server.gpio.isEnabled(i):
+            self.sendError(403, "GPIO " + pin + " Disabled")
+            return False
+        return True
+
+
+    def do_GET(self):
+        relativePath = self.path.replace(self.server.context, "")
+        fullPath = SCRIPT_DIR + os.sep + relativePath 
+        if self.path == "/":
+            self.send_response(301)
+            self.send_header("Location", self.server.context);
+            self.end_headers()
+        elif not self.path.startswith(self.server.context):
+            self.sendError(404, "Not Found")
+        elif os.path.exists(fullPath):
+            realpath = os.path.realpath(fullPath)
+            if not realpath.startswith(SCRIPT_DIR):
+                self.sendError(403, "Not Authorized")
                 return
                 
-            if (os.path.isdir(path)):
-                path += os.sep + INDEX_FILE;
-                if not os.path.exists(path):
-                    WebPiHandler.sendError(s, 403, "Not Authorized")
+            if (os.path.isdir(realpath)):
+                realpath += os.sep + self.server.index;
+                if not os.path.exists(realpath):
+                    self.sendError(403, "Not Authorized")
                     return
                 
-            f = open(path);
-            s.send_response(200)
-            (type, encoding) = mime.guess_type(s.path.replace("/%s/" % CONTEXT, ""))
-            s.send_header("Content-type", type);
-            s.end_headers()
-            s.wfile.write(f.read())
+            (type, encoding) = mime.guess_type(realpath)
+            f = open(realpath);
+            self.send_response(200)
+            self.send_header("Content-type", type);
+            self.end_headers()
+            self.wfile.write(f.read())
             f.close()
-        elif s.path == "/%s/*" % CONTEXT:
-            s.send_response(200)
-            s.send_header("Content-type", "application/json")
-            s.end_headers()
-            writeJSON(s.wfile)
-        elif (s.path.startswith("/%s/GPIO/" % CONTEXT)):
-            (root, context, mode, pin, operation) = s.path.split("/")
+        elif relativePath == "*":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            self.server.gpio.writeJSON(self.wfile)
+        elif (relativePath.startswith("GPIO/")):
+            (mode, pin, operation) = relativePath.split("/")
             i = int(pin)
-            if not checkGPIOPin(s, pin):
+            if not self.checkGPIOPin(pin):
                 return
             value = ""
             if (operation == "value"):
-                if (GPIO_PINS[i]["direction"] == GPIO.IN):
-                    GPIO_PINS[i]["value"] = GPIO.input(i)
-                if (GPIO_PINS[i]["value"] == GPIO.HIGH):
-                    value = "1"
-                else:
-                    value = "0"
+                value = self.server.gpio.getValue(i)
     
             elif (operation == "direction"):
-                if (GPIO_PINS[i]["direction"] == GPIO.OUT):
-                    value = "out"
-                else:
-                    value = "in"
+                value = self.server.gpio.getDirection(i)
     
             else:
-                WebPiHandler.sendError(s, 404, operation + " Not Found")
+                self.sendError(404, operation + " Not Found")
                 return
                 
-            s.send_response(200)
-            s.send_header("Content-type", "text/plain");
-            s.wfile.write(value)
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain");
+            self.end_headers()
+            self.wfile.write(value)
 
         else:
-            WebPiHandler.sendError(s, 404, "Not Found")
+            self.sendError(404, "Not Found")
 
-    def do_POST(s):
-        if (s.path.startswith("/%s/GPIO/" % CONTEXT)):
-            (root, context, mode, pin, operation, value) = s.path.split("/")
+    def do_POST(self):
+        relativePath = self.path.replace(self.server.context, "")
+        if (relativePath.startswith("GPIO/")):
+            (mode, pin, operation, value) = relativePath.split("/")
             i = int(pin)
-            if not checkGPIOPin(s, pin):
+            if not self.checkGPIOPin(pin):
                 return
             
             if (operation == "value"):
-                if (value == "1"):
-                    setGPIOValue(i, True)
+                if (value == "0"):
+                    self.server.gpio.setValue(i, False)
+                elif (value == "1"):
+                    self.server.gpio.setValue(i , True)
                 else:
-                    setGPIOValue(i , False)
+                    self.sendError(400, "Bad Value")
+                    return
     
-                s.send_response(200)
-                s.send_header("Content-type", "text/plain");
-                s.end_headers()
-                s.wfile.write(value)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(value)
             elif (operation == "direction"):
                 if value == "in":
-                    setGPIODirection(i, GPIO.IN)
+                    self.server.gpio.setDirection(i, GPIO.IN)
+                elif value == "out":
+                    self.server.gpio.setDirection(i, GPIO.OUT)
                 else:
-                    setGPIODirection(i, GPIO.OUT)
+                    self.sendError(400, "Bad Direction")
+                    return
     
-                s.send_response(200)
-                s.send_header("Content-type", "text/plain");
-                s.end_headers()
-                s.wfile.write(value)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(value)
             else:
-                WebPiHandler.sendError(s, 404, operation + " Not Found")
+                self.sendError(404, operation + " Not Found")
         else:
-            WebPiHandler.sendError(s, 404, "Not Found")
+            self.sendError(404, "Not Found")
             
-def initGPIOs():
-    GPIO.setmode(GPIO.BCM)
+def main(argv):
+    host = '0.0.0.0'
+    port = 80
+    context = "/webiopi/"
+    index = "index.html"
 
-    for i in range(PIN_COUNT):
-        GPIO_PINS.append({"mode": 0, "direction": None, "value": None})
-
-    setALT("UART", True)
-
-    for pin in GPIO_AVAILABLE:
-        if GPIO_PINS[pin]["mode"] != MODE.ALT:
-            initGPIO(pin)
-            
-def startServer(host, port):
-    server_class = BaseHTTPServer.HTTPServer
-    httpd = server_class((host, port), WebPiHandler)
-    print time.asctime(), "WebIOPi Started at %s:%s" % (host, port)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        running = False
-        pass
-    httpd.server_close()
-
-if __name__ == '__main__':
-    port = PORT_NUMBER
-    host = HOST_NAME
-
-    args = sys.argv
-    
-    if len(args)  == 2:
-        port = int(args[1])
+    if len(argv)  == 2:
+        port = int(argv[1])
     
     try:
-        initGPIOs()
-        startServer(host, port)
-        print time.asctime(), "WebIOPi Stopped"
+        server = WebIOPiServer((host, port), WebIOPiHandler, context, index)
+        print time.asctime(), "WebIOPi Started at http://%s:%s%s" % (host, port, context)
+        server.serve_forever()
     except socket.error, e:
         if (e[0] == errno.EADDRINUSE):
             print "Address already in use, try another port"
         else:
             print "Unknown socket error %d" % e[0]
+    except KeyboardInterrupt:
+        server.server_close()
+        print time.asctime(), "WebIOPi Stopped"
 
+if __name__ == "__main__":
+    main(sys.argv)
