@@ -276,18 +276,18 @@ def main(argv):
     
     try:
         server = WebIOPiServer((host, port), WebIOPiHandler, context, index)
-        print time.asctime(), "%s Started at http://%s:%s%s" % (SERVER_VERSION, host, port, context)
+        print SERVER_VERSION, "Started at", "http://%s:%s%s" % (host, port, context)
         server.serve_forever()
 
     except socket.error, e:
         if (e[0] == errno.EADDRINUSE):
             print "Address already in use, try another port"
         else:
-            print "Unknown socket error %d" % e[0]
+            print "Unknown socket error", e[0]
 
     except KeyboardInterrupt:
         server.server_close()
-        print time.asctime(), SERVER_VERSION, "Stopped"
+        print SERVER_VERSION, "Stopped"
 
 if __name__ == "__main__":
     main(sys.argv)
