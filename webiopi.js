@@ -238,21 +238,55 @@ function updateUI() {
 	setTimeout(updateUI, 1000);
 }
 
+function showUpdate(url) {
+	var update = $('<div id="update"><a href="' + url + '">Update available</a></div>');
+	$("#webiopi").append(update);
+}
+
+var _gaq = _gaq || [];
+
+function checkVersion() {
+	var version;
+	
+	$.get("version", function(data) {
+		_gaq.push(['_trackEvent', 'version', data]);
+		version = data.split("/")[2];
+	});
+
+	$.get("http://trouch.com/version.php", function(data) {
+		var lines = data.split("\n");
+		var c = version.split(".");
+		var n = lines[0].split(".");
+		
+		for (i=0; i<Math.min(c.length, n.length); i++) {
+			if (n[i]>c[i]) {
+				showUpdate(lines[1]);
+				return;
+			}
+		}
+		if (n.length > c.length) {
+			showUpdate(lines[1]);
+		}
+	});
+}
+
+
+
 function webpi_init() {
 	init_pinout();
 	buildTable();
 	updateUI();
-}
 
-$(document).ready(webpi_init);
-
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-33979593-2']);
-_gaq.push(['_trackPageview']);
-
-(function() {
+	_gaq.push(['_setAccount', 'UA-33979593-2']);
+	_gaq.push(['_trackPageview']);
+	
+	checkVersion();
+	
 	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
+
+}
+
+$(document).ready(webpi_init);
 

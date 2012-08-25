@@ -27,7 +27,7 @@ import RPi.GPIO
 
 VERSION = '0.2.1'
 
-SERVER_VERSION = 'WebIOPi/' + VERSION 
+SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class GPIO:
@@ -194,6 +194,12 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.server.gpio.writeJSON(self.wfile)
+
+        elif relativePath == "version":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(SERVER_VERSION)
 
         elif (relativePath.startswith("GPIO/")):
             (mode, pin, operation) = relativePath.split("/")

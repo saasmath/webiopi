@@ -17,6 +17,9 @@
 
 include("gpio.php");
 
+$VERSION = "0.2.1";
+$SERVER_VERSION = "WebIOPi/PHP/$VERSION";
+
 function sendError($code, $message) {
 	header($_SERVER['SERVER_PROTOCOL'] . " " . $code . " " . $message);
 	exit($message);
@@ -32,8 +35,13 @@ function checkGPIOPin($gpio, $pin) {
 }
 
 function doGET($gpio, $vars) {
+	global $SERVER_VERSION;
 	if ($vars[1] == "*") {
 		writeJSON($gpio);
+	}
+	else if ($vars[1] == "version") {
+		header("Content-type: text/plain");
+		echo $SERVER_VERSION;
 	}
 	else if ($vars[1] == "GPIO") {
 		if (count($vars) != 4) {
@@ -137,6 +145,9 @@ function routeRequest($gpio) {
 	$uri = substr($request_uri, strlen($context));
 
 	$vars = explode('/', $uri);
+	
+	global $SERVER_VERSION;
+	header("Server: " + $SERVER_VERSION);
 	if ($method == "GET") {
 		doGET($gpio, $vars);
 	}

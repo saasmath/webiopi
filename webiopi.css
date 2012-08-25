@@ -61,3 +61,16 @@ input {
 	font-weight: bold;
 	width: 75px;
 }
+
+#update {
+	position: absolute;
+	top: 16px;
+	right: 12px;
+}
+
+#update > a {
+	font-family: sans-serif;
+	font-size: 12pt;
+	font-weight: bold;
+	color: FireBrick;
+}
