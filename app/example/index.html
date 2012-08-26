@@ -3,24 +3,24 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
-	<title>WebIOPi | Example App</title>
+	<title>WebIOPi | Example</title>
 	<script type="text/javascript" src="../../jquery.js"></script>
 	<script type="text/javascript" src="../../webiopi.js"></script>
 	<link rel="stylesheet" type="text/css" href="../../webiopi.css" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script type="text/javascript">
 	$(document).ready(function() {
-		webiopi().createHeader();
+		webiopi().RPiHeader().createTable("content"); // create RPiHeader Table and append it to content div
 
-		webiopi().setDirection(0, "in");
-		webiopi().setLabel(0, "SW");
+        webiopi().setDirection(0, "in"); // set GPIO 0 as input
+        webiopi().setLabel(0, "SW"); // set GPIO 0 label
 
-		webiopi().setDirection(7, "out");
-		webiopi().setLabel(7, "LED");
+        webiopi().setDirection(7, "out"); // set GPIO 7 as output
+        webiopi().setLabel(7, "LED"); // set GPIO 7 label
 	});
 	</script>
 </head>
 <body>
-<div id="webiopi" align="center"></div>
+<div id="content" align="center"></div>
 </body>
 </html>

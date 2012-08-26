@@ -3,24 +3,25 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
-	<title>WebIOPi | Example App</title>
+	<title>WebIOPi | Example 2</title>
 	<script type="text/javascript" src="../../jquery.js"></script>
 	<script type="text/javascript" src="../../webiopi.js"></script>
 	<link rel="stylesheet" type="text/css" href="../../webiopi.css" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script type="text/javascript">
 	$(document).ready(function() {
-		var sw = webiopi().getGPIOButton(0, "SW");
-		webiopi().setDirection(0, "in");
-		$("body").append(sw);
-		
-		var led = webiopi().getGPIOButton(7, "LED");
-		webiopi().setDirection(7, "out");
-		$("body").append(led);
+        var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
+        $("#content").append(sw); // append button to webiopi div
+                
+        var led = webiopi().createGPIOButton(7, "LED"); // create a "SW" button for GPIO 7
+        $("#content").append(led); // append button to webiopi div
+
+        webiopi().setDirection(0, "in"); // set GPIO 0 as input
+        webiopi().setDirection(7, "out"); // set GPIO 7 as output
 	});
 	</script>
 </head>
 <body>
-<div id="webiopi" align="center"></div>
+<div id="content"></div>
 </body>
 </html>

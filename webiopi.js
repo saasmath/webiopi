@@ -31,7 +31,14 @@ function webiopi() {
 
 function WebIOPi() {
 	this.context = "/webiopi/";
-
+	this.GPIO = Array(26);
+	this.ALT = {
+			UART: {name: "UART", enabled: false, gpios: []},
+			I2C: {name: "I2C", enabled: false, gpios: []},
+			SPI: {name: "SPI", enabled: false, gpios: []}
+		};
+		
+	// get context
 	var scripts = document.getElementsByTagName("script");
 	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
 	for(var i = 0; i < scripts.length; i++) {
@@ -42,21 +49,16 @@ function WebIOPi() {
 		}
 	}
 
-	this.GPIO = Array(26);
-
+	// init GPIOs
 	for (var i=0; i<this.GPIO.length; i++) {
 		var gpio = Object();
 		gpio.value = 0;
 		gpio.direction = "in";
 		this.GPIO[i] = gpio;
 	}
-
-	this.ALT = {
-		UART: {name: "UART", enabled: false, gpios: []},
-		I2C: {name: "I2C", enabled: false, gpios: []},
-		SPI: {name: "SPI", enabled: false, gpios: []}
-	};
 	
+	
+	// init ALTs
 	this.addALT(this.ALT.UART, 14, "TX");
 	this.addALT(this.ALT.UART, 15, "RX");
 
@@ -68,7 +70,8 @@ function WebIOPi() {
 	this.addALT(this.ALT.SPI, 11, "SCLK");
 	this.addALT(this.ALT.SPI,  8, "CE0");
 	this.addALT(this.ALT.SPI,  7, "CE1");
-
+	
+	// GA
 	_gaq.push(['_setAccount', 'UA-33979593-2']);
 	_gaq.push(['_trackPageview']);
 		
@@ -78,7 +81,8 @@ function WebIOPi() {
 	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 
 	scripts[0].parentNode.insertBefore(ga, scripts[0]);
-
+	
+	// schedule UpdateUI and CheckVersion
 	setTimeout(this.updateUI, 100);
 	setTimeout(this.checkVersion, 100);
 }
@@ -110,7 +114,7 @@ WebIOPi.prototype.toggleValue = function (gpio) {
 	this.setValue(gpio, value);
 }
 
-WebIOPi.prototype.getGPIOButton = function (gpio, label) {
+WebIOPi.prototype.createGPIOButton = function (gpio, label) {
 	var button = $('<input type="submit">');
 	button.attr("id", "gpio"+gpio);
 	button.val(label);
@@ -140,7 +144,7 @@ WebIOPi.prototype.toggleDirection = function (gpio) {
 	this.setDirection(gpio, value)
 }
 
-WebIOPi.prototype.getDirectionButton = function (gpio) {
+WebIOPi.prototype.createDirectionButton = function (gpio) {
 	var button = $('<input>');
 	button.attr("id", "direction"+gpio);
 	button.attr("type", "submit");
@@ -212,10 +216,11 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
-WebIOPi.prototype.createHeader = function () {
+WebIOPi.prototype.RPiHeader = function () {
 	if (this._header == undefined) {
-		this._header == new RPiHeader();
+		this._header = new RPiHeader();
 	}
+	return this._header;
 }
 
 function RPiHeader() {
@@ -242,15 +247,13 @@ function RPiHeader() {
 	this.map(21, this.TYPE.GPIO, 9);	this.map(22, this.TYPE.GPIO, 25);
 	this.map(23, this.TYPE.GPIO, 11);	this.map(24, this.TYPE.GPIO, 8);
 	this.map(25, this.TYPE.DNC, "--");	this.map(26, this.TYPE.GPIO, 7);
-
-	this.buildTable();
 }
 
 RPiHeader.prototype.getPinCell = function (pin) {
 	var cell = $('<td align="center">');
 	var button;
 	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
-		button = w().getGPIOButton(this.PINS[pin].value, pin);
+		button = w().createGPIOButton(this.PINS[pin].value, pin);
 	}
 	else {
 		var button = $('<input type="submit">');
@@ -283,15 +286,15 @@ RPiHeader.prototype.getDescriptionCell = function (pin, align) {
 RPiHeader.prototype.getDirectionCell = function (pin) {
 	var cell = $('<td align="center">');
 	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
-		var button = w().getDirectionButton(this.PINS[pin].value);
+		var button = w().createDirectionButton(this.PINS[pin].value);
 		cell.append(button);
 	}
 	return cell;
 }
 
-RPiHeader.prototype.buildTable = function () {
-	$("#webiopi").append($('<table>'));
-	var table = $("#webiopi > table");
+RPiHeader.prototype.createTable = function (containerId) {
+	var table = $("<table>");
+	table.attr("id", "RPiHeader")
 	for (var pin=1; pin<=26; pin++) {
 		var line = 	$('<tr>');
 		line.append(this.getDirectionCell(pin))
@@ -305,6 +308,12 @@ RPiHeader.prototype.buildTable = function () {
 
 		table.append(line);
 	}
+	
+	if (containerId != undefined) {
+		$("#"+containerId).append(table);
+	}
+	
+	return table;
 }
 
 RPiHeader.prototype.map = function (pin, type, value) {
