@@ -14,279 +14,303 @@
    limitations under the License.
 */
 
-var PIN_COUNT = 26;
+var _gaq = _gaq || [];
+var _webiopi; 
 
-var TYPE = {
-	DNC: {value: 0, style: "DNC"},
-	GND: {value: 1, style: "GND"},
-	V33: {value: 2, style: "V33"},
-	V50: {value: 3, style: "V50"},
-	GPIO: {value: 4, style: "GPIO"}
-};
-
-var ALT = {
-	UART: {name: "UART", style: "UART", enabled: false, pins: []},
-	I2C: {name: "I2C", style: "I2C", enabled: false, pins: []},
-	SPI: {name: "SPI", style: "SPI", enabled: false, pins: []}
-};
-
-var PINS = Array(PIN_COUNT+1);
-var GPIO = Array(PIN_COUNT);
-
-function MAP(pin, pin_type, pin_value) {
-	PINS[pin] = {type: pin_type, value: pin_value};
-	if (pin_type.value == TYPE.GPIO.value) {
-		GPIO[pin_value].rpin = pin;
+function w() {
+	if (_webiopi == undefined) {
+		_webiopi = new WebIOPi();
 	}
-}
-
-function MAP_ALT(alt, alt_pin, alt_gpio, alt_name) {
-	alt.pins.push({pin: alt_pin, gpio: alt_gpio, name: alt_name});
-}
-
-function init_pinout() {
-	for (var i=0; i<PIN_COUNT; i++) {
-		GPIO[i] = Object();
-	}
-
-	MAP(1, TYPE.V33, "3.3V");	MAP(2, TYPE.V50, "5V");
-	MAP(3, TYPE.GPIO, 0);		MAP(4, TYPE.DNC, "--");
-	MAP(5, TYPE.GPIO, 1);		MAP(6, TYPE.GND, "GROUND");
-	MAP(7, TYPE.GPIO, 4);		MAP(8, TYPE.GPIO, 14);
-	MAP(9, TYPE.DNC, "--");	MAP(10, TYPE.GPIO, 15);
-	MAP(11, TYPE.GPIO, 17);		MAP(12, TYPE.GPIO, 18);
-	MAP(13, TYPE.GPIO, 21);		MAP(14, TYPE.DNC, "--");
-	MAP(15, TYPE.GPIO, 22);		MAP(16, TYPE.GPIO, 23);
-	MAP(17, TYPE.DNC, "--");	MAP(18, TYPE.GPIO, 24);
-	MAP(19, TYPE.GPIO, 10);		MAP(20, TYPE.DNC, "--");
-	MAP(21, TYPE.GPIO, 9);		MAP(22, TYPE.GPIO, 25);
-	MAP(23, TYPE.GPIO, 11);		MAP(24, TYPE.GPIO, 8);
-	MAP(25, TYPE.DNC, "--");	MAP(26, TYPE.GPIO, 7);
-
-	MAP_ALT(ALT.UART, 8, 14, "TX");
-	MAP_ALT(ALT.UART, 10, 15, "RX");
-
-	MAP_ALT(ALT.I2C, 3, 0, "SDA");
-	MAP_ALT(ALT.I2C, 5, 1, "SCL");
-
-	MAP_ALT(ALT.SPI, 19, 10, "MOSI");
-	MAP_ALT(ALT.SPI, 21, 9, "MISO");
-	MAP_ALT(ALT.SPI, 23, 11, "SCLK");
-	MAP_ALT(ALT.SPI, 24, 8, "CE0");
-	MAP_ALT(ALT.SPI, 26, 7, "CE1");
 	
+	return _webiopi;
 }
 
-function setPinLabel(pin, label) {
-	$("#pin" + pin).val(label);
+function webiopi() {
+	return w();
 }
 
-function updateGPIOValue(gpio, value) {
-	GPIO[gpio].value = value;
+function WebIOPi() {
+	this.context = "/webiopi/";
+
+	var scripts = document.getElementsByTagName("script");
+	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
+	for(var i = 0; i < scripts.length; i++) {
+		var res = reg.exec(scripts[i].src);
+		if (res && (res.length > 1)) {
+			this.context = res[1];
+			
+		}
+	}
+
+	this.GPIO = Array(26);
+
+	for (var i=0; i<this.GPIO.length; i++) {
+		var gpio = Object();
+		gpio.value = 0;
+		gpio.direction = "in";
+		this.GPIO[i] = gpio;
+	}
+
+	this.ALT = {
+		UART: {name: "UART", enabled: false, gpios: []},
+		I2C: {name: "I2C", enabled: false, gpios: []},
+		SPI: {name: "SPI", enabled: false, gpios: []}
+	};
+	
+	this.addALT(this.ALT.UART, 14, "TX");
+	this.addALT(this.ALT.UART, 15, "RX");
+
+	this.addALT(this.ALT.I2C, 0, "SDA");
+	this.addALT(this.ALT.I2C, 1, "SCL");
+
+	this.addALT(this.ALT.SPI, 10, "MOSI");
+	this.addALT(this.ALT.SPI,  9, "MISO");
+	this.addALT(this.ALT.SPI, 11, "SCLK");
+	this.addALT(this.ALT.SPI,  8, "CE0");
+	this.addALT(this.ALT.SPI,  7, "CE1");
+
+	_gaq.push(['_setAccount', 'UA-33979593-2']);
+	_gaq.push(['_trackPageview']);
+		
+	var ga = document.createElement('script');
+	ga.type = 'text/javascript';
+	ga.async = false;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+
+	scripts[0].parentNode.insertBefore(ga, scripts[0]);
+
+	setTimeout(this.updateUI, 100);
+	setTimeout(this.checkVersion, 100);
+}
+
+
+WebIOPi.prototype.addALT = function (alt, gpio, name) {
+	var o = Object();
+	o.gpio = gpio;
+	o.name = name;
+	alt.gpios.push(o);
+}
+
+WebIOPi.prototype.updateValue = function (gpio, value) {
+	this.GPIO[gpio].value = value;
 	var style = (value == 1) ? "HIGH" : "LOW";
-	$("#pin"+GPIO[gpio].rpin).attr("class", style);
+	$("#gpio"+gpio).attr("class", style);
 }
 
-function updateGPIODirection(gpio, direction) {
-	GPIO[gpio].direction = direction;
-	$("#direction"+GPIO[gpio].rpin).val(direction.toUpperCase());
-}
-
-function setGPIOValue(gpio, value) {
-	$.post('GPIO/' + gpio + "/value/" + value, function(data) {
-		updateGPIOValue(gpio, data);
-	});
-}
-
-function setPinValue(pin, value) {
-	if (PINS[pin].type.value == TYPE.GPIO.value) {
-		var gpio = PINS[pin].value;
-		setGPIOValue(gpio, value);
+WebIOPi.prototype.setValue = function (gpio, value) {
+	if (this.GPIO[gpio].direction=="out") {
+		$.post(this.context + 'GPIO/' + gpio + "/value/" + value, function(data) {
+			w().updateValue(gpio, data);
+		});
 	}
 }
 
-function toggleValue(pin) {
-	var gpio = PINS[pin].value;
-	if ((PINS[pin].type.value == TYPE.GPIO.value) && (GPIO[gpio].direction=="out")) {
-		var value = (GPIO[gpio].value == 1) ? 0 : 1;
-		setGPIOValue(gpio, value);
-	}
+WebIOPi.prototype.toggleValue = function (gpio) {
+	var value = (this.GPIO[gpio].value == 1) ? 0 : 1;
+	this.setValue(gpio, value);
 }
 
-function setGPIODirection(gpio, value) {
-	$.post('GPIO/' + gpio + "/direction/" + value, function(data) {
-		updateGPIODirection(gpio, data);
-	});
-}
-
-function setPinDirection(pin, value) {
-	if (PINS[pin].type.value == TYPE.GPIO.value) {
-		var gpio = PINS[pin].value;
-		setGPIODirection(gpio, value);
-	}
-}
-
-function toggleDirection(pin) {
-	if (PINS[pin].type.value == TYPE.GPIO.value) {
-		var gpio = PINS[pin].value;
-		var value = (GPIO[gpio].direction == "in") ? "out" : "in";
-		setGPIODirection(gpio, value)
-	}
-}
-
-function getPinCell(pin) {
-	var cell = $('<td align="center">');
+WebIOPi.prototype.getGPIOButton = function (gpio, label) {
 	var button = $('<input type="submit">');
-	button.attr("id", "pin"+pin);
-	button.val(pin);
-	button.attr("class", PINS[pin].type.style);
+	button.attr("id", "gpio"+gpio);
+	button.val(label);
 	button.bind("click", function(event) {
-		toggleValue(pin);
+		w().toggleValue(gpio);
 	});
+	return button;
+}
+
+WebIOPi.prototype.setLabel = function (gpio, label) {
+	$("#gpio" + gpio).val(label);
+}
+
+WebIOPi.prototype.updateDirection = function (gpio, direction) {
+	this.GPIO[gpio].direction = direction;
+	$("#direction"+gpio).val(direction.toUpperCase());
+}
+
+WebIOPi.prototype.setDirection = function (gpio, value) {
+	$.post(this.context + 'GPIO/' + gpio + "/direction/" + value, function(data) {
+		w().updateDirection(gpio, data);
+	});
+}
+
+WebIOPi.prototype.toggleDirection = function (gpio) {
+	var value = (this.GPIO[gpio].direction == "in") ? "out" : "in";
+	this.setDirection(gpio, value)
+}
+
+WebIOPi.prototype.getDirectionButton = function (gpio) {
+	var button = $('<input>');
+	button.attr("id", "direction"+gpio);
+	button.attr("type", "submit");
+	button.attr("class", "DirectionEnabled");
+	button.val("");
+	button.bind("click", function(event) {
+		w().toggleDirection(gpio);
+	});
+	return button;
+}
+
+WebIOPi.prototype.updateALT = function (alt, enable) {
+	for (var p in alt.gpios) {
+		gpio = alt.gpios[p].gpio;
+		$("#description"+gpio).empty();
+		if (enable) {
+			$("#description"+gpio).append(alt.name + " " + alt.gpios[p].name);
+			$("#gpio"+gpio).attr("class", alt.name);
+			$("#direction"+gpio).attr("class", "DirectionDisabled");
+		}
+		else {
+			$("#description"+gpio).append("GPIO " + gpio);
+			$("#gpio"+gpio).attr("class", "");
+			$("#direction"+gpio).attr("class", "DirectionEnabled");
+		}
+	}
+	alt.enabled = enable;
+}
+
+WebIOPi.prototype.updateUI = function () {
+	$.getJSON(w().context + "*", function(data) {
+		w().updateALT(w().ALT.UART, data["UART"]);
+		w().updateALT(w().ALT.I2C, data["I2C"]);
+		w().updateALT(w().ALT.SPI, data["SPI"]);
+		
+		$.each(data["GPIO"], function(gpio, data) {
+		    if (data["mode"] == "GPIO") {
+		    	w().updateDirection(gpio, data["direction"]);
+		    	w().updateValue(gpio, data["value"]);
+		    }
+		});
+	});
+	setTimeout(w().updateUI, 1000);
+}
+
+
+WebIOPi.prototype.checkVersion = function () {
+	var version;
+	
+	$.get(w().context + "version", function(data) {
+		_gaq.push(['_trackEvent', 'version', data]);
+		version = data.split("/")[2];
+
+		$.get("http://trouch.com/version.php", function(data) {
+			var lines = data.split("\n");
+			var c = version.split(".");
+			var n = lines[0].split(".");
+			var updated = false;
+			for (i=0; i<Math.min(c.length, n.length); i++) {
+				if (n[i]>c[i]) {
+					updated = true;
+				}
+			}
+			if (updated || (n.length > c.length)) {
+				var div = $('<div id="update"><a href="' + lines[1] + '">Update available</a></div>');
+				$("body").append(div);
+			}
+		});
+	});
+}
+
+function RPiHeader() {
+	this.PINS = Array(27);
+
+	this.TYPE = {
+			DNC: {value: 0, style: "DNC"},
+			GND: {value: 1, style: "GND"},
+			V33: {value: 2, style: "V33"},
+			V50: {value: 3, style: "V50"},
+			GPIO: {value: 4, style: "GPIO"}
+	};
+
+	this.map(1, this.TYPE.V33, "3.3V");	this.map(2, this.TYPE.V50, "5V");
+	this.map(3, this.TYPE.GPIO, 0);		this.map(4, this.TYPE.DNC, "--");
+	this.map(5, this.TYPE.GPIO, 1);		this.map(6, this.TYPE.GND, "GROUND");
+	this.map(7, this.TYPE.GPIO, 4);		this.map(8, this.TYPE.GPIO, 14);
+	this.map(9, this.TYPE.DNC, "--");	this.map(10, this.TYPE.GPIO, 15);
+	this.map(11, this.TYPE.GPIO, 17);	this.map(12, this.TYPE.GPIO, 18);
+	this.map(13, this.TYPE.GPIO, 21);	this.map(14, this.TYPE.DNC, "--");
+	this.map(15, this.TYPE.GPIO, 22);	this.map(16, this.TYPE.GPIO, 23);
+	this.map(17, this.TYPE.DNC, "--");	this.map(18, this.TYPE.GPIO, 24);
+	this.map(19, this.TYPE.GPIO, 10);	this.map(20, this.TYPE.DNC, "--");
+	this.map(21, this.TYPE.GPIO, 9);	this.map(22, this.TYPE.GPIO, 25);
+	this.map(23, this.TYPE.GPIO, 11);	this.map(24, this.TYPE.GPIO, 8);
+	this.map(25, this.TYPE.DNC, "--");	this.map(26, this.TYPE.GPIO, 7);
+
+	this.buildTable();
+}
+
+RPiHeader.prototype.getPinCell = function (pin) {
+	var cell = $('<td align="center">');
+	var button;
+	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
+		button = w().getGPIOButton(this.PINS[pin].value, pin);
+	}
+	else {
+		var button = $('<input type="submit">');
+		button.val(pin);
+		button.attr("class", this.PINS[pin].type.style);
+	}
 	cell.append(button);
 	return cell;
 }
 
-function getName(pin) {
-	if (PINS[pin].type.value != TYPE.GPIO.value) {
-		return PINS[pin].value;
-	}
-	else {
-		return "GPIO " + PINS[pin].value;
-	}
-}
-
-function getNameCell(pin, align) {
+RPiHeader.prototype.getDescriptionCell = function (pin, align) {
 	var cell = $('<td>');
 	cell.attr("align", align);
 	
 	var div = $('<div>');
-	div.attr("id", "name"+pin);
-	div.attr("class", "pinName");
-	div.append(getName(pin));
+	div.attr("class", "Description");
+	if (this.PINS[pin].type.value != this.TYPE.GPIO.value) {
+		div.append(this.PINS[pin].value);
+	}
+	else {
+		div.attr("id", "description"+this.PINS[pin].value);
+		div.append("GPIO " + this.PINS[pin].value);
+	}
 	
 	cell.append(div);
 
 	return cell;
 }
 
-function getDirectionCell(pin) {
+RPiHeader.prototype.getDirectionCell = function (pin) {
 	var cell = $('<td align="center">');
-	if (PINS[pin].type.value == TYPE.GPIO.value) {
-		var button = $('<input>');
-		button.attr("id", "direction"+pin);
-		button.attr("type", "submit");
-		button.attr("class", "pinDirection_Enabled");
-		button.val(GPIO[PINS[pin].value].direction);
-		button.bind("click", function(event) {
-			toggleDirection(pin);
-		});
+	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
+		var button = w().getDirectionButton(this.PINS[pin].value);
 		cell.append(button);
 	}
 	return cell;
 }
 
-function setALT(alt, enable) {
-	for (var p in alt.pins) {
-		pin = alt.pins[p].pin;
-		$("#name"+pin).empty();
-		if (enable) {
-			$("#name"+pin).append(alt.name + " " + alt.pins[p].name);
-			$("#pin"+pin).attr("class", alt.style);
-			$("#direction"+pin).attr("class", "pinDirection_Disabled");
-		}
-		else {
-			$("#name"+pin).append(getName(pin));
-			$("#pin"+pin).attr("class", TYPE.GPIO.style);
-			$("#direction"+pin).attr("class", "pinDirection_Enabled");
-		}
-	}
-	alt.enabled = enable;
-}
-
-function buildTable() {
+RPiHeader.prototype.buildTable = function () {
 	$("#webiopi").append($('<table>'));
 	var table = $("#webiopi > table");
 	for (var pin=1; pin<=26; pin++) {
 		var line = 	$('<tr>');
-		line.append(getDirectionCell(pin))
-		line.append(getNameCell(pin, "right"))
-		line.append(getPinCell(pin));
+		line.append(this.getDirectionCell(pin))
+		line.append(this.getDescriptionCell(pin, "right"))
+		line.append(this.getPinCell(pin));
 
 		pin++;
-		line.append(getPinCell(pin));
-		line.append(getNameCell(pin, "left"))
-		line.append(getDirectionCell(pin))
+		line.append(this.getPinCell(pin));
+		line.append(this.getDescriptionCell(pin, "left"))
+		line.append(this.getDirectionCell(pin))
 
 		table.append(line);
 	}
 }
 
-function updateUI() {
-	$.getJSON("*", function(data) {
-		setALT(ALT.UART, data["UART"]);
-		setALT(ALT.I2C, data["I2C"]);
-		setALT(ALT.SPI, data["SPI"]);
-		
-		$.each(data["GPIO"], function(gpio, data) {
-		    if (data["mode"] == "GPIO") {
-		    	updateGPIODirection(gpio, data["direction"]);
-		    	updateGPIOValue(gpio, data["value"]);
-		    }
-		});
-	});
-	setTimeout(updateUI, 1000);
+RPiHeader.prototype.map = function (pin, type, value) {
+	this.PINS[pin] = Object();
+	this.PINS[pin].type = type
+	this.PINS[pin].value = value;
 }
 
-function showUpdate(url) {
-	var update = $('<div id="update"><a href="' + url + '">Update available</a></div>');
-	$("#webiopi").append(update);
+function init() {
+	var header = new RPiHeader();
 }
 
-var _gaq = _gaq || [];
+$(document).ready(init);
 
-function checkVersion() {
-	var version;
-	
-	$.get("version", function(data) {
-		_gaq.push(['_trackEvent', 'version', data]);
-		version = data.split("/")[2];
-	});
-
-	$.get("http://trouch.com/version.php", function(data) {
-		var lines = data.split("\n");
-		var c = version.split(".");
-		var n = lines[0].split(".");
-		
-		for (i=0; i<Math.min(c.length, n.length); i++) {
-			if (n[i]>c[i]) {
-				showUpdate(lines[1]);
-				return;
-			}
-		}
-		if (n.length > c.length) {
-			showUpdate(lines[1]);
-		}
-	});
-}
-
-
-
-function webpi_init() {
-	init_pinout();
-	buildTable();
-	updateUI();
-
-	_gaq.push(['_setAccount', 'UA-33979593-2']);
-	_gaq.push(['_trackPageview']);
-	
-	checkVersion();
-	
-	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-
-}
-
-$(document).ready(webpi_init);
 

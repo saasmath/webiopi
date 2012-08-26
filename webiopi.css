@@ -47,16 +47,16 @@ input {
 	background-color: LightBlue;
 }
 
-.pinDirection_Enabled {
+.DirectionEnabled {
 	width: 50px;
 	background-color: Gray;
 }
 
-.pinDirection_Disabled {
+.DirectionDisabled {
 	visibility: hidden;
 }
 
-.pinName {
+.Description {
 	font-size: 12pt;
 	font-weight: bold;
 	width: 75px;
