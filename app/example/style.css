@@ -12,7 +12,7 @@ input {
 	position: absolute;
 }
 
-#pin3 {
+#gpio0 {
 	visibility: visible;
 	top: 20px;
 	left: 20px;
@@ -22,7 +22,7 @@ input {
 	font-weight: bold;
 }
 
-#pin26 {
+#gpio7 {
 	visibility: visible;
 	top: 120px;
 	left: 20px;
@@ -33,10 +33,10 @@ input {
 	color: black;
 }
 
-#pin26.LOW {
+#gpio7.LOW {
 	background-color: white;
 }
 
-#pin26.HIGH {
+#gpio7.HIGH {
 	background-color: red;
 }
