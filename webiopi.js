@@ -212,6 +212,12 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
+WebIOPi.prototype.createHeader = function () {
+	if (this._header == undefined) {
+		this._header == new RPiHeader();
+	}
+}
+
 function RPiHeader() {
 	this.PINS = Array(27);
 
@@ -306,11 +312,4 @@ RPiHeader.prototype.map = function (pin, type, value) {
 	this.PINS[pin].type = type
 	this.PINS[pin].value = value;
 }
-
-function init() {
-	var header = new RPiHeader();
-}
-
-$(document).ready(init);
-
 

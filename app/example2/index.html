@@ -10,13 +10,13 @@
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script type="text/javascript">
 	$(document).ready(function() {
-		webiopi().createHeader();
-
+		var sw = webiopi().getGPIOButton(0, "SW");
 		webiopi().setDirection(0, "in");
-		webiopi().setLabel(0, "SW");
-
+		$("body").append(sw);
+		
+		var led = webiopi().getGPIOButton(7, "LED");
 		webiopi().setDirection(7, "out");
-		webiopi().setLabel(7, "LED");
+		$("body").append(led);
 	});
 	</script>
 </head>
