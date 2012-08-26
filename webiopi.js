@@ -222,11 +222,11 @@ WebIOPi.prototype.RPiHeader = function () {
 	return this._header;
 }
 
-WebIOPi.prototype.OrderedGPIO = function () {
-	if (this._ordered == undefined) {
-		this._ordered = new OrderedGPIO();
+WebIOPi.prototype.Expert = function () {
+	if (this._expert == undefined) {
+		this._expert = new Expert();
 	}
-	return this._ordered;
+	return this._expert;
 }
 
 function RPiHeader() {
@@ -328,11 +328,11 @@ RPiHeader.prototype.map = function (pin, type, value) {
 	this.PINS[pin].value = value;
 }
 
-function OrderedGPIO() {
+function Expert() {
 	
 }
 
-OrderedGPIO.prototype.createGPIO = function (gpio) {
+Expert.prototype.createGPIO = function (gpio) {
 	var box = $("<div>");
 	box.append(w().createDirectionButton(gpio));
 	box.append(w().createGPIOButton(gpio, gpio));
@@ -346,12 +346,12 @@ OrderedGPIO.prototype.createGPIO = function (gpio) {
 	return box;
 }
 
-OrderedGPIO.prototype.createList = function (containerId) {
+Expert.prototype.createList = function (containerId) {
 	var box = $('<div>');
 	
 	$.getJSON(w().context + "*", function(data) {
 		$.each(data["GPIO"], function(gpio, data) {
-			var gpio = w().OrderedGPIO().createGPIO(gpio);
+			var gpio = w().Expert().createGPIO(gpio);
 			box.append(gpio);
 		});
 	});
