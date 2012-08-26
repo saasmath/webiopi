@@ -271,6 +271,14 @@ def main(argv):
     context = "/webiopi/"
     index = "index.html"
 
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('google.com', 80))
+        host = s.getsockname()[0]
+        s.close()
+    except socket.error, e:
+        print "Cannot determine local IP, binding to all"
+
     if len(argv)  == 2:
         port = int(argv[1])
     
