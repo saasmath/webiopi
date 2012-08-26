@@ -1,10 +1,6 @@
 @CHARSET "UTF-8";
 
 input {
-	-webkit-appearance: none;
-	color: white;
-	border: black 3px solid;
-	padding: 0 0 0 0;
 	position: absolute;
 }
 
