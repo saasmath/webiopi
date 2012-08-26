@@ -148,7 +148,7 @@ WebIOPi.prototype.createDirectionButton = function (gpio) {
 	button.attr("id", "direction"+gpio);
 	button.attr("type", "submit");
 	button.attr("class", "DirectionEnabled");
-	button.val("");
+	button.val(" ");
 	button.bind("click", function(event) {
 		w().toggleDirection(gpio);
 	});
@@ -220,6 +220,13 @@ WebIOPi.prototype.RPiHeader = function () {
 		this._header = new RPiHeader();
 	}
 	return this._header;
+}
+
+WebIOPi.prototype.OrderedGPIO = function () {
+	if (this._ordered == undefined) {
+		this._ordered = new OrderedGPIO();
+	}
+	return this._ordered;
 }
 
 function RPiHeader() {
@@ -320,4 +327,40 @@ RPiHeader.prototype.map = function (pin, type, value) {
 	this.PINS[pin].type = type
 	this.PINS[pin].value = value;
 }
+
+function OrderedGPIO() {
+	
+}
+
+OrderedGPIO.prototype.createGPIO = function (gpio) {
+	var box = $("<div>");
+	box.append(w().createDirectionButton(gpio));
+	box.append(w().createGPIOButton(gpio, gpio));
+
+	div = $('<div>');
+	div.attr("id", "description"+gpio);
+	div.attr("class", "Description");
+	div.append("GPIO " + gpio);
+	box.append(div);
+
+	return box;
+}
+
+OrderedGPIO.prototype.createList = function (containerId) {
+	var box = $('<div>');
+	
+	$.getJSON(w().context + "*", function(data) {
+		$.each(data["GPIO"], function(gpio, data) {
+			var gpio = w().OrderedGPIO().createGPIO(gpio);
+			box.append(gpio);
+		});
+	});
+	
+	if (containerId != undefined) {
+		$("#"+containerId).append(box);
+	}
+	
+	return box;
+} 
+
 
