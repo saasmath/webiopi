@@ -1,3 +1,6 @@
+Warning : this page is being updated for next version, please refer to included doc in WebIOPi 0.2 tarball
+
+
 WebIOPi UI customization is easy but requires some CSS knowledge. The basic technic is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
 
 Before starting, copy index.html to mypage.html and create a new blank mypage.css
