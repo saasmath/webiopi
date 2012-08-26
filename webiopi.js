@@ -15,7 +15,7 @@
 */
 
 var _gaq = _gaq || [];
-var _webiopi; 
+var _webiopi;
 
 function w() {
 	if (_webiopi == undefined) {
@@ -86,7 +86,6 @@ function WebIOPi() {
 	setTimeout(this.updateUI, 100);
 	setTimeout(this.checkVersion, 100);
 }
-
 
 WebIOPi.prototype.addALT = function (alt, gpio, name) {
 	var o = Object();
