@@ -48,11 +48,12 @@ input {
 }
 
 .DirectionEnabled {
-	width: 50px;
+	width: 60px;
 	background-color: Gray;
 }
 
 .DirectionDisabled {
+	width: 60px;
 	visibility: hidden;
 }
 
