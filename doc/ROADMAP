@@ -1,8 +1,7 @@
-   Parallel BUS helper (client, servers)
-   PHP Extension to use registers (php server)
-   Remove sudoer need (php server)
-   UART/SPI/I2C support (client, servers)
-   Interrupts (servers)
-   Long-polling/Bayeux/Cometd and/or WebSocket (client, servers)
-   Web oscilloscope (client, may be servers)
+   UART/SPI/I2C support
+   Parallel BUS helper
+   Interrupts
+   Long-polling/Bayeux/Cometd and/or WebSocket
+   Logic analyzer
    Java server version ?
+   Resume PHP server version development ?
