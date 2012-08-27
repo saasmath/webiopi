@@ -271,10 +271,11 @@ def main(argv):
     context = "/webiopi/"
     index = "index.html"
 
+    hostHint = host
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(('google.com', 80))
-        host = s.getsockname()[0]
+        hostHint = s.getsockname()[0]
         s.close()
     except socket.error, e:
         print "Cannot determine local IP, binding to all"
@@ -284,7 +285,7 @@ def main(argv):
     
     try:
         server = WebIOPiServer((host, port), WebIOPiHandler, context, index)
-        print SERVER_VERSION, "Started at", "http://%s:%s%s" % (host, port, context)
+        print SERVER_VERSION, "Started at", "http://%s:%s%s" % (hostHint, port, context)
         server.serve_forever()
 
     except socket.error, e:
