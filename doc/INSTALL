@@ -68,6 +68,7 @@ fastcgi.server = ( ".php" => ((
 
 Then add the following lines to set WebIOPi's rewrite rules :
 url.rewrite += (
+        "^/webiopi/(.)/$" => "$0",
         "^/webiopi/(.)\.(.+)$" => "$0",
         "^/webiopi/(.+)$" => "/webiopi/webiopi.php"
 )
