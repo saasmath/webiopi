@@ -30,7 +30,7 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
 Check the [ROADMAP] for the upcoming features
 
 =Usage=
-First of all, follow [INSTALL] instructions.
+If not already done, follow [INSTALL] instructions.
 
 If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost/webiopi/ Don't forget to add :port right after localhost if you use a different port.
 
@@ -41,4 +41,9 @@ You can even add a port redirection on your router (and/or use IPv6) to control 
    Click/Tap the OUT/IN button to change GPIO direction.
    Click/Tap pins to change the GPIO output state.
 
+
 http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome.png
+
+You can also use the expert app, which gives you an ordered list of GPIOs. It's located at http://localhost/webiopi/app/expert/ (or http://raspberrypi/webiopi/app/expert/)
+
+http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome-expert.png

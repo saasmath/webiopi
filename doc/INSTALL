@@ -37,7 +37,7 @@ $ sudo mv webiopi /var/www
 or
 $ sudo ln -s webiopi /var/www/webiopi
 
-You're done, and ready to enjoy WebIOPi !
+You're done, and ready to enjoy WebIOPi ! Go to [README#Usage README] for usage instructions.
 
 =PHP/lighttpd=
 If you don't already have lighttpd and PHP, install required packages first. On Raspbian, open a terminal :
@@ -76,7 +76,7 @@ url.rewrite += (
 
 Finally restart lighttpd :
 $ sudo /etc/init.d/lighttpd restart
-You're done, and ready to enjoy WebIOPi !
+You're done, and ready to enjoy WebIOPi ! Go to [README#Usage README] for usage instructions.
 
 
 =PYTHON=
@@ -118,3 +118,5 @@ $ sudo /etc/init.d/webiopi stop
 
 You can even start WebIOPi at boot :
 $ sudo update-rc.d webiopi defaults
+
+Go to [README#Usage README] for usage instructions.

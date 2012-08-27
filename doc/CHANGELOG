@@ -1,6 +1,8 @@
-=Current version : 0.2 (08/21/12)=
+=Current version : 0.3 (08/27/12)=
 
 ==trunk==
+
+==0.3 (08/27/12)==
    Fixed security issue in the Python server
    Python server general improvements
    Python server display real IP
