@@ -30,8 +30,8 @@ Exit, save, confirm changes, and restart Apache :
 $ sudo /etc/init.d/apache2 restart
 
 Now, download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
-$ tar xvzf WebIOPi-0.2.tar.gz
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
+$ tar xvzf WebIOPi-0.3.tar.gz
 Finally, move extracted files or create a symbolic link :
 $ sudo mv webiopi /var/www
 or
@@ -44,8 +44,8 @@ If you don't already have lighttpd and PHP, install required packages first. On 
 $ sudo aptitude install lighttpd php5-cgi
 
 Now, download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
-$ tar xvzf WebIOPi-0.2.tar.gz
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
+$ tar xvzf WebIOPi-0.3.tar.gz
 Then move extracted files or create a symbolic link :
 $ sudo mv webiopi /var/www
 or
@@ -90,8 +90,8 @@ $ cd RPi.GPIO-0.3.1a
 $ sudo python setup.py install
 
 Now download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.2.tar.gz
-$ tar xvzf WebIOPi-0.2.tar.gz
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
+$ tar xvzf WebIOPi-0.3.tar.gz
 $ cd webiopi
 
 Finally, run the python script :
