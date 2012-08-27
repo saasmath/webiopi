@@ -6,7 +6,7 @@
 
 =0.2 => 0.X=
 ==PHP==
-# Add a rewrite rule in /etc/lighttpd/lighttpd.conf before the first webiopi rule :
+Add a rewrite rule in /etc/lighttpd/lighttpd.conf before the first webiopi rule :
 url.rewrite += (
 	"^/webiopi/(.)/$" => "$0", #add this line
 	"^/webiopi/(.)\.(.+)$" => "$0",
