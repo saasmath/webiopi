@@ -1,7 +1,7 @@
 Warning : this page is being updated for both trunk and next version, please refer to included doc in WebIOPi 0.2 tarball
 
 
-WebIOPi UI customization is easy but requires some CSS knowledge. The basic technic is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
+WebIOPi UI customization is easy but requires some CSS knowledge. The basic technique is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
 
 Before starting, make a copy of skeleton in the app directory
 
@@ -86,7 +86,7 @@ $(document).ready(function() {
 </body>
 </html>
 
-You can also create buttons directly whereas using the default header :
+You can also create buttons directly instead of using the RPiHeader :
 $(document).ready(function() {
 	var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
 	$("#content").append(sw); // append button to content div

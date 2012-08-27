@@ -1,11 +1,10 @@
 =Current version : 0.2 (08/21/12)=
 
-==waiting==
-
 ==trunk==
    Fixed security issue in the Python server
    Python server general improvements
-   Allow PHP5 < 5.4
+   Python server display real IP
+   Allow PHP5 < 5.4 (Works on Debian wheezy)
    Added update tracking
    Refactored Javascript code to be used as a library
    Changed IDs and CSS naming
