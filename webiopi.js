@@ -197,7 +197,7 @@ WebIOPi.prototype.checkVersion = function () {
 		_gaq.push(['_trackEvent', 'version', data]);
 		version = data.split("/")[2];
 
-		$.get("http://trouch.com/version.php", function(data) {
+		$.get("http://webiopi.trouch.com/version.php", function(data) {
 			var lines = data.split("\n");
 			var c = version.split(".");
 			var n = lines[0].split(".");

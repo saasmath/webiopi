@@ -25,7 +25,7 @@ import BaseHTTPServer
 import mimetypes as mime
 import RPi.GPIO
 
-VERSION = '0.2.1'
+VERSION = '0.3'
 
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
