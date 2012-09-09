@@ -23,85 +23,84 @@ import errno
 import socket
 import BaseHTTPServer
 import mimetypes as mime
-import RPi.GPIO
+import RPi.GPIO as RPi
 
-VERSION = '0.3'
+VERSION = '0.3.x'
 
-SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
+SERVER_VERSION = 'WebIOPi/' + VERSION 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+def log(message):
+    print SERVER_VERSION, message
+
+def log_socket_error(message):
+    log("Socket Error: %s" % message)
 
 class GPIO:
     DISABLED=0
     ENABLED=1
     ALT=2
         
-    IN = RPi.GPIO.IN
-    OUT = RPi.GPIO.OUT
+    IN = RPi.IN
+    OUT = RPi.OUT
+    ALT0 = RPi.ALT0
     
-    LOW = RPi.GPIO.LOW
-    HIGH = RPi.GPIO.HIGH
+    LOW = RPi.LOW
+    HIGH = RPi.HIGH
 
-    GPIO_PINS = []
+    GPIO_MODE = []
     GPIO_AVAILABLE = [0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25]
     ALT = {
-        "I2C": {"enabled": False, "pins": [0, 1]},
-        "SPI": {"enabled": False, "pins": [7, 8, 9, 10, 11]},
-        "UART": {"enabled": False, "pins": [14, 15]}
+        "I2C": {"enabled": False, "gpio": [0, 1]},
+        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
+        "UART": {"enabled": False, "gpio": [14, 15]}
     }
     
     def __init__(self):
-        RPi.GPIO.setmode(RPi.GPIO.BCM)
+        RPi.setmode(RPi.BCM)
         
         for i in range(self.GPIO_AVAILABLE[len(self.GPIO_AVAILABLE)-1]+1):
-            self.GPIO_PINS.append({"mode": 0, "direction": None, "value": None})
+            self.GPIO_MODE.append(GPIO.DISABLED)
     
         self.setALT("UART", True)
     
-        for pin in self.GPIO_AVAILABLE:
-            if self.GPIO_PINS[pin]["mode"] != GPIO.ALT:
-                self.GPIO_PINS[pin]["mode"] = GPIO.ENABLED
-                self.setDirection(pin, GPIO.IN)
+        for gpio in self.GPIO_AVAILABLE:
+            if self.GPIO_MODE[gpio] != GPIO.ALT:
+                self.GPIO_MODE[gpio] = GPIO.ENABLED
+                self.setDirection(gpio, GPIO.IN)
 
     def isAvailable(self, gpio):
         return gpio in self.GPIO_AVAILABLE
     
     def isEnabled(self, gpio):
-        return self.GPIO_PINS[gpio]["mode"] == GPIO.ENABLED
+        return self.GPIO_MODE[gpio] == GPIO.ENABLED
     
-    def setValue(self, pin, value):
-        RPi.GPIO.output(pin, value)
-        self.GPIO_PINS[pin]["value"] = value
+    def setValue(self, gpio, value):
+        RPi.output(gpio, value)
     
-    def getValue(self, pin):
-        if (self.GPIO_PINS[pin]["direction"] == GPIO.IN):
-            self.GPIO_PINS[pin]["value"] = RPi.GPIO.input(pin)
-        if (self.GPIO_PINS[pin]["value"] == GPIO.HIGH):
+    def getValueInteger(self, gpio):
+        if (RPi.input(gpio)):
             return 1
         else:
             return 0
         
-    def setDirection(self, pin, direction):
-        if self.GPIO_PINS[pin]["direction"] != direction:
-            RPi.GPIO.setup(pin, direction)
-            self.GPIO_PINS[pin]["direction"] = direction
-            if (direction == GPIO.OUT):
-                self.setValue(pin, False)
+    def setDirection(self, gpio, direction):
+        RPi.setup(gpio, direction, force=1)
                 
-    def getDirection(self, pin):
-        if self.GPIO_PINS[pin]["direction"] == GPIO.IN:
+    def getDirectionString(self, gpio):
+        if RPi.gpio_function(gpio) == GPIO.IN:
             return "in"
         else:
             return "out"
             
     def setALT(self, alt, enable):
-        for pin in self.ALT[alt]["pins"]:
-            p = self.GPIO_PINS[pin];
+        for gpio in self.ALT[alt]["gpio"]:
             if enable:
-                p["mode"] = GPIO.ALT
+                self.GPIO_MODE[gpio] = GPIO.ALT
             else:
-                p["mode"] = GPIO.ENABLED
-                self.setDirection(pin, GPIO.OUT)
-                self.setValue(pin, False)
+                self.GPIO_MODE[gpio] = GPIO.ENABLED
+                self.setDirection(gpio, GPIO.OUT)
+                self.setValue(gpio, False)
         self.ALT[alt]["enabled"] = enable
                 
     def writeJSON(self, out):
@@ -123,35 +122,79 @@ class GPIO:
             direction = "out"
             value = 0
 
-            if (self.GPIO_PINS[pin]["mode"] == GPIO.ALT):
+            if (self.GPIO_MODE[pin] == GPIO.ALT):
                 mode = "ALT"
             else:
-                direction = self.getDirection(pin)
-                value = self.getValue(pin)
+                direction = self.getDirectionString(pin)
+                value = self.getValueInteger(pin)
                 
             out.write('"%d": {"mode": "%s", "direction": "%s", "value": %d}' % (pin, mode, direction, value))
             first = False
             
         out.write("\n}}")
                 
-                
-class WebIOPiServer(BaseHTTPServer.HTTPServer):
-    def __init__(self, binding, handler, context, index):
-        BaseHTTPServer.HTTPServer.__init__(self, binding, handler)
+class Server(BaseHTTPServer.HTTPServer, threading.Thread):
+    def __init__(self, port=8000, context="webiopi", index="index.html"):
+        try:
+            BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
+        except socket.error, (e_no, e_str):
+            if (e_no == errno.EADDRINUSE):
+                log_socket_error("Port %d already in use, try another one" % port)
+            else:
+                log_socket_error(e_str)
+            sys.exit()
+            
+        threading.Thread.__init__(self)
+        self.port = port
         self.context = context
         self.index = index
         self.gpio = GPIO()
-            
-class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+        self.log_enabled = False;
+        
+        if not self.context.startswith("/"):
+            self.context = "/" + self.context
+        if not self.context.endswith("/"):
+            self.context += "/"
+        self.start()
+
+
+    def run(self):
+        host = "[RaspberryIP]"
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(('8.8.8.8', 53))
+            (host, p) = s.getsockname()
+            s.close()
+        except socket.error, e:
+            pass
+
+        self.running = True
+        log("Started at http://%s:%s%s" % (host, self.port, self.context))
+        try:
+            self.serve_forever()
+        except socket.error, (e_no, e_str):
+            if self.running:
+                log_socket_error(e_str)
+        log("Stopped")
+
+    def stop(self):
+        self.running = False
+        self.server_close()
+    
+        
+class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        if self.server.log_enabled:
+            BaseHTTPServer.BaseHTTPRequestHandler.log_message(self, format, args)
+
     def version_string(self):
         return SERVER_VERSION + ' ' + self.sys_version
         
     def checkGPIO(self, gpio):
-        i = int(gpio)
-        if not self.server.gpio.isAvailable(i):
+        if not self.server.gpio.isAvailable(gpio):
             self.send_error(403, "GPIO " + gpio + " Not Available")
             return False
-        if not self.server.gpio.isEnabled(i):
+        if not self.server.gpio.isEnabled(gpio):
             self.send_error(403, "GPIO " + gpio + " Disabled")
             return False
         return True
@@ -202,16 +245,16 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(SERVER_VERSION)
 
         elif (relativePath.startswith("GPIO/")):
-            (mode, pin, operation) = relativePath.split("/")
-            i = int(pin)
-            if not self.checkGPIO(pin):
+            (mode, s_gpio, operation) = relativePath.split("/")
+            gpio = int(s_gpio)
+            if not self.checkGPIO(gpio):
                 return
-            value = ""
+            value = None
             if (operation == "value"):
-                value = self.server.gpio.getValue(i)
+                value = self.server.gpio.getValueInteger(gpio)
     
             elif (operation == "direction"):
-                value = self.server.gpio.getDirection(i)
+                value = self.server.gpio.getDirectionString(gpio)
     
             else:
                 self.send_error(404, operation + " Not Found")
@@ -228,16 +271,16 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
         relativePath = self.path.replace(self.server.context, "")
         if (relativePath.startswith("GPIO/")):
-            (mode, pin, operation, value) = relativePath.split("/")
-            i = int(pin)
-            if not self.checkGPIO(pin):
+            (mode, s_gpio, operation, value) = relativePath.split("/")
+            gpio = int(s_gpio)
+            if not self.checkGPIO(gpio):
                 return
             
             if (operation == "value"):
                 if (value == "0"):
-                    self.server.gpio.setValue(i, False)
+                    self.server.gpio.setValue(gpio, False)
                 elif (value == "1"):
-                    self.server.gpio.setValue(i , True)
+                    self.server.gpio.setValue(gpio, True)
                 else:
                     self.send_error(400, "Bad Value")
                     return
@@ -249,9 +292,9 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             elif (operation == "direction"):
                 if value == "in":
-                    self.server.gpio.setDirection(i, GPIO.IN)
+                    self.server.gpio.setDirection(gpio, GPIO.IN)
                 elif value == "out":
-                    self.server.gpio.setDirection(i, GPIO.OUT)
+                    self.server.gpio.setDirection(gpio, GPIO.OUT)
                 else:
                     self.send_error(400, "Bad Direction")
                     return
@@ -266,37 +309,20 @@ class WebIOPiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_error(404, "Not Found")
             
 def main(argv):
-    host = '0.0.0.0'
-    port = 80
-    context = "/webiopi/"
-    index = "index.html"
-
-    hostHint = host
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(('google.com', 80))
-        hostHint = s.getsockname()[0]
-        s.close()
-    except socket.error, e:
-        print "Cannot determine local IP, binding to all"
+    port = 8000
 
     if len(argv)  == 2:
         port = int(argv[1])
     
+    server = Server(port)
     try:
-        server = WebIOPiServer((host, port), WebIOPiHandler, context, index)
-        print SERVER_VERSION, "Started at", "http://%s:%s%s" % (hostHint, port, context)
-        server.serve_forever()
-
-    except socket.error, e:
-        if (e[0] == errno.EADDRINUSE):
-            print "Address already in use, try another port"
-        else:
-            print "Unknown socket error", e[0]
-
+        while True:
+            time.sleep(10)
+            
     except KeyboardInterrupt:
-        server.server_close()
-        print SERVER_VERSION, "Stopped"
+        pass
+    
+    server.stop()
 
 if __name__ == "__main__":
     main(sys.argv)
