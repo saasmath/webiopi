@@ -138,17 +138,16 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
     def __init__(self, port=8000, context="webiopi", index="index.html"):
         m = re.search("^(.*)/RPi.GPIO-(.*)-(.*)", RPi.__file__)
-        if not m.group(2).startswith("0.5"):
+        if not m.group(2).startswith("0.4"):
             raise Exception("This WebIOPi version requires an experimental RPi.GPIO library. Use WebIOPi 0.3 tarball instead.")
 
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error, (e_no, e_str):
             if (e_no == errno.EADDRINUSE):
-                log_socket_error("Port %d already in use, try another one" % port)
+                raise Exception("Port %d already in use, try another one" % port)
             else:
-                log_socket_error(e_str)
-            sys.exit()
+                raise Exception(e_str)
             
         threading.Thread.__init__(self)
         self.port = port
