@@ -27,9 +27,7 @@ import _webiopi.GPIO as GPIO
 import re
 
 VERSION = '0.3.x'
-
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def log(message):
     print SERVER_VERSION, message
@@ -39,7 +37,7 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port=8000, context="webiopi", index="index.html"):
+    def __init__(self, port=8000, context="webiopi", docroot="htdocs", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error, (e_no, e_str):
@@ -51,6 +49,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         threading.Thread.__init__(self)
         self.port = port
         self.context = context
+        self.docroot = os.path.realpath(docroot);
         self.index = index
         self.log_enabled = False;
         
@@ -126,7 +125,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
     def do_GET(self):
         relativePath = self.path.replace(self.server.context, "")
-        fullPath = SCRIPT_DIR + os.sep + relativePath 
+        fullPath = self.server.docroot + os.sep + relativePath 
 
         if self.path == "/":
             self.send_response(301)
@@ -138,7 +137,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         elif os.path.exists(fullPath):
             realpath = os.path.realpath(fullPath)
-            if not realpath.startswith(SCRIPT_DIR):
+            if not realpath.startswith(self.server.docroot):
                 self.send_error(403, "Not Authorized")
                 return
                 

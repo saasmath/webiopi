@@ -42,7 +42,7 @@ static PyObject *_pud_down;
 
 static PyObject *_board_revision;
 
-static const char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3"};
+static char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3"};
 
 
 // setup function run on import of the RPi.GPIO module
