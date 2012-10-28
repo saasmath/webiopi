@@ -23,12 +23,12 @@ import errno
 import socket
 import BaseHTTPServer
 import mimetypes as mime
-import RPi.GPIO as RPi
+import _webiopi.GPIO as GPIO
 import re
 
 VERSION = '0.3.x'
 
-SERVER_VERSION = 'WebIOPi/' + VERSION 
+SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def log(message):
@@ -37,110 +37,9 @@ def log(message):
 def log_socket_error(message):
     log("Socket Error: %s" % message)
 
-class GPIO:
-    DISABLED=0
-    ENABLED=1
-    ALT=2
-        
-    IN = RPi.IN
-    OUT = RPi.OUT
-    ALT0 = RPi.ALT0
-    
-    LOW = RPi.LOW
-    HIGH = RPi.HIGH
-
-    GPIO_MODE = []
-    GPIO_AVAILABLE = [0, 1, 4, 7, 8, 9, 10, 11, 14, 15, 17, 18, 21, 22, 23, 24, 25]
-    ALT = {
-        "I2C": {"enabled": False, "gpio": [0, 1]},
-        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
-        "UART": {"enabled": False, "gpio": [14, 15]}
-    }
-    
-    def __init__(self):
-        RPi.setmode(RPi.BCM)
-        
-        for i in range(self.GPIO_AVAILABLE[len(self.GPIO_AVAILABLE)-1]+1):
-            self.GPIO_MODE.append(GPIO.DISABLED)
-    
-        self.setALT("UART", True)
-    
-        for gpio in self.GPIO_AVAILABLE:
-            if self.GPIO_MODE[gpio] != GPIO.ALT:
-                self.GPIO_MODE[gpio] = GPIO.ENABLED
-                self.setDirection(gpio, GPIO.IN)
-
-    def isAvailable(self, gpio):
-        return gpio in self.GPIO_AVAILABLE
-    
-    def isEnabled(self, gpio):
-        return self.GPIO_MODE[gpio] == GPIO.ENABLED
-    
-    def setValue(self, gpio, value):
-        RPi.output(gpio, value)
-    
-    def getValueInteger(self, gpio):
-        if (RPi.input(gpio)):
-            return 1
-        else:
-            return 0
-        
-    def setDirection(self, gpio, direction):
-        RPi.setup(gpio, direction, force=1)
-                
-    def getDirectionString(self, gpio):
-        if RPi.gpio_function(gpio) == GPIO.IN:
-            return "in"
-        else:
-            return "out"
-            
-    def setALT(self, alt, enable):
-        for gpio in self.ALT[alt]["gpio"]:
-            if enable:
-                self.GPIO_MODE[gpio] = GPIO.ALT
-            else:
-                self.GPIO_MODE[gpio] = GPIO.ENABLED
-                self.setDirection(gpio, GPIO.OUT)
-                self.setValue(gpio, False)
-        self.ALT[alt]["enabled"] = enable
-                
-    def writeJSON(self, out):
-        out.write("{")
-        first = True
-        for (alt, value) in self.ALT.items():
-            if not first:
-                out.write (", ")
-            out.write('"%s": %d' % (alt, value["enabled"]))
-            first = False
-        
-        out.write(', "GPIO":{\n')
-        first = True
-        for pin in self.GPIO_AVAILABLE:
-            if not first:
-                out.write (", \n")
-
-            mode = "GPIO"
-            direction = "out"
-            value = 0
-
-            if (self.GPIO_MODE[pin] == GPIO.ALT):
-                mode = "ALT"
-            else:
-                direction = self.getDirectionString(pin)
-                value = self.getValueInteger(pin)
-                
-            out.write('"%d": {"mode": "%s", "direction": "%s", "value": %d}' % (pin, mode, direction, value))
-            first = False
-            
-        out.write("\n}}")
-                
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
     def __init__(self, port=8000, context="webiopi", index="index.html"):
-        m = re.search("^(.*)/RPi.GPIO-(.*)-(.*)", RPi.__file__)
-        if not m.group(2).startswith("0.4"):
-            raise Exception("This WebIOPi version requires an experimental RPi.GPIO library. Use WebIOPi 0.3 tarball instead.")
-
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error, (e_no, e_str):
@@ -153,7 +52,6 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.port = port
         self.context = context
         self.index = index
-        self.gpio = GPIO()
         self.log_enabled = False;
         
         if not self.context.startswith("/"):
@@ -162,6 +60,37 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             self.context += "/"
         self.start()
 
+
+    GPIO_COUNT = 54
+    
+    ALT = {
+        "I2C": {"enabled": False, "gpio": [0, 1]},
+        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
+        "UART": {"enabled": True, "gpio": [14, 15]}
+    }
+    
+    def writeJSON(self, out):
+        out.write("{")
+        first = True
+        for (alt, value) in self.ALT.items():
+            if not first:
+                out.write (", ")
+            out.write('"%s": %d' % (alt, value["enabled"]))
+            first = False
+        
+        out.write(', "GPIO":{\n')
+        first = True
+        for gpio in range(self.GPIO_COUNT):
+            if not first:
+                out.write (", \n")
+
+            function = GPIO.getFunctionString(gpio)
+            value = GPIO.input(gpio)
+                
+            out.write('"%d": {"function": "%s", "value": %d}' % (gpio, function, value))
+            first = False
+            
+        out.write("\n}}")
 
     def run(self):
         host = "[RaspberryIP]"
@@ -195,16 +124,6 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def version_string(self):
         return SERVER_VERSION + ' ' + self.sys_version
         
-    def checkGPIO(self, gpio):
-        if not self.server.gpio.isAvailable(gpio):
-            self.send_error(403, "GPIO " + gpio + " Not Available")
-            return False
-        if not self.server.gpio.isEnabled(gpio):
-            self.send_error(403, "GPIO " + gpio + " Disabled")
-            return False
-        return True
-
-
     def do_GET(self):
         relativePath = self.path.replace(self.server.context, "")
         fullPath = SCRIPT_DIR + os.sep + relativePath 
@@ -241,7 +160,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.server.gpio.writeJSON(self.wfile)
+            self.server.writeJSON(self.wfile)
 
         elif relativePath == "version":
             self.send_response(200)
@@ -252,14 +171,13 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif (relativePath.startswith("GPIO/")):
             (mode, s_gpio, operation) = relativePath.split("/")
             gpio = int(s_gpio)
-            if not self.checkGPIO(gpio):
-                return
+
             value = None
             if (operation == "value"):
-                value = self.server.gpio.getValueInteger(gpio)
+                value = GPIO.input(gpio)
     
-            elif (operation == "direction"):
-                value = self.server.gpio.getDirectionString(gpio)
+            elif (operation == "function"):
+                value = GPIO.getFunctionString(gpio)
     
             else:
                 self.send_error(404, operation + " Not Found")
@@ -278,14 +196,12 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         if (relativePath.startswith("GPIO/")):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
-            if not self.checkGPIO(gpio):
-                return
             
             if (operation == "value"):
                 if (value == "0"):
-                    self.server.gpio.setValue(gpio, False)
+                    GPIO.output(gpio, GPIO.LOW)
                 elif (value == "1"):
-                    self.server.gpio.setValue(gpio, True)
+                    GPIO.output(gpio, GPIO.HIGH)
                 else:
                     self.send_error(400, "Bad Value")
                     return
@@ -295,15 +211,16 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(value)
 
-            elif (operation == "direction"):
+            elif (operation == "function"):
+                value = value.lower()
                 if value == "in":
-                    self.server.gpio.setDirection(gpio, GPIO.IN)
+                    GPIO.setFunction(gpio, GPIO.IN)
                 elif value == "out":
-                    self.server.gpio.setDirection(gpio, GPIO.OUT)
+                    GPIO.setFunction(gpio, GPIO.OUT)
                 else:
-                    self.send_error(400, "Bad Direction")
+                    self.send_error(400, "Bad Function")
                     return
-    
+                value = GPIO.getFunctionString(gpio)
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()

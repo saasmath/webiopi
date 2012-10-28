@@ -31,7 +31,7 @@ function webiopi() {
 
 function WebIOPi() {
 	this.context = "/webiopi/";
-	this.GPIO = Array(26);
+	this.GPIO = Array(54);
 	this.ALT = {
 			UART: {name: "UART", enabled: false, gpios: []},
 			I2C: {name: "I2C", enabled: false, gpios: []},
@@ -53,7 +53,7 @@ function WebIOPi() {
 	for (var i=0; i<this.GPIO.length; i++) {
 		var gpio = Object();
 		gpio.value = 0;
-		gpio.direction = "in";
+		gpio.func = "IN";
 		this.GPIO[i] = gpio;
 	}
 	
@@ -101,7 +101,7 @@ WebIOPi.prototype.updateValue = function (gpio, value) {
 }
 
 WebIOPi.prototype.setValue = function (gpio, value) {
-	if (this.GPIO[gpio].direction=="out") {
+	if (this.GPIO[gpio].func=="OUT") {
 		$.post(this.context + 'GPIO/' + gpio + "/value/" + value, function(data) {
 			w().updateValue(gpio, data);
 		});
@@ -127,30 +127,30 @@ WebIOPi.prototype.setLabel = function (gpio, label) {
 	$("#gpio" + gpio).val(label);
 }
 
-WebIOPi.prototype.updateDirection = function (gpio, direction) {
-	this.GPIO[gpio].direction = direction;
-	$("#direction"+gpio).val(direction.toUpperCase());
+WebIOPi.prototype.updateFunction = function (gpio, func) {
+	this.GPIO[gpio].func = func;
+	$("#function"+gpio).val(func);
 }
 
-WebIOPi.prototype.setDirection = function (gpio, value) {
-	$.post(this.context + 'GPIO/' + gpio + "/direction/" + value, function(data) {
-		w().updateDirection(gpio, data);
+WebIOPi.prototype.setFunction = function (gpio, func) {
+	$.post(this.context + 'GPIO/' + gpio + "/function/" + func, function(data) {
+		w().updateFunction(gpio, data);
 	});
 }
 
-WebIOPi.prototype.toggleDirection = function (gpio) {
-	var value = (this.GPIO[gpio].direction == "in") ? "out" : "in";
-	this.setDirection(gpio, value)
+WebIOPi.prototype.toggleFunction = function (gpio) {
+	var value = (this.GPIO[gpio].func == "IN") ? "OUT" : "IN";
+	this.setFunction(gpio, value)
 }
 
-WebIOPi.prototype.createDirectionButton = function (gpio) {
+WebIOPi.prototype.createFunctionButton = function (gpio) {
 	var button = $('<input>');
-	button.attr("id", "direction"+gpio);
+	button.attr("id", "function"+gpio);
 	button.attr("type", "submit");
 	button.attr("class", "DirectionEnabled");
 	button.val(" ");
 	button.bind("click", function(event) {
-		w().toggleDirection(gpio);
+		w().toggleFunction(gpio);
 	});
 	return button;
 }
@@ -162,12 +162,12 @@ WebIOPi.prototype.updateALT = function (alt, enable) {
 		if (enable) {
 			$("#description"+gpio).append(alt.name + " " + alt.gpios[p].name);
 			$("#gpio"+gpio).attr("class", alt.name);
-			$("#direction"+gpio).attr("class", "DirectionDisabled");
+			$("#function"+gpio).attr("class", "DirectionDisabled");
 		}
 		else {
 			$("#description"+gpio).append("GPIO " + gpio);
 			$("#gpio"+gpio).attr("class", "");
-			$("#direction"+gpio).attr("class", "DirectionEnabled");
+			$("#function"+gpio).attr("class", "DirectionEnabled");
 		}
 	}
 	alt.enabled = enable;
@@ -180,10 +180,10 @@ WebIOPi.prototype.updateUI = function () {
 		w().updateALT(w().ALT.SPI, data["SPI"]);
 		
 		$.each(data["GPIO"], function(gpio, data) {
-		    if (data["mode"] == "GPIO") {
-		    	w().updateDirection(gpio, data["direction"]);
-		    	w().updateValue(gpio, data["value"]);
-		    }
+	    	w().updateFunction(gpio, data["function"]);
+	    	if ((data["function"] == "IN") || (data["function"] == "OUT")) { 
+	    		w().updateValue(gpio, data["value"]);
+	    	}
 		});
 	});
 	setTimeout(w().updateUI, 1000);
@@ -289,10 +289,10 @@ RPiHeader.prototype.getDescriptionCell = function (pin, align) {
 	return cell;
 }
 
-RPiHeader.prototype.getDirectionCell = function (pin) {
+RPiHeader.prototype.getFunctionCell = function (pin) {
 	var cell = $('<td align="center">');
 	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
-		var button = w().createDirectionButton(this.PINS[pin].value);
+		var button = w().createFunctionButton(this.PINS[pin].value);
 		cell.append(button);
 	}
 	return cell;
@@ -303,14 +303,14 @@ RPiHeader.prototype.createTable = function (containerId) {
 	table.attr("id", "RPiHeader")
 	for (var pin=1; pin<=26; pin++) {
 		var line = 	$('<tr>');
-		line.append(this.getDirectionCell(pin))
+		line.append(this.getFunctionCell(pin))
 		line.append(this.getDescriptionCell(pin, "right"))
 		line.append(this.getPinCell(pin));
 
 		pin++;
 		line.append(this.getPinCell(pin));
 		line.append(this.getDescriptionCell(pin, "left"))
-		line.append(this.getDirectionCell(pin))
+		line.append(this.getFunctionCell(pin))
 
 		table.append(line);
 	}
@@ -334,7 +334,7 @@ function Expert() {
 
 Expert.prototype.createGPIO = function (gpio) {
 	var box = $("<div>");
-	box.append(w().createDirectionButton(gpio));
+	box.append(w().createFunctionButton(gpio));
 	box.append(w().createGPIOButton(gpio, gpio));
 
 	div = $('<div>');
