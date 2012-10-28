@@ -26,7 +26,7 @@ import mimetypes as mime
 import _webiopi.GPIO as GPIO
 import re
 
-VERSION = '0.3.x'
+VERSION = '0.5.x'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
 
 def log(message):
@@ -37,7 +37,7 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port=8000, context="webiopi", docroot="htdocs", index="index.html"):
+    def __init__(self, port=8000, context="webiopi", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error, (e_no, e_str):
@@ -49,7 +49,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         threading.Thread.__init__(self)
         self.port = port
         self.context = context
-        self.docroot = os.path.realpath(docroot);
+        self.docroot = "/usr/share/webiopi/htdocs"
         self.index = index
         self.log_enabled = False;
         
