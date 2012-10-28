@@ -37,6 +37,14 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
+    GPIO_COUNT = 54
+    
+    ALT = {
+        "I2C": {"enabled": False, "gpio": [0, 1]},
+        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
+        "UART": {"enabled": True, "gpio": [14, 15]}
+    }
+    
     def __init__(self, port=8000, context="webiopi", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
@@ -59,15 +67,6 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             self.context += "/"
         self.start()
 
-
-    GPIO_COUNT = 54
-    
-    ALT = {
-        "I2C": {"enabled": False, "gpio": [0, 1]},
-        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
-        "UART": {"enabled": True, "gpio": [14, 15]}
-    }
-    
     def writeJSON(self, out):
         out.write("{")
         first = True

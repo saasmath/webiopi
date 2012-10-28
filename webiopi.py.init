@@ -10,15 +10,13 @@
 ### END INIT INFO
 
 # Author: trouch <trouch@trouch.com>
-WEBIOPI_HOME=/var/www/webiopi
-WEBIOPI_PORT=80
-
+WEBIOPI_PORT=8000
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="WebIOPi"
 NAME=webiopi
 DAEMON=/usr/bin/python
-DAEMON_ARGS="$WEBIOPI_HOME/webiopi.py $WEBIOPI_PORT"
+DAEMON_ARGS="-m webiopi $WEBIOPI_PORT"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
