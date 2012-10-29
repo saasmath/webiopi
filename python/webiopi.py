@@ -123,14 +123,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
     def do_GET(self):
         relativePath = self.path.replace(self.server.context, "")
-
-        if self.path == "/":
-            self.send_response(301)
-            self.send_header("Location", self.server.context);
-            self.end_headers()
+        if (relativePath.startswith("/")):
+            relativePath = relativePath[1:];
 
         # JSON full state
-        elif relativePath == "*":
+        if relativePath == "*":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -168,7 +165,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             if relativePath == "":
                 relativePath = self.server.index
-                
+                            
             realPath = relativePath;
             
             if not os.path.exists(realPath):
@@ -206,6 +203,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_POST(self):
         relativePath = self.path.replace(self.server.context, "")
+        if (relativePath.startswith("/")):
+            relativePath = relativePath[1:];
+
         if (relativePath.startswith("GPIO/")):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
