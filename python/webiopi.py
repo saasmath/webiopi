@@ -58,6 +58,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.context = context
         self.docroot = "/usr/share/webiopi/htdocs"
         self.index = index
+        self.callbacks = {}
         self.log_enabled = False;
         
         if not self.context.startswith("/"):
@@ -65,6 +66,9 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         if not self.context.endswith("/"):
             self.context += "/"
         self.start()
+        
+    def addFunction(self, name, callback):
+        self.callbacks[name] = callback
 
     def writeJSON(self, out):
         out.write("{")
@@ -240,6 +244,14 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(value)
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
+        elif (relativePath.startswith("functions/")):
+            (mode, fname, value) = relativePath.split("/")
+            if (self.server.callbacks[fname]):
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(self.server.callbacks[fname](value))
+                
         else: # path unknowns
             self.send_error(404, "Not Found")
             
