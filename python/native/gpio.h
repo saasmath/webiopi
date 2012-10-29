@@ -33,6 +33,8 @@ void cleanup(void);
 #define SETUP_MALLOC_FAIL 2
 #define SETUP_MMAP_FAIL   3
 
+#define GPIO_COUNT 54
+
 #define INPUT	0
 #define OUTPUT	1
 #define ALT0	4

@@ -30,11 +30,20 @@ static PyObject *_InvalidDirectionException;
 static PyObject *_InvalidChannelException;
 static PyObject *_InvalidPullException;
 
+static PyObject *_gpioCount;
+
+
 static PyObject *_low;
 static PyObject *_high;
+
 static PyObject *_input;
 static PyObject *_output;
 static PyObject *_alt0;
+static PyObject *_alt1;
+static PyObject *_alt2;
+static PyObject *_alt3;
+static PyObject *_alt4;
+static PyObject *_alt5;
 
 static PyObject *_pud_off;
 static PyObject *_pud_up;
@@ -111,7 +120,7 @@ static PyObject *py_output(PyObject *self, PyObject *args)
    if (!PyArg_ParseTuple(args, "ii", &channel, &value)) 
       return NULL;
 
-   if (channel < 0 || channel > 53)
+   if (channel < 0 || channel >= GPIO_COUNT)
    {
       PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
       return NULL;
@@ -219,20 +228,38 @@ PyMODINIT_FUNC initGPIO(void)
    _InvalidPullException = PyErr_NewException("_webiopi.GPIO.InvalidPullException", NULL, NULL);
    PyModule_AddObject(module, "InvalidPullException", _InvalidPullException);
 
-   _high = Py_BuildValue("i", HIGH);
-   PyModule_AddObject(module, "HIGH", _high);
+   _gpioCount = Py_BuildValue("i", GPIO_COUNT);
+   PyModule_AddObject(module, "GPIO_COUNT", _gpioCount);
 
    _low = Py_BuildValue("i", LOW);
    PyModule_AddObject(module, "LOW", _low);
 
-   _output = Py_BuildValue("i", OUTPUT);
-   PyModule_AddObject(module, "OUT", _output);
+   _high = Py_BuildValue("i", HIGH);
+   PyModule_AddObject(module, "HIGH", _high);
 
    _input = Py_BuildValue("i", INPUT);
    PyModule_AddObject(module, "IN", _input);
    
+   _output = Py_BuildValue("i", OUTPUT);
+   PyModule_AddObject(module, "OUT", _output);
+
    _alt0 = Py_BuildValue("i", ALT0);
    PyModule_AddObject(module, "ALT0", _alt0);
+
+   _alt1 = Py_BuildValue("i", ALT1);
+   PyModule_AddObject(module, "ALT0", _alt1);
+
+   _alt2 = Py_BuildValue("i", ALT2);
+   PyModule_AddObject(module, "ALT0", _alt2);
+
+   _alt3 = Py_BuildValue("i", ALT3);
+   PyModule_AddObject(module, "ALT0", _alt3);
+
+   _alt4 = Py_BuildValue("i", ALT4);
+   PyModule_AddObject(module, "ALT0", _alt4);
+
+   _alt5 = Py_BuildValue("i", ALT5);
+   PyModule_AddObject(module, "ALT0", _alt5);
 
    _pud_off = Py_BuildValue("i", PUD_OFF);
    PyModule_AddObject(module, "PUD_OFF", _pud_off);
