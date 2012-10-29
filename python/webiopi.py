@@ -27,7 +27,14 @@ import _webiopi.GPIO as GPIO
 import re
 
 VERSION = '0.5.x'
-SERVER_VERSION = 'WebIOPi/Python/' + VERSION 
+SERVER_VERSION = 'WebIOPi/Python/' + VERSION
+
+FUNCTIONS = {
+    "I2C": {"enabled": False, "gpio": [0, 1]},
+    "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
+    "UART": {"enabled": True, "gpio": [14, 15]}
+}
+    
 
 def log(message):
     print SERVER_VERSION, message
@@ -36,14 +43,6 @@ def log_socket_error(message):
     log("Socket Error: %s" % message)
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
-    
-    GPIO_COUNT = 54
-    
-    ALT = {
-        "I2C": {"enabled": False, "gpio": [0, 1]},
-        "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
-        "UART": {"enabled": True, "gpio": [14, 15]}
-    }
     
     def __init__(self, port=8000, context="webiopi", index="index.html"):
         try:
@@ -70,7 +69,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     def writeJSON(self, out):
         out.write("{")
         first = True
-        for (alt, value) in self.ALT.items():
+        for (alt, value) in FUNCTIONS.items():
             if not first:
                 out.write (", ")
             out.write('"%s": %d' % (alt, value["enabled"]))
@@ -78,7 +77,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         
         out.write(', "GPIO":{\n')
         first = True
-        for gpio in range(self.GPIO_COUNT):
+        for gpio in range(GPIO.GPIO_COUNT):
             if not first:
                 out.write (", \n")
 
@@ -124,48 +123,27 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
     def do_GET(self):
         relativePath = self.path.replace(self.server.context, "")
-        fullPath = self.server.docroot + os.sep + relativePath 
 
         if self.path == "/":
             self.send_response(301)
             self.send_header("Location", self.server.context);
             self.end_headers()
 
-        elif not self.path.startswith(self.server.context):
-            self.send_error(404, "Not Found")
-
-        elif os.path.exists(fullPath):
-            realpath = os.path.realpath(fullPath)
-            if not realpath.startswith(self.server.docroot):
-                self.send_error(403, "Not Authorized")
-                return
-                
-            if (os.path.isdir(realpath)):
-                realpath += os.sep + self.server.index;
-                if not os.path.exists(realpath):
-                    self.send_error(403, "Not Authorized")
-                    return
-                
-            (type, encoding) = mime.guess_type(realpath)
-            f = open(realpath);
-            self.send_response(200)
-            self.send_header("Content-type", type);
-            self.end_headers()
-            self.wfile.write(f.read())
-            f.close()
-
+        # JSON full state
         elif relativePath == "*":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.server.writeJSON(self.wfile)
 
+        # version
         elif relativePath == "version":
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             self.wfile.write(SERVER_VERSION)
 
+        # Single GPIO getter
         elif (relativePath.startswith("GPIO/")):
             (mode, s_gpio, operation) = relativePath.split("/")
             gpio = int(s_gpio)
@@ -186,8 +164,45 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(value)
 
+        # handle files
         else:
-            self.send_error(404, "Not Found")
+            if relativePath == "":
+                relativePath = self.server.index
+                
+            realPath = relativePath;
+            
+            if not os.path.exists(realPath):
+                realPath = self.server.docroot + os.sep + relativePath
+                
+            if not os.path.exists(realPath):
+                self.send_error(404, "Not Found")
+                return
+
+            realPath = os.path.realpath(realPath)
+            
+            if realPath.endswith(".py"):
+                self.send_error(403, "Not Authorized")
+                return
+            
+            if not (realPath.startswith(self.server.docroot) or realPath.startswith(os.getcwd())):
+                self.send_error(403, "Not Authorized")
+                return
+                
+            if (os.path.isdir(realPath)):
+                realPath += os.sep + self.server.index;
+                if not os.path.exists(realPath):
+                    self.send_error(403, "Not Authorized")
+                    return
+                
+            (type, encoding) = mime.guess_type(realPath)
+            f = open(realPath);
+            self.send_response(200)
+            self.send_header("Content-type", type);
+            self.send_header("Content-length", os.path.getsize(realPath))
+            self.end_headers()
+            self.wfile.write(f.read())
+            f.close()
+            
 
     def do_POST(self):
         relativePath = self.path.replace(self.server.context, "")
