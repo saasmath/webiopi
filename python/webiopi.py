@@ -244,15 +244,18 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(value)
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
+                return
         elif (relativePath.startswith("functions/")):
             (mode, fname, value) = relativePath.split("/")
             if (self.server.callbacks.has_key(fname)):
+                callback = self.server.callbacks[fname]
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(self.server.callbacks[fname](value))
+                self.wfile.write(callback(value))
             else:
                 self.send_error(404, fname + " Not Found")
+                return
                 
         else: # path unknowns
             self.send_error(404, "Not Found")
