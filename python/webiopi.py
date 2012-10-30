@@ -34,6 +34,10 @@ FUNCTIONS = {
     "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
     "UART": {"enabled": True, "gpio": [14, 15]}
 }
+
+MAPPING = [[], [], []]
+MAPPING[1] = ["V33", "V50", 0, "DNC", 1, "GND", 4, 14, "DNC", 15, 17, 18, 21, "DNC", 22, 23, "DNC", 24, 10, "DNC", 9, 25, 11, 8, "DNC", 7]
+MAPPING[2] = ["V33", "V50", 2, "DNC", 3, "GND", 4, 14, "DNC", 15, 17, 18, 27, "DNC", 22, 23, "DNC", 24, 10, "DNC", 9, 25, 11, 8, "DNC", 7]
     
 
 def log(message):
@@ -136,6 +140,12 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.server.writeJSON(self.wfile)
+            
+        elif relativePath == "map":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            self.wfile.write(MAPPING[GPIO.BOARD_REVISION])
 
         # version
         elif relativePath == "version":
