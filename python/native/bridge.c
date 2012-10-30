@@ -113,11 +113,13 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
 }
 
 // python function output(channel, value)
-static PyObject *py_output(PyObject *self, PyObject *args)
+static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    int channel, value;
+   int delay = 0;
+   static char *kwlist[] = {"channel", "value", "delay", NULL};
 
-   if (!PyArg_ParseTuple(args, "ii", &channel, &value)) 
+   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &value, &delay))
       return NULL;
 
    if (channel < 0 || channel >= GPIO_COUNT)
@@ -133,7 +135,7 @@ static PyObject *py_output(PyObject *self, PyObject *args)
    }
 
 //   printf("Output GPIO %d value %d\n", gpio, value);
-   output(channel, value);
+   output(channel, value, delay);
 
    Py_INCREF(Py_None);
    return Py_None;
@@ -183,7 +185,7 @@ PyMethodDef python_methods[] = {
    {"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
    {"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)"},
    {"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0) as string"},
-   {"output", py_output, METH_VARARGS, "Output to a GPIO channel"},
+   {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
    {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {NULL, NULL, 0, NULL}
 };

@@ -242,6 +242,17 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
                 self.wfile.write(value)
+
+            elif (operation == "sequence"):
+                (delay, sequence) = value.split(",")
+                delay = int(delay)
+                for v in sequence:
+                    GPIO.output(gpio, int(v), delay)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(value)
+                
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
                 return

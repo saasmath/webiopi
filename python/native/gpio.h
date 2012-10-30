@@ -24,7 +24,7 @@ SOFTWARE.
 int setup(void);
 void set_function(int gpio, int direction, int pud);
 int get_function(int gpio);
-void output(int gpio, int value);
+void output(int gpio, int value, int delay);
 int input(int gpio);
 void cleanup(void);
 

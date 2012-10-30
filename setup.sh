@@ -1,6 +1,6 @@
 #!/bin/sh
 cd python
-python setup.py install
+python setup.py install || exit
 cd ..
 rm -rf /usr/share/webiopi
 mkdir /usr/share/webiopi

@@ -25,6 +25,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <time.h>
 #include "gpio.h"
 
 #define BCM2708_PERI_BASE   0x20000000
@@ -119,9 +120,10 @@ int get_function(int gpio)
    return value; // 0=input, 1=output, 4=alt0
 }
 
-void output(int gpio, int value)
+void output(int gpio, int value, int delay)
 {
     int offset, shift;
+	struct timespec ts;
     
     if (value) // value == HIGH
         offset = SET_OFFSET + (gpio/32);
@@ -131,6 +133,11 @@ void output(int gpio, int value)
     shift = (gpio%32);
 
     *(gpio_map+offset) = 1 << shift;
+    if (delay > 0) {
+    	ts.tv_sec = delay/1000;
+    	ts.tv_nsec = (delay%1000) * 1000000;
+    	nanosleep(&ts, NULL);
+    }
 }
 
 int input(int gpio)
