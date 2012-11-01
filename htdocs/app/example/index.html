@@ -12,10 +12,9 @@
         var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
         $("#content").append(sw); // append button to content div
                 
+        webiopi().setFunction(7, "out"); // set GPIO 7 as output
         var led = webiopi().createGPIOButton(7, "LED"); // create a "SW" button for GPIO 7
         $("#content").append(led); // append button to content div
-
-        webiopi().setFunction(7, "out"); // set GPIO 7 as output
 	});
 	</script>
 </head>
