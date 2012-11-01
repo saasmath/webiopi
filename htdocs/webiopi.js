@@ -191,10 +191,15 @@ WebIOPi.prototype.toggleValue = function (gpio) {
 	w().setValue(gpio, value);
 }
 
-WebIOPi.prototype.createGPIOButton = function (gpio, label) {
+WebIOPi.prototype.createButton = function (id, label) {
 	var button = $('<input type="submit">');
-	button.attr("id", "gpio"+gpio);
+	button.attr("id", id);
 	button.val(label);
+	return button;
+}
+
+WebIOPi.prototype.createGPIOButton = function (gpio, label) {
+	var button = w().createButton("gpio" + gpio, label);
 	button.bind("click", function(event) {
 		w().toggleValue(gpio);
 	});
