@@ -35,6 +35,7 @@ function WebIOPi() {
 	this.PINS = Array(27);
 
 	this.TYPE = {
+			DNC: {value: 0, style: "DNC", label: "--"},
 			GND: {value: 1, style: "GND", label: "GROUND"},
 			V33: {value: 2, style: "V33", label: "3.3V"},
 			V50: {value: 3, style: "V50", label: "5.0V"},
@@ -122,7 +123,11 @@ WebIOPi.prototype.init = function() {
 			var type = w().TYPE.GPIO;
 			var label = data[i];
 			
-			if (label == "GND") {
+			if (label == "DNC") {
+				type = w().TYPE.DNC;
+			}
+			
+			else if (label == "GND") {
 				type = w().TYPE.GND;
 			}
 			else if (label == "V33") {
