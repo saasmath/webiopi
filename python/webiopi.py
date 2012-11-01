@@ -30,14 +30,15 @@ VERSION = '0.5.x'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION
 
 FUNCTIONS = {
-    "I2C": {"enabled": False, "gpio": [0, 1]},
-    "SPI": {"enabled": False, "gpio": [7, 8, 9, 10, 11]},
-    "UART": {"enabled": True, "gpio": [14, 15]}
+    "I2C0": {"enabled": False, "gpio": {0:"SDA", 1:"SCL"}},
+    "I2C1": {"enabled": False, "gpio": {2:"SDA", 3:"SCL"}},
+    "SPI0": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}},
+    "UART0": {"enabled": True, "gpio": {14:"TX", 15:"RX"}}
 }
 
 MAPPING = [[], [], []]
-MAPPING[1] = ["V33", "V50", 0, "DNC", 1, "GND", 4, 14, "DNC", 15, 17, 18, 21, "DNC", 22, 23, "DNC", 24, 10, "DNC", 9, 25, 11, 8, "DNC", 7]
-MAPPING[2] = ["V33", "V50", 2, "DNC", 3, "GND", 4, 14, "DNC", 15, 17, 18, 27, "DNC", 22, 23, "DNC", 24, 10, "DNC", 9, 25, 11, 8, "DNC", 7]
+MAPPING[1] = ["V33", "V50", 0, "V50", 1, "GND", 4, 14, "GND", 15, 17, 18, 21, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
+MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
     
 
 def log(message):
@@ -130,7 +131,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         return SERVER_VERSION + ' ' + self.sys_version
         
     def do_GET(self):
-        relativePath = self.path.replace(self.server.context, "")
+        relativePath = self.path.replace(self.server.context, "/")
         if (relativePath.startswith("/")):
             relativePath = relativePath[1:];
 
@@ -142,10 +143,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.server.writeJSON(self.wfile)
             
         elif relativePath == "map":
+            json = "%s"%MAPPING[GPIO.BOARD_REVISION];
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(MAPPING[GPIO.BOARD_REVISION])
+            self.wfile.write(json.replace("'", "\""))
 
         # version
         elif relativePath == "version":

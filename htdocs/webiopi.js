@@ -33,9 +33,10 @@ function WebIOPi() {
 	this.context = "/webiopi/";
 	this.GPIO = Array(54);
 	this.ALT = {
-			UART: {name: "UART", enabled: false, gpios: []},
-			I2C: {name: "I2C", enabled: false, gpios: []},
-			SPI: {name: "SPI", enabled: false, gpios: []}
+			I2C0: {name: "I2C0", enabled: false, gpios: []},
+			I2C1: {name: "I2C1", enabled: false, gpios: []},
+			SPI0: {name: "SPI0", enabled: false, gpios: []},
+			UART0: {name: "UART0", enabled: false, gpios: []},
 		};
 		
 	// get context
@@ -59,18 +60,21 @@ function WebIOPi() {
 	
 	
 	// init ALTs
-	this.addALT(this.ALT.UART, 14, "TX");
-	this.addALT(this.ALT.UART, 15, "RX");
+	this.addALT(this.ALT.I2C0, 0, "SDA");
+	this.addALT(this.ALT.I2C0, 1, "SCL");
 
-	this.addALT(this.ALT.I2C, 0, "SDA");
-	this.addALT(this.ALT.I2C, 1, "SCL");
+	this.addALT(this.ALT.I2C1, 2, "SDA");
+	this.addALT(this.ALT.I2C1, 3, "SCL");
 
-	this.addALT(this.ALT.SPI, 10, "MOSI");
-	this.addALT(this.ALT.SPI,  9, "MISO");
-	this.addALT(this.ALT.SPI, 11, "SCLK");
-	this.addALT(this.ALT.SPI,  8, "CE0");
-	this.addALT(this.ALT.SPI,  7, "CE1");
+	this.addALT(this.ALT.SPI0,  7, "CE1");
+	this.addALT(this.ALT.SPI0,  8, "CE0");
+	this.addALT(this.ALT.SPI0,  9, "MISO");
+	this.addALT(this.ALT.SPI0, 10, "MOSI");
+	this.addALT(this.ALT.SPI0, 11, "SCLK");
 	
+	this.addALT(this.ALT.UART0, 14, "TX");
+	this.addALT(this.ALT.UART0, 15, "RX");
+
 	// GA
 	_gaq.push(['_setAccount', 'UA-33979593-2']);
 	_gaq.push(['_trackPageview']);
@@ -83,8 +87,14 @@ function WebIOPi() {
 	scripts[0].parentNode.insertBefore(ga, scripts[0]);
 	
 	// schedule UpdateUI and CheckVersion
+	setTimeout(this.RPiHeader, 100);
 	setTimeout(this.updateUI, 100);
 	setTimeout(this.checkVersion, 100);
+}
+
+
+WebIOPi.prototype.ready = function (cb) {
+	this.readyCallback = cb;
 }
 
 WebIOPi.prototype.addALT = function (alt, gpio, name) {
@@ -175,9 +185,10 @@ WebIOPi.prototype.updateALT = function (alt, enable) {
 
 WebIOPi.prototype.updateUI = function () {
 	$.getJSON(w().context + "*", function(data) {
-		w().updateALT(w().ALT.UART, data["UART"]);
-		w().updateALT(w().ALT.I2C, data["I2C"]);
-		w().updateALT(w().ALT.SPI, data["SPI"]);
+		w().updateALT(w().ALT.I2C0, data["I2C0"]);
+		w().updateALT(w().ALT.I2C1, data["I2C1"]);
+		w().updateALT(w().ALT.SPI0, data["SPI0"]);
+		w().updateALT(w().ALT.UART0, data["UART0"]);
 		
 		$.each(data["GPIO"], function(gpio, data) {
 	    	w().updateFunction(gpio, data["function"]);
@@ -216,43 +227,54 @@ WebIOPi.prototype.checkVersion = function () {
 }
 
 WebIOPi.prototype.RPiHeader = function () {
-	if (this._header == undefined) {
-		this._header = new RPiHeader();
+	if (w()._header == undefined) {
+		w()._header = new RPiHeader();
 	}
-	return this._header;
+	return w()._header;
 }
 
 WebIOPi.prototype.Expert = function () {
-	if (this._expert == undefined) {
-		this._expert = new Expert();
+	if (w()._expert == undefined) {
+		w()._expert = new Expert();
 	}
-	return this._expert;
+	return w()._expert;
 }
 
 function RPiHeader() {
 	this.PINS = Array(27);
 
 	this.TYPE = {
-			DNC: {value: 0, style: "DNC"},
-			GND: {value: 1, style: "GND"},
-			V33: {value: 2, style: "V33"},
-			V50: {value: 3, style: "V50"},
-			GPIO: {value: 4, style: "GPIO"}
+			GND: {value: 1, style: "GND", label: "GROUND"},
+			V33: {value: 2, style: "V33", label: "3.3V"},
+			V50: {value: 3, style: "V50", label: "5.0V"},
+			GPIO: {value: 4, style: "GPIO", label: "GPIO"}
 	};
-
-	this.map(1, this.TYPE.V33, "3.3V");	this.map(2, this.TYPE.V50, "5V");
-	this.map(3, this.TYPE.GPIO, 0);		this.map(4, this.TYPE.DNC, "--");
-	this.map(5, this.TYPE.GPIO, 1);		this.map(6, this.TYPE.GND, "GROUND");
-	this.map(7, this.TYPE.GPIO, 4);		this.map(8, this.TYPE.GPIO, 14);
-	this.map(9, this.TYPE.DNC, "--");	this.map(10, this.TYPE.GPIO, 15);
-	this.map(11, this.TYPE.GPIO, 17);	this.map(12, this.TYPE.GPIO, 18);
-	this.map(13, this.TYPE.GPIO, 21);	this.map(14, this.TYPE.DNC, "--");
-	this.map(15, this.TYPE.GPIO, 22);	this.map(16, this.TYPE.GPIO, 23);
-	this.map(17, this.TYPE.DNC, "--");	this.map(18, this.TYPE.GPIO, 24);
-	this.map(19, this.TYPE.GPIO, 10);	this.map(20, this.TYPE.DNC, "--");
-	this.map(21, this.TYPE.GPIO, 9);	this.map(22, this.TYPE.GPIO, 25);
-	this.map(23, this.TYPE.GPIO, 11);	this.map(24, this.TYPE.GPIO, 8);
-	this.map(25, this.TYPE.DNC, "--");	this.map(26, this.TYPE.GPIO, 7);
+	
+	$.getJSON(w().context + "map", function(data) {
+		var header = w().RPiHeader();
+		var count = header.PINS.length;
+		for (i = 0; i<count-1; i++) {
+			var type = header.TYPE.GPIO;
+			var label = data[i];
+			
+			if (label == "GND") {
+				type = header.TYPE.GND;
+			}
+			else if (label == "V33") {
+				type = header.TYPE.V33;
+			}
+			else if (label == "V50") {
+				type = header.TYPE.V50;
+			}
+			
+			if (type.value != header.TYPE.GPIO.value) {
+				label = type.label;
+			}
+			
+			header.map(i+1, type, label);
+		}
+		w().readyCallback();
+	});
 }
 
 RPiHeader.prototype.getPinCell = function (pin) {
