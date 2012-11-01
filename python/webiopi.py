@@ -125,7 +125,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
 class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         if self.server.log_enabled:
-            BaseHTTPServer.BaseHTTPRequestHandler.log_message(self, format, args)
+            log(format % args)
 
     def version_string(self):
         return SERVER_VERSION + ' ' + self.sys_version
@@ -143,11 +143,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.server.writeJSON(self.wfile)
             
         elif relativePath == "map":
-            json = "%s"%MAPPING[GPIO.BOARD_REVISION];
+            json = "%s"%MAPPING[GPIO.BOARD_REVISION]
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(json.replace("'", "\""))
+            self.wfile.write(json.replace("'", '"'))
 
         # version
         elif relativePath == "version":

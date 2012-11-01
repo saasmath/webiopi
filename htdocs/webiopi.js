@@ -32,6 +32,15 @@ function webiopi() {
 function WebIOPi() {
 	this.context = "/webiopi/";
 	this.GPIO = Array(54);
+	this.PINS = Array(27);
+
+	this.TYPE = {
+			GND: {value: 1, style: "GND", label: "GROUND"},
+			V33: {value: 2, style: "V33", label: "3.3V"},
+			V50: {value: 3, style: "V50", label: "5.0V"},
+			GPIO: {value: 4, style: "GPIO", label: "GPIO"}
+	};
+	
 	this.ALT = {
 			I2C0: {name: "I2C0", enabled: false, gpios: []},
 			I2C1: {name: "I2C1", enabled: false, gpios: []},
@@ -39,6 +48,14 @@ function WebIOPi() {
 			UART0: {name: "UART0", enabled: false, gpios: []},
 		};
 		
+	// init GPIOs
+	for (var i=0; i<this.GPIO.length; i++) {
+		var gpio = Object();
+		gpio.value = 0;
+		gpio.func = "IN";
+		this.GPIO[i] = gpio;
+	}
+
 	// get context
 	var scripts = document.getElementsByTagName("script");
 	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
@@ -49,15 +66,17 @@ function WebIOPi() {
 			
 		}
 	}
-
-	// init GPIOs
-	for (var i=0; i<this.GPIO.length; i++) {
-		var gpio = Object();
-		gpio.value = 0;
-		gpio.func = "IN";
-		this.GPIO[i] = gpio;
-	}
 	
+	// GA
+	_gaq.push(['_setAccount', 'UA-33979593-2']);
+	_gaq.push(['_trackPageview']);
+		
+	var ga = document.createElement('script');
+	ga.type = 'text/javascript';
+	ga.async = false;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+
+	scripts[0].parentNode.insertBefore(ga, scripts[0]);
 	
 	// init ALTs
 	this.addALT(this.ALT.I2C0, 0, "SDA");
@@ -75,19 +94,32 @@ function WebIOPi() {
 	this.addALT(this.ALT.UART0, 14, "TX");
 	this.addALT(this.ALT.UART0, 15, "RX");
 
-	// GA
-	_gaq.push(['_setAccount', 'UA-33979593-2']);
-	_gaq.push(['_trackPageview']);
-		
-	var ga = document.createElement('script');
-	ga.type = 'text/javascript';
-	ga.async = false;
-	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	$.getJSON(this.context + "map", function(data) {
+		var count = w().PINS.length;
+		for (i = 0; i<count-1; i++) {
+			var type = w().TYPE.GPIO;
+			var label = data[i];
+			
+			if (label == "GND") {
+				type = w().TYPE.GND;
+			}
+			else if (label == "V33") {
+				type = w().TYPE.V33;
+			}
+			else if (label == "V50") {
+				type = w().TYPE.V50;
+			}
+			
+			if (type.value != w().TYPE.GPIO.value) {
+				label = type.label;
+			}
+			
+			w().map(i+1, type, label);
+		}
+		w().readyCallback();
+	});
 
-	scripts[0].parentNode.insertBefore(ga, scripts[0]);
-	
 	// schedule UpdateUI and CheckVersion
-	setTimeout(this.RPiHeader, 100);
 	setTimeout(this.updateUI, 100);
 	setTimeout(this.checkVersion, 100);
 }
@@ -95,6 +127,12 @@ function WebIOPi() {
 
 WebIOPi.prototype.ready = function (cb) {
 	this.readyCallback = cb;
+}
+
+WebIOPi.prototype.map = function (pin, type, value) {
+	this.PINS[pin] = Object();
+	this.PINS[pin].type = type
+	this.PINS[pin].value = value;
 }
 
 WebIOPi.prototype.addALT = function (alt, gpio, name) {
@@ -233,60 +271,20 @@ WebIOPi.prototype.RPiHeader = function () {
 	return w()._header;
 }
 
-WebIOPi.prototype.Expert = function () {
-	if (w()._expert == undefined) {
-		w()._expert = new Expert();
-	}
-	return w()._expert;
-}
-
 function RPiHeader() {
-	this.PINS = Array(27);
 
-	this.TYPE = {
-			GND: {value: 1, style: "GND", label: "GROUND"},
-			V33: {value: 2, style: "V33", label: "3.3V"},
-			V50: {value: 3, style: "V50", label: "5.0V"},
-			GPIO: {value: 4, style: "GPIO", label: "GPIO"}
-	};
-	
-	$.getJSON(w().context + "map", function(data) {
-		var header = w().RPiHeader();
-		var count = header.PINS.length;
-		for (i = 0; i<count-1; i++) {
-			var type = header.TYPE.GPIO;
-			var label = data[i];
-			
-			if (label == "GND") {
-				type = header.TYPE.GND;
-			}
-			else if (label == "V33") {
-				type = header.TYPE.V33;
-			}
-			else if (label == "V50") {
-				type = header.TYPE.V50;
-			}
-			
-			if (type.value != header.TYPE.GPIO.value) {
-				label = type.label;
-			}
-			
-			header.map(i+1, type, label);
-		}
-		w().readyCallback();
-	});
 }
 
 RPiHeader.prototype.getPinCell = function (pin) {
 	var cell = $('<td align="center">');
 	var button;
-	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
-		button = w().createGPIOButton(this.PINS[pin].value, pin);
+	if (w().PINS[pin].type.value == w().TYPE.GPIO.value) {
+		button = w().createGPIOButton(w().PINS[pin].value, pin);
 	}
 	else {
 		var button = $('<input type="submit">');
 		button.val(pin);
-		button.attr("class", this.PINS[pin].type.style);
+		button.attr("class", w().PINS[pin].type.style);
 	}
 	cell.append(button);
 	return cell;
@@ -298,12 +296,12 @@ RPiHeader.prototype.getDescriptionCell = function (pin, align) {
 	
 	var div = $('<div>');
 	div.attr("class", "Description");
-	if (this.PINS[pin].type.value != this.TYPE.GPIO.value) {
-		div.append(this.PINS[pin].value);
+	if (w().PINS[pin].type.value != w().TYPE.GPIO.value) {
+		div.append(w().PINS[pin].value);
 	}
 	else {
-		div.attr("id", "description"+this.PINS[pin].value);
-		div.append("GPIO " + this.PINS[pin].value);
+		div.attr("id", "description"+w().PINS[pin].value);
+		div.append("GPIO " + w().PINS[pin].value);
 	}
 	
 	cell.append(div);
@@ -313,8 +311,8 @@ RPiHeader.prototype.getDescriptionCell = function (pin, align) {
 
 RPiHeader.prototype.getFunctionCell = function (pin) {
 	var cell = $('<td align="center">');
-	if (this.PINS[pin].type.value == this.TYPE.GPIO.value) {
-		var button = w().createFunctionButton(this.PINS[pin].value);
+	if (w().PINS[pin].type.value == w().TYPE.GPIO.value) {
+		var button = w().createFunctionButton(w().PINS[pin].value);
 		cell.append(button);
 	}
 	return cell;
@@ -344,10 +342,11 @@ RPiHeader.prototype.createTable = function (containerId) {
 	return table;
 }
 
-RPiHeader.prototype.map = function (pin, type, value) {
-	this.PINS[pin] = Object();
-	this.PINS[pin].type = type
-	this.PINS[pin].value = value;
+WebIOPi.prototype.Expert = function () {
+	if (w()._expert == undefined) {
+		w()._expert = new Expert();
+	}
+	return w()._expert;
 }
 
 function Expert() {
