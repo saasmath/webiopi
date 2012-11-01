@@ -126,13 +126,13 @@ function WebIOPi() {
 
 
 WebIOPi.prototype.ready = function (cb) {
-	this.readyCallback = cb;
+	w().readyCallback = cb;
 }
 
 WebIOPi.prototype.map = function (pin, type, value) {
-	this.PINS[pin] = Object();
-	this.PINS[pin].type = type
-	this.PINS[pin].value = value;
+	w().PINS[pin] = Object();
+	w().PINS[pin].type = type
+	w().PINS[pin].value = value;
 }
 
 WebIOPi.prototype.addALT = function (alt, gpio, name) {
@@ -143,22 +143,28 @@ WebIOPi.prototype.addALT = function (alt, gpio, name) {
 }
 
 WebIOPi.prototype.updateValue = function (gpio, value) {
-	this.GPIO[gpio].value = value;
+	w().GPIO[gpio].value = value;
 	var style = (value == 1) ? "HIGH" : "LOW";
 	$("#gpio"+gpio).attr("class", style);
 }
 
-WebIOPi.prototype.setValue = function (gpio, value) {
-	if (this.GPIO[gpio].func=="OUT") {
-		$.post(this.context + 'GPIO/' + gpio + "/value/" + value, function(data) {
+WebIOPi.prototype.setValue = function (gpio, value, callback) {
+	if (w().GPIO[gpio].func.toUpperCase()=="OUT") {
+		$.post(w().context + 'GPIO/' + gpio + "/value/" + value, function(data) {
 			w().updateValue(gpio, data);
+			if (callback != undefined) {
+				callback(gpio, data);
+			}
 		});
+	}
+	else {
+		console.log(w().GPIO[gpio].func);
 	}
 }
 
 WebIOPi.prototype.toggleValue = function (gpio) {
-	var value = (this.GPIO[gpio].value == 1) ? 0 : 1;
-	this.setValue(gpio, value);
+	var value = (w().GPIO[gpio].value == 1) ? 0 : 1;
+	w().setValue(gpio, value);
 }
 
 WebIOPi.prototype.createGPIOButton = function (gpio, label) {
@@ -176,19 +182,22 @@ WebIOPi.prototype.setLabel = function (gpio, label) {
 }
 
 WebIOPi.prototype.updateFunction = function (gpio, func) {
-	this.GPIO[gpio].func = func;
+	w().GPIO[gpio].func = func;
 	$("#function"+gpio).val(func);
 }
 
-WebIOPi.prototype.setFunction = function (gpio, func) {
-	$.post(this.context + 'GPIO/' + gpio + "/function/" + func, function(data) {
+WebIOPi.prototype.setFunction = function (gpio, func, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/function/" + func, function(data) {
 		w().updateFunction(gpio, data);
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
 	});
 }
 
 WebIOPi.prototype.toggleFunction = function (gpio) {
-	var value = (this.GPIO[gpio].func == "IN") ? "OUT" : "IN";
-	this.setFunction(gpio, value)
+	var value = (w().GPIO[gpio].func == "IN") ? "OUT" : "IN";
+	w().setFunction(gpio, value)
 }
 
 WebIOPi.prototype.createFunctionButton = function (gpio) {
