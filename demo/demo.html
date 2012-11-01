@@ -8,21 +8,29 @@
 	<link rel="stylesheet" type="text/css" href="demo.css" />
 	<script type="text/javascript">
 	webiopi().ready(function() {
-		webiopi().RPiHeader().createTable("content"); // create RPiHeader Table and append it to content div
-
         webiopi().setFunction(0, "in"); // set GPIO 0 as input
-        webiopi().setLabel(0, "SW"); // set GPIO 0 label
-
+        var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
+        $("#content").append(sw); // append button to content div
+                
         webiopi().setFunction(7, "out"); // set GPIO 7 as output
-        webiopi().setLabel(7, "LED"); // set GPIO 7 label
-        
-        webiopi().outputSequence(7, 100, "010101010", function(gpio, data) {
-        	console.log("sequence on " + gpio + " finished with " + data);
-        });
+        var led = webiopi().createGPIOButton(7, "LED"); // create a "SW" button for GPIO 7
+        $("#content").append(led); // append button to content div
 
-        webiopi().callFunction("myFunction", "data", function(func, args, data) {
-        	console.log("function " + func + "(" +  args + ") returned with " + data);
+        var seq = webiopi().createButton("seq", "PULSE");
+        seq.click(function(event) {
+            webiopi().outputSequence(7, 10, "010", function(gpio, data) {
+            	alert("sequence on " + gpio + " finished with " + data);
+            });
         });
+        $("#content").append(seq); // append button to content div
+        
+        var func = webiopi().createButton("func", "FUNC");
+        func.click(function(event) {
+            webiopi().callFunction("myFunction", "data", function(f, args, data) {
+            	alert("function " + f + " returned with " + data);
+            });
+        });
+        $("#content").append(func); // append button to content div
 	});
 	</script>
 </head>

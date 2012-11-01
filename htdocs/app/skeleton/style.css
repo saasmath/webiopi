@@ -1,15 +1,10 @@
 @CHARSET "UTF-8";
 
-#RPiHeader {
-	visibility: hidden;
-}
-
 input {
 	position: absolute;
 }
 
 #gpio0 {
-	visibility: visible;
 	top: 20px;
 	left: 20px;
 	width: 80px;

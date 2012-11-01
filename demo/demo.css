@@ -1,28 +1,22 @@
 @CHARSET "UTF-8";
 
-#RPiHeader {
-	visibility: hidden;
-}
-
 input {
 	position: absolute;
 }
 
 #gpio0 {
-	visibility: visible;
 	top: 20px;
 	left: 20px;
-	width: 80px;
+	width: 120px;
 	height: 80px;
 	font-size: 24pt;
 	font-weight: bold;
 }
 
 #gpio7 {
-	visibility: visible;
 	top: 120px;
 	left: 20px;
-	width: 80px;
+	width: 120px;
 	height: 80px;
 	font-size: 24pt;
 	font-weight: bold;
@@ -36,3 +30,26 @@ input {
 #gpio7.HIGH {
 	background-color: red;
 }
+
+#seq {
+	visibility: visible;
+	top: 220px;
+	left: 20px;
+	width: 120px;
+	height: 80px;
+	font-size: 24pt;
+	font-weight: bold;
+	color: black;
+}
+
+#func {
+	visibility: visible;
+	top: 320px;
+	left: 20px;
+	width: 120px;
+	height: 80px;
+	font-size: 24pt;
+	font-weight: bold;
+	color: black;
+}
+
