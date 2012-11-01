@@ -76,11 +76,18 @@ function WebIOPi() {
 	style.type = 'text/css';
 	style.href = '/webiopi.css';
 	head.appendChild(style);
-	
+
 	var jquery = document.createElement('script');
 	jquery.type = 'text/javascript';
-	jquery.async = false;
 	jquery.src = '/jquery.js';
+	jquery.onload = function() {
+		w().init();
+	};
+	jquery.onreadystatechange = function() {
+		if (this.readyState == 'complete') {
+			w().init();
+		}
+	};
 	head.appendChild(jquery);
 	
 	// GA
@@ -108,12 +115,7 @@ function WebIOPi() {
 	
 	this.addALT(this.ALT.UART0, 14, "TX");
 	this.addALT(this.ALT.UART0, 15, "RX");
-
-
-	// schedule tasks
-	setTimeout(this.init, 200);
-	setTimeout(this.updateUI, 200);
-	setTimeout(this.checkVersion, 200);
+	
 }
 
 WebIOPi.prototype.init = function() {
@@ -144,8 +146,9 @@ WebIOPi.prototype.init = function() {
 			w().map(i+1, type, label);
 		}
 		w().readyCallback();
+		w().updateUI();
+		w().checkVersion();
 	});
-	
 }
 
 
