@@ -15,6 +15,14 @@
 
         webiopi().setFunction(7, "out"); // set GPIO 7 as output
         webiopi().setLabel(7, "LED"); // set GPIO 7 label
+        
+        webiopi().outputSequence(7, 100, "010101010", function(gpio, data) {
+        	console.log("sequence on " + gpio + " finished with " + data);
+        });
+
+        webiopi().callFunction("myFunction", "data", function(func, args, data) {
+        	console.log("function " + func + "(" +  args + ") returned with " + data);
+        });
 	});
 	</script>
 </head>
