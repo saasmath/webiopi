@@ -31,7 +31,7 @@ SERVER_VERSION = 'WebIOPi/Python/' + VERSION
 
 FUNCTIONS = {
     "I2C0": {"enabled": False, "gpio": {0:"SDA", 1:"SCL"}},
-    "I2C1": {"enabled": False, "gpio": {2:"SDA", 3:"SCL"}},
+    "I2C1": {"enabled": True, "gpio": {2:"SDA", 3:"SCL"}},
     "SPI0": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}},
     "UART0": {"enabled": True, "gpio": {14:"TX", 15:"RX"}}
 }
