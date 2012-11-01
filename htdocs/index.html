@@ -9,12 +9,6 @@
 	<script type="text/javascript">
 	webiopi().ready(function() {
 		webiopi().RPiHeader().createTable("content");
-		webiopi().setFunction(7, "OUT", function(gpio, direction) {
-			console.log("cb(" + gpio +", " + direction + ")");
-			webiopi().setValue(gpio, 1, function(gpio, value) {
-				console.log("cb(" + gpio +", " + value + ")");
-			});
-		});
 	});
 	</script>
 </head>
