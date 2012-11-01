@@ -1,6 +1,7 @@
 import webiopi
-import RPi.GPIO as gpio
 import time
+
+GPIO = webiopi.GPIO
 
 def myFunction(data):
     print "myFunction (%s)" % data
@@ -9,17 +10,16 @@ def myFunction(data):
 server = webiopi.Server()
 server.addFunction("myFunction", myFunction)
 
-gpio.setmode(gpio.BCM)
-gpio.setup(7, gpio.OUT)
+GPIO.setFunction(7, GPIO.OUT)
 
 try:
     while True:
-        gpio.output(7, 1)
+        GPIO.output(7, 1)
         time.sleep(5)
-        gpio.output(7, 0)
+        GPIO.output(7, 0)
         time.sleep(5)
 except KeyboardInterrupt:
     pass
 
 server.stop()
-gpio.setup(7, gpio.IN)
+GPIO.setFunction(7, GPIO.IN)
