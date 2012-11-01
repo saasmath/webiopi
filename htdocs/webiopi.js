@@ -30,7 +30,7 @@ function webiopi() {
 }
 
 function WebIOPi() {
-	this.context = "/webiopi/";
+	this.context = "/";
 	this.GPIO = Array(54);
 	this.PINS = Array(27);
 
@@ -58,6 +58,7 @@ function WebIOPi() {
 
 	// get context
 	var scripts = document.getElementsByTagName("script");
+
 	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
 	for(var i = 0; i < scripts.length; i++) {
 		var res = reg.exec(scripts[i].src);
@@ -66,6 +67,20 @@ function WebIOPi() {
 			
 		}
 	}
+
+	var head = document.getElementsByTagName('head')[0];
+	
+	var style = document.createElement('link');
+	style.rel = "stylesheet";
+	style.type = 'text/css';
+	style.href = '/webiopi.css';
+	head.appendChild(style);
+	
+	var jquery = document.createElement('script');
+	jquery.type = 'text/javascript';
+	jquery.async = false;
+	jquery.src = '/jquery.js';
+	head.appendChild(jquery);
 	
 	// GA
 	_gaq.push(['_setAccount', 'UA-33979593-2']);
@@ -75,8 +90,7 @@ function WebIOPi() {
 	ga.type = 'text/javascript';
 	ga.async = false;
 	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-
-	scripts[0].parentNode.insertBefore(ga, scripts[0]);
+	head.appendChild(ga);
 	
 	// init ALTs
 	this.addALT(this.ALT.I2C0, 0, "SDA");
@@ -94,7 +108,15 @@ function WebIOPi() {
 	this.addALT(this.ALT.UART0, 14, "TX");
 	this.addALT(this.ALT.UART0, 15, "RX");
 
-	$.getJSON(this.context + "map", function(data) {
+
+	// schedule tasks
+	setTimeout(this.init, 200);
+	setTimeout(this.updateUI, 200);
+	setTimeout(this.checkVersion, 200);
+}
+
+WebIOPi.prototype.init = function() {
+	$.getJSON(w().context + "map", function(data) {
 		var count = w().PINS.length;
 		for (i = 0; i<count-1; i++) {
 			var type = w().TYPE.GPIO;
@@ -118,10 +140,7 @@ function WebIOPi() {
 		}
 		w().readyCallback();
 	});
-
-	// schedule UpdateUI and CheckVersion
-	setTimeout(this.updateUI, 100);
-	setTimeout(this.checkVersion, 100);
+	
 }
 
 
