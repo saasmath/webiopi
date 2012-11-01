@@ -297,6 +297,23 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
+WebIOPi.prototype.outputSequence = function(gpio, delay, sequence, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/sequence/" + delay + "," + sequence, function(data) {
+		w().updateValue(gpio, data);
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.callFunction = function(func, args, callback) {
+	$.post(w().context + 'functions/' + func + "/" + args, function(data) {
+		if (callback != undefined) {
+			callback(func, args, data);
+		}
+	});
+}
+
 WebIOPi.prototype.RPiHeader = function () {
 	if (w()._header == undefined) {
 		w()._header = new RPiHeader();
