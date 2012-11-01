@@ -227,6 +227,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             gpio = int(s_gpio)
             
             if (operation == "value"):
+                if GPIO.getFunction(gpio) != GPIO.OUT:
+                    self.send_error(400, "Not Output")
+                    return;
                 if (value == "0"):
                     GPIO.output(gpio, GPIO.LOW)
                 elif (value == "1"):
@@ -256,14 +259,19 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(value)
 
             elif (operation == "sequence"):
+                if GPIO.getFunction(gpio) != GPIO.OUT:
+                    self.send_error(400, "Not Output")
+                    return;
+
                 (delay, sequence) = value.split(",")
                 delay = int(delay)
+                
                 for v in sequence:
                     GPIO.output(gpio, int(v), delay)
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(value)
+                self.wfile.write(v)
                 
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
