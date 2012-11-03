@@ -59,24 +59,26 @@ function WebIOPi() {
 
 	// get context
 	var scripts = document.getElementsByTagName("script");
+	var styles = document.getElementsByTagName("link");
 
 	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
 	for(var i = 0; i < scripts.length; i++) {
 		var res = reg.exec(scripts[i].src);
 		if (res && (res.length > 1)) {
+			script = scripts[i];
 			this.context = res[1];
 			
 		}
 	}
 
 	var head = document.getElementsByTagName('head')[0];
-	
+
 	var style = document.createElement('link');
 	style.rel = "stylesheet";
 	style.type = 'text/css';
 	style.href = '/webiopi.css';
-	head.appendChild(style);
-
+	head.insertBefore(style, styles[0]);
+	
 	var jquery = document.createElement('script');
 	jquery.type = 'text/javascript';
 	jquery.src = '/jquery.js';
@@ -88,7 +90,7 @@ function WebIOPi() {
 			w().init();
 		}
 	};
-	head.appendChild(jquery);
+	head.insertBefore(jquery, scripts[0]);
 	
 	// GA
 	_gaq.push(['_setAccount', 'UA-33979593-2']);
@@ -98,7 +100,7 @@ function WebIOPi() {
 	ga.type = 'text/javascript';
 	ga.async = false;
 	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	head.appendChild(ga);
+	head.insertBefore(ga, scripts[0]);
 	
 	// init ALTs
 	this.addALT(this.ALT.I2C0, 0, "SDA");
@@ -128,7 +130,6 @@ WebIOPi.prototype.init = function() {
 			if (label == "DNC") {
 				type = w().TYPE.DNC;
 			}
-			
 			else if (label == "GND") {
 				type = w().TYPE.GND;
 			}
@@ -145,7 +146,9 @@ WebIOPi.prototype.init = function() {
 			
 			w().map(i+1, type, label);
 		}
-		w().readyCallback();
+		if (w().readyCallback != undefined) {
+			w().readyCallback();
+		}
 		w().updateUI();
 		w().checkVersion();
 	});
@@ -216,6 +219,12 @@ WebIOPi.prototype.setLabel = function (gpio, label) {
 WebIOPi.prototype.updateFunction = function (gpio, func) {
 	w().GPIO[gpio].func = func;
 	$("#function"+gpio).val(func);
+	if (func != "OUT") {
+		$("#gpio"+gpio).prop("disabled", true);
+	}
+	else {
+		$("#gpio"+gpio).prop("disabled", false);
+	}
 }
 
 WebIOPi.prototype.setFunction = function (gpio, func, callback) {
@@ -233,15 +242,28 @@ WebIOPi.prototype.toggleFunction = function (gpio) {
 }
 
 WebIOPi.prototype.createFunctionButton = function (gpio) {
-	var button = $('<input>');
-	button.attr("id", "function"+gpio);
-	button.attr("type", "submit");
-	button.attr("class", "DirectionEnabled");
-	button.val(" ");
+	var button = w().createButton("function" + gpio, " ");
+	button.attr("class", "FunctionBasic");
 	button.bind("click", function(event) {
 		w().toggleFunction(gpio);
 	});
 	return button;
+}
+
+WebIOPi.prototype.createMacroButton = function (macro, args, id, label) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().callMacro(macro, args);
+    });
+    return button;
+}
+
+WebIOPi.prototype.createSequenceButton = function (gpio, delay, sequence, id, label) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().outputSequence(gpio, delay, sequence);
+    });
+    return button;
 }
 
 WebIOPi.prototype.updateALT = function (alt, enable) {
@@ -251,12 +273,12 @@ WebIOPi.prototype.updateALT = function (alt, enable) {
 		if (enable) {
 			$("#description"+gpio).append(alt.name + " " + alt.gpios[p].name);
 			$("#gpio"+gpio).attr("class", alt.name);
-			$("#function"+gpio).attr("class", "DirectionDisabled");
+			$("#function"+gpio).attr("class", "FunctionSpecial");
 		}
 		else {
 			$("#description"+gpio).append("GPIO " + gpio);
 			$("#gpio"+gpio).attr("class", "");
-			$("#function"+gpio).attr("class", "DirectionEnabled");
+			$("#function"+gpio).attr("class", "FunctionBasic");
 		}
 	}
 	alt.enabled = enable;
@@ -314,10 +336,10 @@ WebIOPi.prototype.outputSequence = function(gpio, delay, sequence, callback) {
 	});
 }
 
-WebIOPi.prototype.callFunction = function(func, args, callback) {
-	$.post(w().context + 'functions/' + func + "/" + args, function(data) {
+WebIOPi.prototype.callMacro = function(macro, args, callback) {
+	$.post(w().context + 'macros/' + macro + "/" + args, function(data) {
 		if (callback != undefined) {
-			callback(func, args, data);
+			callback(macro, args, data);
 		}
 	});
 }

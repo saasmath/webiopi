@@ -3,12 +3,12 @@ import time
 
 GPIO = webiopi.GPIO
 
-def myFunction(data):
-    print "myFunction (%s)" % data
+def myMacro(data):
+    print "myMacro (%s)" % data
     return "OK"
 
 server = webiopi.Server()
-server.addFunction("myFunction", myFunction)
+server.addMacro("myMacro", myMacro)
 
 GPIO.setFunction(7, GPIO.OUT)
 

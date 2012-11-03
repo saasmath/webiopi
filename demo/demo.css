@@ -1,55 +1,28 @@
 @CHARSET "UTF-8";
 
 input {
-	position: absolute;
-}
-
-#gpio0 {
-	top: 20px;
-	left: 20px;
-	width: 120px;
-	height: 80px;
-	font-size: 24pt;
-	font-weight: bold;
-}
-
-#gpio7 {
-	top: 120px;
-	left: 20px;
-	width: 120px;
+	display: block;
+	margin: 5px 5px 5px 5px;
+	width: 150px;
 	height: 80px;
 	font-size: 24pt;
 	font-weight: bold;
 	color: black;
+	background-color: Silver;
 }
 
+input:active {
+	background-color: Gray;
+}
+
+
 #gpio7.LOW {
-	background-color: white;
+	background-color: White;
 }
 
 #gpio7.HIGH {
-	background-color: red;
+	background-color: Red;
 }
 
-#seq {
-	visibility: visible;
-	top: 220px;
-	left: 20px;
-	width: 120px;
-	height: 80px;
-	font-size: 24pt;
-	font-weight: bold;
-	color: black;
-}
 
-#func {
-	visibility: visible;
-	top: 320px;
-	left: 20px;
-	width: 120px;
-	height: 80px;
-	font-size: 24pt;
-	font-weight: bold;
-	color: black;
-}
 

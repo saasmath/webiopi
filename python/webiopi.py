@@ -72,7 +72,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             self.context += "/"
         self.start()
         
-    def addFunction(self, name, callback):
+    def addMacro(self, name, callback):
         self.callbacks[name] = callback
 
     def writeJSON(self, out):
@@ -276,7 +276,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
                 return
-        elif (relativePath.startswith("functions/")):
+        elif (relativePath.startswith("macros/")):
             (mode, fname, value) = relativePath.split("/")
             if (self.server.callbacks.has_key(fname)):
                 callback = self.server.callbacks[fname]

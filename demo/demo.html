@@ -8,27 +8,33 @@
 	<link rel="stylesheet" type="text/css" href="demo.css" />
 	<script type="text/javascript">
 	webiopi().ready(function() {
-        var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
-        $("#content").append(sw); // append button to content div
+        var switchButton = webiopi().createGPIOButton(0, "SWITCH"); // create a "SWITCH" labeled button for GPIO 0
+        $("#content").append(switchButton); // append button to content div
                 
-        var led = webiopi().createGPIOButton(7, "LED"); // create a "SW" button for GPIO 7
-        $("#content").append(led); // append button to content div
-
-        var seq = webiopi().createButton("seq", "PULSE");
-        seq.click(function(event) {
+        var ledButton = webiopi().createGPIOButton(7, "LED"); // create a "LED" button for GPIO 7
+        $("#content").append(ledButton); // append button to content div
+        
+        var seqButton = webiopi().createSequenceButton(7, 10, "010", "seq", "_|_ 1");
+        $("#content").append(seqButton); // append button to content div
+        
+        var seqButton2 = webiopi().createButton("seq2", "_|_ 2");
+        seqButton2.click(function(event) {
             webiopi().outputSequence(7, 10, "010", function(gpio, data) {
             	alert("sequence on " + gpio + " finished with " + data);
             });
         });
-        $("#content").append(seq); // append button to content div
+        $("#content").append(seqButton2); // append button to content div
         
-        var func = webiopi().createButton("func", "FUNC");
-        func.click(function(event) {
-            webiopi().callFunction("myFunction", "data", function(f, args, data) {
-            	alert("function " + f + " returned with " + data);
+        var macroButton = webiopi().createMacroButton("myMacro", "args", "macro", "Macro 1");
+        $("#content").append(macroButton); // append button to content div
+
+        var macroButton2 = webiopi().createButton("macro2", "Macro 2");
+        macroButton2.click(function(event) {
+            webiopi().callMacro("myMacro", "args", function(m, args, data) {
+            	alert("macro " + m + " returned with " + data);
             });
         });
-        $("#content").append(func); // append button to content div
+        $("#content").append(macroButton2); // append button to content div
 	});
 	</script>
 </head>

@@ -31,7 +31,15 @@ input {
 	background-color: Black;
 }
 
+.LOW:active {
+	background-color: White;
+}
+
 .HIGH {
+	background-color: Orange;
+}
+
+.HIGH:active {
 	background-color: Orange;
 }
 
@@ -51,12 +59,12 @@ input {
 	background-color: DarkBlue;
 }
 
-.DirectionEnabled {
+.FunctionBasic {
 	width: 60px;
 	background-color: Gray;
 }
 
-.DirectionDisabled {
+.FunctionSpecial {
 	width: 60px;
 	visibility: hidden;
 }
