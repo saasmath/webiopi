@@ -7,14 +7,19 @@
    Python server usable as a library
    Removed RPi.GPIO library dependency
      Merged and improved native code into WebIOPi
-     GPIO full access from the Server
+     Allows GPIO full access from the Server
+     Remove RPi.GPIO mode conflict (RPi or BCM)
    Added setup.sh script
+     Ease WebIOPi install
      Compile and install python library
-     Copy ressources to /usr/share/webiopi
-   Improved HTTP server file handling
-   Added bit sequence function
+     Copy HTML/JS/CSS ressources to /usr/share/webiopi/htdocs
+     Copy documentation to /usr/share/webiopi/doc
+   Improved REST API
    Added ability to create custom REST macro
-   JS library improvements
+   Added ability to output a bit sequence
+   Improved HTTP server file handling
+   Improved Javascript library
+   Added ability to create button with one or two callback (mousedown and mouseup)
   
 
 ==0.3 (08/27/12)==

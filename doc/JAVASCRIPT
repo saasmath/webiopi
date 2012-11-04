@@ -1,5 +1,7 @@
 This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
 
+You can use the included Javascript library to build your own interface. You will find an example on the [CUSTOMIZE] page.
+
 <wiki:toc maxdepth="3" />
 
 =webiopi()=

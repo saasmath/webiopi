@@ -1,9 +1,16 @@
+Check [CHANGELOG] for changes included in the next version.
+
+=Confirmed, undated, by priority=
+   Login/Password access
    UART/SPI/I2C support
    Parallel BUS helper
-   Edge detection
-   Long-polling/Bayeux/Cometd and/or WebSocket
    Logic analyzer
 
-   WiringPi server side lib ?
-   Java server side lib ?
-   Resume PHP development ?
+=Unconfirmed, depends on hardware/software possibilities=
+   Edge detection
+   Long-polling/Bayeux/Cometd and/or WebSocket
+
+=Unconfirmed, depends on users needs=
+   WiringPi server side lib
+   Java server side lib
+   Resume PHP development
