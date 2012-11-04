@@ -6,7 +6,7 @@
    Removed PHP server
    Python server usable as a library
    Removed RPi.GPIO library dependency
-     Merged and improved required native code into WebIOPi
+     Merged and improved native code into WebIOPi
      GPIO full access from the Server
    Added setup.sh script
      Compile and install python library
