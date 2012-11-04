@@ -19,7 +19,7 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
    Easily [CUSTOMIZE] UI
    REST/JSON [RESTAPI]
    [JAVASCRIPT] helper API
-   Server usable as a Python lib
+   Server usable as a [PYTHON] lib
 
 =Restrictions=
    GPIOs 0 and 1 have input pull-up resistor enabled.
