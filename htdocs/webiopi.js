@@ -198,7 +198,7 @@ WebIOPi.prototype.toggleValue = function (gpio) {
 }
 
 WebIOPi.prototype.createButton = function (id, label, callback) {
-	var button = $('<input type="submit">');
+	var button = $('<input type="submit" class="Button">');
 	button.attr("id", id);
 	button.val(label);
 	if (callback != undefined) {
@@ -222,12 +222,6 @@ WebIOPi.prototype.setLabel = function (gpio, label) {
 WebIOPi.prototype.updateFunction = function (gpio, func) {
 	w().GPIO[gpio].func = func;
 	$("#function"+gpio).val(func);
-	if (func != "OUT") {
-		$("#gpio"+gpio).prop("disabled", true);
-	}
-	else {
-		$("#gpio"+gpio).prop("disabled", false);
-	}
 }
 
 WebIOPi.prototype.setFunction = function (gpio, func, callback) {

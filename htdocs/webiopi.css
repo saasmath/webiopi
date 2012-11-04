@@ -11,6 +11,14 @@ input {
 	padding: 0 0 0 0;
 }
 
+.Button {
+	background-color: Gray;
+}
+
+.Button:active {
+	background-color: Silver;
+}
+
 .DNC {
 	background-color: Gray;
 }
@@ -31,15 +39,7 @@ input {
 	background-color: Black;
 }
 
-.LOW:active {
-	background-color: White;
-}
-
 .HIGH {
-	background-color: Orange;
-}
-
-.HIGH:active {
 	background-color: Orange;
 }
 

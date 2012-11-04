@@ -11,13 +11,13 @@
 		var content, button;
 		content = $("#content");
 		
-		 // create a "SWITCH" labeled button for GPIO 0 and append it to content
+		 // create a "SWITCH" labeled button for GPIO 0
         button = webiopi().createGPIOButton(0, "SWITCH");
-        content.append(button);
+        content.append(button); // append button to content div
                 
-		 // create a "LED" labeled button for GPIO 7 and append it to content
+		 // create a "LED" labeled button for GPIO 7
         button = webiopi().createGPIOButton(7, "LED");
-        content.append(button);
+        content.append(button); // append button to content div
         
         // create a button which output a bit sequence on GPIO 7 : 010 with a 10ms period (pulse or momentary button) 
         button = webiopi().createSequenceButton("pulse", "_|_", 7, 10, "010");
@@ -25,7 +25,7 @@
         
         // the previous button will always output "010" sequence
         // you can also create a simple button with your own function 
-        button = webiopi().createButton("sos", "SOS", outputSequence);
+        button = webiopi().createButton("sos", "S.O.S", outputSequence);
         content.append(button); // append button to content div
         
         // create a button which call "myMacro" with "1,2,3" as argument
