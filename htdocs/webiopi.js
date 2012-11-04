@@ -328,7 +328,7 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
-WebIOPi.prototype.outputSequence = function(gpio, period, sequence, callback) {
+WebIOPi.prototype.outputSequence = function (gpio, period, sequence, callback) {
 	$.post(w().context + 'GPIO/' + gpio + "/sequence/" + period + "," + sequence, function(data) {
 		w().updateValue(gpio, data);
 		if (callback != undefined) {
@@ -337,7 +337,7 @@ WebIOPi.prototype.outputSequence = function(gpio, period, sequence, callback) {
 	});
 }
 
-WebIOPi.prototype.callMacro = function(macro, args, callback) {
+WebIOPi.prototype.callMacro = function (macro, args, callback) {
 	$.post(w().context + 'macros/' + macro + "/" + args, function(data) {
 		if (callback != undefined) {
 			callback(macro, args, data);
