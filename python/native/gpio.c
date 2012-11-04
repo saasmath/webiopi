@@ -120,7 +120,7 @@ int get_function(int gpio)
    return value; // 0=input, 1=output, 4=alt0
 }
 
-void output(int gpio, int value, int delay)
+void output(int gpio, int value, int period)
 {
     int offset, shift;
 	struct timespec ts;
@@ -133,9 +133,9 @@ void output(int gpio, int value, int delay)
     shift = (gpio%32);
 
     *(gpio_map+offset) = 1 << shift;
-    if (delay > 0) {
-    	ts.tv_sec = delay/1000;
-    	ts.tv_nsec = (delay%1000) * 1000000;
+    if (period > 0) {
+    	ts.tv_sec = period/1000;
+    	ts.tv_nsec = (period%1000) * 1000000;
     	nanosleep(&ts, NULL);
     }
 }

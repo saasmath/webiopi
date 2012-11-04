@@ -263,11 +263,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_error(400, "Not Output")
                     return;
 
-                (delay, sequence) = value.split(",")
-                delay = int(delay)
+                (period, sequence) = value.split(",")
+                period = int(period)
                 
                 for v in sequence:
-                    GPIO.output(gpio, int(v), delay)
+                    GPIO.output(gpio, int(v), period)
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()

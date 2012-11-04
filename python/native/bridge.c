@@ -116,10 +116,10 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
 static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    int channel, value;
-   int delay = 0;
-   static char *kwlist[] = {"channel", "value", "delay", NULL};
+   int period = 0;
+   static char *kwlist[] = {"channel", "value", "period", NULL};
 
-   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &value, &delay))
+   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &value, &period))
       return NULL;
 
    if (channel < 0 || channel >= GPIO_COUNT)
@@ -135,7 +135,7 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
    }
 
 //   printf("Output GPIO %d value %d\n", gpio, value);
-   output(channel, value, delay);
+   output(channel, value, period);
 
    Py_INCREF(Py_None);
    return Py_None;

@@ -197,10 +197,13 @@ WebIOPi.prototype.toggleValue = function (gpio) {
 	w().setValue(gpio, value);
 }
 
-WebIOPi.prototype.createButton = function (id, label) {
+WebIOPi.prototype.createButton = function (id, label, callback) {
 	var button = $('<input type="submit">');
 	button.attr("id", id);
 	button.val(label);
+	if (callback != undefined) {
+		button.click(callback);
+	}
 	return button;
 }
 
@@ -250,7 +253,7 @@ WebIOPi.prototype.createFunctionButton = function (gpio) {
 	return button;
 }
 
-WebIOPi.prototype.createMacroButton = function (macro, args, id, label) {
+WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
     var button = webiopi().createButton(id, label);
     button.bind("click", function(event) {
         webiopi().callMacro(macro, args);
@@ -258,10 +261,10 @@ WebIOPi.prototype.createMacroButton = function (macro, args, id, label) {
     return button;
 }
 
-WebIOPi.prototype.createSequenceButton = function (gpio, delay, sequence, id, label) {
+WebIOPi.prototype.createSequenceButton = function (id, label, gpio, period, sequence) {
     var button = webiopi().createButton(id, label);
     button.bind("click", function(event) {
-        webiopi().outputSequence(gpio, delay, sequence);
+        webiopi().outputSequence(gpio, period, sequence);
     });
     return button;
 }
@@ -327,8 +330,8 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
-WebIOPi.prototype.outputSequence = function(gpio, delay, sequence, callback) {
-	$.post(w().context + 'GPIO/' + gpio + "/sequence/" + delay + "," + sequence, function(data) {
+WebIOPi.prototype.outputSequence = function(gpio, period, sequence, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/sequence/" + period + "," + sequence, function(data) {
 		w().updateValue(gpio, data);
 		if (callback != undefined) {
 			callback(gpio, data);

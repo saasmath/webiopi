@@ -8,34 +8,55 @@
 	<link rel="stylesheet" type="text/css" href="demo.css" />
 	<script type="text/javascript">
 	webiopi().ready(function() {
-        var switchButton = webiopi().createGPIOButton(0, "SWITCH"); // create a "SWITCH" labeled button for GPIO 0
-        $("#content").append(switchButton); // append button to content div
+		var content, button;
+		content = $("#content");
+		
+		 // create a "SWITCH" labeled button for GPIO 0 and append it to content
+        button = webiopi().createGPIOButton(0, "SWITCH");
+        content.append(button);
                 
-        var ledButton = webiopi().createGPIOButton(7, "LED"); // create a "LED" button for GPIO 7
-        $("#content").append(ledButton); // append button to content div
+		 // create a "LED" labeled button for GPIO 7 and append it to content
+        button = webiopi().createGPIOButton(7, "LED");
+        content.append(button);
         
-        var seqButton = webiopi().createSequenceButton(7, 10, "010", "seq", "_|_ 1");
-        $("#content").append(seqButton); // append button to content div
+        // create a button which output a bit sequence on GPIO 7 : 010 with a 10ms period (pulse or momentary button) 
+        button = webiopi().createSequenceButton("pulse", "_|_", 7, 10, "010");
+        content.append(button); // append button to content div
         
-        var seqButton2 = webiopi().createButton("seq2", "_|_ 2");
-        seqButton2.click(function(event) {
-            webiopi().outputSequence(7, 10, "010", function(gpio, data) {
-            	alert("sequence on " + gpio + " finished with " + data);
-            });
-        });
-        $("#content").append(seqButton2); // append button to content div
+        // the previous button will always output "010" sequence
+        // you can also create a simple button with your own function 
+        button = webiopi().createButton("sos", "SOS", outputSequence);
+        content.append(button); // append button to content div
         
-        var macroButton = webiopi().createMacroButton("myMacro", "args", "macro", "Macro 1");
-        $("#content").append(macroButton); // append button to content div
+        // create a button which call "myMacro" with "1,2,3" as argument
+        button = webiopi().createMacroButton("macro", "Macro", "myMacro", "1,2,3");
+        content.append(button); // append button to content div
 
-        var macroButton2 = webiopi().createButton("macro2", "Macro 2");
-        macroButton2.click(function(event) {
-            webiopi().callMacro("myMacro", "args", function(m, args, data) {
-            	alert("macro " + m + " returned with " + data);
-            });
-        });
-        $("#content").append(macroButton2); // append button to content div
+        // the previous button will always call "myMacro" with the same "1,2,3" argument
+        // you can also create a simple button with your own function 
+        button = webiopi().createButton("macro2", "Macro", callMacro);
+        content.append(button); // append button to content div
 	});
+	
+	function outputSequence() {
+		var sequence = "01010100110011001100101010" // S.O.S. morse code or whatever you want
+		// output sequence on gpio 7 with a 100ms period
+        webiopi().outputSequence(7, 100, sequence, sequenceCallback);
+	}
+	
+	function sequenceCallback(gpio, data) {
+    	alert("sequence on " + gpio + " finished with " + data);
+    }
+	
+	function callMacro() {
+		var arg = "1,2,3" // or whatever you want
+		// call myMacro(arg)
+        webiopi().callMacro("myMacro", arg, macroCallback);
+	}
+	
+	function macroCallback(macro, args, data) {
+    	alert(macro + " returned with " + data);
+    }
 	</script>
 </head>
 <body>
