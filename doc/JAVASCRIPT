@@ -1,0 +1,75 @@
+This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
+
+<wiki:toc maxdepth="3" />
+
+=webiopi()=
+Returns the WebIOPi object instance.
+
+=WebIOPi.ready(cb)=
+Register the callback to call when WebIOPi is ready.
+   cb : callback function
+
+=WebIOPi.setFunction(gpio, func[, callback])=
+Set the function on the GPIO.
+   gpio : GPIO number from 0 to 53
+   func : "IN" or "OUT"
+   callback (optional) : function called when result received from the server
+
+=WebIOPi.setValue(gpio, value[, callback])=
+Set the output value of a GPIO.
+   gpio : GPIO number from 0 to 53
+   value : 0 or 1
+   callback (optional) : function called when result received from the server
+
+=WebIOPi.toggleValue(gpio)=
+Toggle value of a GPIO.
+   gpio : GPIO number from 0 to 53
+
+=WebIOPi.callMacro(macro, args[, callback])=
+Call a macro on the server.
+   macro : name of the macro to call
+   args : string arguments
+   callback (optional) : function called when result received from the server
+
+=WebIOPi.outputSequence(gpio, period, sequence[, callback])=
+Output a bit sequence on a GPIO.
+   gpio : GPIO number from 0 to 53
+   period : time in ms between each bit
+   sequence : bit sequence
+   callback (optional) : function called when result received from the server
+
+=WebIOPi.createButton(id, label[, callback[, callbackUp]])=
+Returs a simple button without predefined behavior.
+   id : id of the button to create
+   label : label of the button
+   callback (optional) : callback function called on mousedown/click event
+   callbackUp (optional) : callback function called on mouseup event
+
+=WebIOPi.createFunctionButton(gpio)=
+Returns a button that change the function of a GPIO.
+   gpio : GPIO number from 0 to 53
+
+=WebIOPi.createGPIOButton(gpio, label)=
+Returns a button that change the state of a GPIO at each click.
+   gpio : GPIO number from 0 to 53
+   label : label of the button
+
+=WebIOPi.createMacroButton(id, label, macro, args)=
+Returns a button that call a macro on the server.
+   id : id of the button to create
+   label : label of the button
+   macro : name of the macro to call
+   args : string arguments
+
+=WebIOPi.createSequenceButton(id, label, gpio, period, sequence)=
+Returns a button that output a bit sequence on a GPIO.
+   id : id of the button to create
+   label : label of the button
+   gpio : GPIO number from 0 to 53
+   period : time in ms between each bit
+   sequence : bit sequence
+
+=WebIOPi.setLabel(id, label)=
+Change a label of given button.
+   id : id of the button to change
+   label : new label of the button

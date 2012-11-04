@@ -1,122 +1,26 @@
-You have the choice of the install, depending on your need and which technology you prefer : PHP/Apache, PHP/lighttpd or Python. Python version is standalone as it serves HTTP.
+This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
 
-Don't use different server at the same time, or it may not work correctly.
-   [#PHP/Apache PHP/Apache] version is good if you already have PHP/Apache on your Pi or if you plan to use it, but requires some common configuration.
-   [#PHP/lighttpd PHP/lighttpd] version allows you to use a lighter HTTP server, but requires more specific configuration.
-   [#PYTHON Python] version is perfect for one time use,  or for users who don't want to install a web server and/or modify its configuration.
-PHP version requires to add the Apache/lighttpd's user (www-data) in the sudoers. Use Python version if you don't want to to this, but it requires to run as root too.
-
-=PHP/Apache=
-If you don't already have Apache and PHP, install required packages first. On Raspbian, open a terminal :
-$ sudo aptitude install apache2 php5
-
-In order to work, WebIOPi requires rewrite module and configuration overriding (.htaccess) :
-$ sudo a2enmod rewrite
-$ sudo nano /etc/apache2/sites-enabled/000-default
-Find the <Directory /var/www/> section and change the line "AllowOverride None" to "AllowOverride All" :
-<Directory /var/www/>
-    Options Indexes FollowSymLinks MultiViews
-    AllowOverride All
-    Order allow,deny
-    allow from all
-</Directory>
-
-You will also need to add Apache's user (www-data) to the sudoers :
-$ sudo visudo
-then add the following line at the end of file :
-www-data ALL=(ALL) NOPASSWD: ALL
-
-Exit, save, confirm changes, and restart Apache :
-$ sudo /etc/init.d/apache2 restart
-
-Now, download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
-$ tar xvzf WebIOPi-0.3.tar.gz
-Finally, move extracted files or create a symbolic link :
-$ sudo mv webiopi /var/www
-or
-$ sudo ln -s webiopi /var/www/webiopi
-
-You're done, and ready to enjoy WebIOPi ! Go to [README#Usage README] for usage instructions.
-
-=PHP/lighttpd=
-If you don't already have lighttpd and PHP, install required packages first. On Raspbian, open a terminal :
-$ sudo aptitude install lighttpd php5-cgi
-
-Now, download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
-$ tar xvzf WebIOPi-0.3.tar.gz
-Then move extracted files or create a symbolic link :
-$ sudo mv webiopi /var/www
-or
-$ sudo ln -s webiopi /var/www/webiopi
-
-You will need to add the lighttpd user (www-data) to the sudoers :
-$ sudo visudo
-then add the following line at the end of file :
-www-data ALL=(ALL) NOPASSWD: ALL
-
-We will now enable PHP and modrewrite in lighttpd:
-$ sudo nano /etc/lighttpd/lighttpd.conf
-Add following lines at the end of file :
-server.modules += ("modrewrite", "modfastcgi")
-
-fastcgi.server = ( ".php" => ((
-        "bin-path" => "/usr/bin/php-cgi",
-        "socket" => "/tmp/php.socket"
-)))
-
-Then add the following lines to set WebIOPi's rewrite rules :
-url.rewrite += (
-        "^/webiopi/(.)/$" => "$0",
-        "^/webiopi/(.)\.(.+)$" => "$0",
-        "^/webiopi/(.+)$" => "/webiopi/webiopi.php"
-)
-
-
-Finally restart lighttpd :
-$ sudo /etc/init.d/lighttpd restart
-You're done, and ready to enjoy WebIOPi ! Go to [README#Usage README] for usage instructions.
-
-
-=PYTHON=
 You will need Python development headers. On Raspbian, open a terminal :
 $ sudo aptitude install python-dev
 
-Then download, and install RPi.GPIO module :
-$ wget http://raspberry-gpio-python.googlecode.com/files/RPi.GPIO-0.3.1a.tar.gz
-$ tar xvzf RPi.GPIO-0.3.1a.tar.gz
-$ cd RPi.GPIO-0.3.1a
-$ sudo python setup.py install
+Now download, extract and install WebIOPi :
+$ tar xvzf WebIOPi-X.Y.tar.gz
+$ cd WebIOPi-X.Y
+$ sudo ./setup.sh
 
-Now download and extract WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.3.tar.gz
-$ tar xvzf WebIOPi-0.3.tar.gz
-$ cd webiopi
-
-Finally, run the python script :
-$ sudo python webiopi.py [port]
-or
-$ sudo ./webiopi.py [port]
-where port is the port to bind the HTTP server, default is 80, but maybe used.
+Finally, run Python using webiopi module :
+$ sudo python -m webiopi [port]
+where port is the port to bind the HTTP server, default is 8000.
 
 You're done, and ready to enjoy WebIOPi ! But the server and GPIO state will be lost when you'll stop the script (CTRL-C) or close the terminal session.
 
-You can also run it or install it as a daemon, using the provided webiopi.init.sample file :
-$ sudo cp webiopi.py.init /etc/init.d/webiopi
-
-Then change WEBIOPIHOME and WEBIOPIPORT variables according to the path you installed it, and to the port you want to use :
-$ sudo nano /etc/init.d/webiopi
-And changes variables next to the Author line.
-WEBIOPIHOME=/var/www/webiopi
-WEBIOPIPORT=80
-
-You can now start/stop the Python version of WebIOPi as a service :
+You can also start/stop the background service :
 $ sudo /etc/init.d/webiopi start
 and
 $ sudo /etc/init.d/webiopi stop
 
-You can even start WebIOPi at boot :
+You can even setup your system to start webiopi at startup :
 $ sudo update-rc.d webiopi defaults
+
 
 Go to [README#Usage README] for usage instructions.

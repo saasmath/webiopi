@@ -1,7 +1,9 @@
    UART/SPI/I2C support
    Parallel BUS helper
-   Interrupts
+   Edge detection
    Long-polling/Bayeux/Cometd and/or WebSocket
    Logic analyzer
-   Java server version ?
-   Resume PHP server version development ?
+
+   WiringPi server side lib ?
+   Java server side lib ?
+   Resume PHP development ?
