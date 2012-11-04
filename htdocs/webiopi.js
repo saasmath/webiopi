@@ -197,12 +197,16 @@ WebIOPi.prototype.toggleValue = function (gpio) {
 	w().setValue(gpio, value);
 }
 
-WebIOPi.prototype.createButton = function (id, label, callback) {
+WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
 	var button = $('<input type="submit" class="Button">');
 	button.attr("id", id);
 	button.val(label);
-	if (callback != undefined) {
-		button.click(callback);
+	if ((callback != undefined) && (callbackUp == undefined)) {
+		button.bind("click", callback);
+	}
+	else if ((callback != undefined) && (callbackUp != undefined)) {
+		button.bind("mousedown", callback);
+		button.bind("mouseup", callbackUp);
 	}
 	return button;
 }
@@ -215,8 +219,8 @@ WebIOPi.prototype.createGPIOButton = function (gpio, label) {
 	return button;
 }
 
-WebIOPi.prototype.setLabel = function (gpio, label) {
-	$("#gpio" + gpio).val(label);
+WebIOPi.prototype.setLabel = function (id, label) {
+	$("#" + id).val(label);
 }
 
 WebIOPi.prototype.updateFunction = function (gpio, func) {
