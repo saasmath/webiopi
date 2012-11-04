@@ -25,6 +25,7 @@ import BaseHTTPServer
 import mimetypes as mime
 import _webiopi.GPIO as GPIO
 import re
+from encodings.base64_codec import base64_encode
 
 VERSION = '0.5.x'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION
@@ -49,7 +50,7 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port=8000, context="webiopi", index="index.html"):
+    def __init__(self, port=8000, login="webiopi", password="raspberry", context="webiopi", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error, (e_no, e_str):
@@ -64,7 +65,8 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.docroot = "/usr/share/webiopi/htdocs"
         self.index = index
         self.callbacks = {}
-        self.log_enabled = False;
+        self.log_enabled = False
+        self.auth = base64_encode("%s:%s"%(login, password))[0][0:-1];
         
         if not self.context.startswith("/"):
             self.context = "/" + self.context
@@ -129,8 +131,20 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def version_string(self):
         return SERVER_VERSION + ' ' + self.sys_version
+    
+    def checkAuthentication(self):
+        auth = self.headers.getheader('Authorization')
+        if auth != "Basic %s" % self.server.auth:
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+            self.end_headers();
+            return False
+        return True
         
     def do_GET(self):
+        if not self.checkAuthentication():
+            return
+        
         relativePath = self.path.replace(self.server.context, "/")
         if (relativePath.startswith("/")):
             relativePath = relativePath[1:];
@@ -218,6 +232,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             
 
     def do_POST(self):
+        if not self.checkAuthentication():
+            return
+
         relativePath = self.path.replace(self.server.context, "")
         if (relativePath.startswith("/")):
             relativePath = relativePath[1:];
