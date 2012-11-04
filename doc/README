@@ -39,6 +39,8 @@ If your Raspberry Pi is connected to your network, you can open a browser to htt
 
 You can even add a port redirection on your router (and/or use IPv6) to control your GPIOs over Internet !
 
+Default user is "webiopi" and password is "raspberry"
+
    Click/Tap the OUT/IN button to change GPIO direction.
    Click/Tap pins to change the GPIO output state.
 

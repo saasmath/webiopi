@@ -3,7 +3,9 @@ This page is being updated for the upcoming release. Please refer to the doc inc
 You will need Python development headers. On Raspbian, open a terminal :
 $ sudo aptitude install python-dev
 
-Now download, extract and install WebIOPi :
+Now download WebIOPi at http://code.google.com/p/webiopi/downloads/list
+
+Then extract and install WebIOPi :
 $ tar xvzf WebIOPi-X.Y.tar.gz
 $ cd WebIOPi-X.Y
 $ sudo ./setup.sh

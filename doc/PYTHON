@@ -15,7 +15,7 @@ def myMacro(data):
     return "OK"
 
 #Instantiate the server on the port 8000, it starts immediately in its own thread
-server = webiopi.Server(8000)
+server = webiopi.Server(port=8000, login="admin", password="p@ssw0rd")
 
 #Register the macro so you can call it through the [RESTAPI] or [JAVASCRIPT]
 server.addMacro("myMacro", myMacro)
@@ -37,4 +37,3 @@ except KeyboardInterrupt:
 #Stops the server
 server.stop()
 GPIO.setFunction(7, GPIO.IN)
-

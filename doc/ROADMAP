@@ -1,7 +1,6 @@
 Check [CHANGELOG] for changes included in the next version.
 
 =Confirmed, undated, by priority=
-   Login/Password access
    UART/SPI/I2C support
    Parallel BUS helper
    Logic analyzer
