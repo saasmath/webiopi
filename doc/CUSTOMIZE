@@ -1,104 +1,138 @@
-WebIOPi UI customization is easy but requires some CSS knowledge. The basic technique is to hide all controls, then show and move wanted controls. You will also need to add a Javascript line for each button you want to change the label.
+This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
 
-Before starting, make a copy of skeleton in the app directory
+WebIOPi UI customization is easy but requires some JS and CSS knowledge. 
+
+=HTML/Javascript=
+The WebIOPi Javascript library allows you to make your own interface easily, only requiring one single script tag to include /webiopi.js
+
+WebIOPi will automatically load and add required jquery.js and webiopi.css into your HTML file at runtime !
+Then you can use the [JAVASCRIPT] library to build the interface, creating buttons and registering callbacks. Check [PYTHON] for the related demo.py server script example.
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+	<title>WebIOPi | Demo</title>
+	<script type="text/javascript" src="/webiopi.js"></script>
+	<link rel="stylesheet" type="text/css" href="demo.css" />
+	<script type="text/javascript">
+	webiopi().ready(function() {
+		//if you use the default server, you have to setup GPIO from javascript
+		webiopi().setFunction(7, "OUT"); 
+		
+		var content, button;
+		content = $("#content");
+		
+		 // create a "SWITCH" labeled button for GPIO 0
+	        button = webiopi().createGPIOButton(0, "SWITCH");
+        	content.append(button); // append button to content div
+                
+		 // create a "LED" labeled button for GPIO 7
+	        button = webiopi().createGPIOButton(7, "LED");
+	        content.append(button); // append button to content div
+        
+        	// create a button which output a bit sequence on GPIO 7 : 010 with a 10ms period 
+	        button = webiopi().createSequenceButton("pulse", "|", 7, 10, "010");
+	        content.append(button); // append button to content div
+        
+        	// the previous button will always output "010" sequence
+	        // you can also create a simple button with your own function 
+        	button = webiopi().createButton("sos", "S.O.S", outputSequence);
+	        content.append(button); // append button to content div
+
+        	// you can also create a button which calls a different function for mouse down and up events
+	        button = webiopi().createButton("button", "FLASH", mousedown, mouseup);
+        	content.append(button);
+        
+	        // create a button which call "myMacro" with "1,2,3" as argument
+        	button = webiopi().createMacroButton("macro", "Macro", "myMacro", "1,2,3");
+	        content.append(button); // append button to content div
+
+        	// the previous button will always call "myMacro" with the same "1,2,3" argument
+	        // you can also create a simple button with your own function 
+        	button = webiopi().createButton("macro2", "Macro", callMacro);
+	        content.append(button); // append button to content div
+	});
+	
+	function mousedown() {
+		webiopi().setValue(7, 1);
+	}
+	
+	function mouseup() {
+		webiopi().setValue(7, 0);
+	}
+	
+	function outputSequence() {
+		var sequence = "01010100110011001100101010" // S.O.S. morse code or whatever you want
+		// output sequence on gpio 7 with a 100ms period
+        	webiopi().outputSequence(7, 100, sequence, sequenceCallback);
+	}
+	
+	function sequenceCallback(gpio, data) {
+	    	alert("sequence on " + gpio + " finished with " + data);
+    	}
+	
+	function callMacro() {
+		var arg = "1,2,3" // or whatever you want
+		// call myMacro(arg)
+        	webiopi().callMacro("myMacro", arg, macroCallback);
+	}
+	
+	function macroCallback(macro, args, data) {
+    		alert(macro + " returned with " + data);
+    	}
+	</script>
+</head>
+<body>
+<div id="content" align="center"></div>
+</body>
+</html>
+
 
 =CSS naming=
-http://trouch.com/wp-content/uploads/2012/08/webiopi-cssnaming.png
-
-All the UI is included in a single div, with the id webiopi. This box then contains a 6 cols x 13 rows table which is dynamically buit. Each cell has a single control.
-
-RPi pins buttons are html inputs (type=submit), and inherit the input CSS style. Their id are from gpio0 to gpio25. There is also two classes for both low and high states, and also somes for non GPIO pins :
+RPi pins buttons are html inputs (type=submit), and inherit the input CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
    .LOW : GPIO in low state
    .HIGH : GPIO in high state
    .DNC : Do not connect
    .GND : Ground
    .V33 : 3.3V
    .V50 : 5.0V
-   .UART
-   .SPI
-   .I2C
+   .UART0
+   .SPI0
+   .I2C0
+   .I2C1
 
-RPi pins direction buttons are also html inputs, with id from direction0 to direction25. Two classes are also used :
-   .DirectionEnabled : Direction button for enabled GPIOs
-   .DirectionDisabled : Direction button for disabled GPIOs
+RPi pins Functions buttons are also html inputs, with id from function0 to function53. Two classes are also used :
+   .FunctionBasic : When GPIO is Input or Output
+   .FunctionSpecial : When GPIO is in ALTx (default hidden)
 
-RPi pins descriptions are made of html div, id from name1 to name26, with a single class :
+RPi pins descriptions are made of html div, id from name0 to name53, with a single class :
    .Description : Text on the left/right of each pin
 
 =Example=
-Included style.css in skeleton contains what you need to hide existing controls. Just add some lines in the CSS file to display wanted controls :
-#gpio0 {
-        visibility: visible;
-        top: 20px;
-        left: 20px;
-        width: 80px;
-        height: 80px;
-        font-size: 24pt;
-        font-weight: bold;
-}
+Included demo/demo.css :
+@CHARSET "UTF-8";
 
-#gpio7 {
-        visibility: visible;
-        top: 120px;
-        left: 20px;
-        width: 80px;
-        height: 80px;
-        font-size: 24pt;
-        font-weight: bold;
-        color: black;
+input {
+	display: block;
+	margin: 5px 5px 5px 5px;
+	width: 150px;
+	height: 60px;
+	font-size: 24pt;
+	font-weight: bold;
+	color: black;
 }
 
 #gpio7.LOW {
-        background-color: white;
+	background-color: White;
 }
 
 #gpio7.HIGH {
-        background-color: red;
+	background-color: Red;
 }
 
 will display the GPIOs 0 and 7, with two bigs buttons in the upper-left corner. It also changes the background color of the GPIO 7 for both low and high states.
 
-In your HTML file, you also have to add some Javascript next to the CSS link. For example, you can use the default header table :
-<html>
-<head>
-<title>WebIOPi | Example</title>
-<script type="text/javascript" src="../../jquery.js"></script>
-<script type="text/javascript" src="../../webiopi.js"></script>
-<link rel="stylesheet" type="text/css" href="../../webiopi.css" />
-<link rel="stylesheet" type="text/css" href="style.css" />
-<script type="text/javascript">
-$(document).ready(function() {
-	webiopi().RPiHeader().createTable("content"); // create RPiHeader Table and append it to content div
 
-	webiopi().setDirection(0, "in"); // set GPIO 0 as input
-	webiopi().setLabel(0, "SW"); // set GPIO 0 label
-
-	webiopi().setDirection(7, "out"); // set GPIO 7 as output
-	webiopi().setLabel(7, "LED"); // set GPIO 7 label
-});
-</script>
-</head>
-<body>
-<div id="content"></div>
-</body>
-</html>
-
-You can also create buttons directly instead of using the RPiHeader :
-$(document).ready(function() {
-	var sw = webiopi().createGPIOButton(0, "SW"); // create a "SW" button for GPIO 0
-	$("#content").append(sw); // append button to content div
-		
-	var led = webiopi().createGPIOButton(7, "LED"); // create a "LED" button for GPIO 7
-	$("#content").append(led); // append button to content div
-
-	webiopi().setDirection(0, "in"); // set GPIO 0 as input
-	webiopi().setDirection(7, "out"); // set GPIO 7 as output
-});
-
-Then open a browser by appending mypage.html to the usual URL (http://raspberrypi/webiopi/mypage.html) and you will see 2 big controls :
-   The first one allows you to see the input state on the GPIO 0 : connect it to the ground (using a switch), and the control will become black.
-   The second, will allow you to control a led on GPIO 7, connected in serial with a resistor to the ground.
-
-http://trouch.com/wp-content/uploads/2012/08/webiopi-mypage.png
-
-http://trouch.com/wp-content/uploads/2012/08/WebIOPi-demo.png
+Start the associated demo.py script then open a browser to http://raspberrypi/webiopi/demo.html
