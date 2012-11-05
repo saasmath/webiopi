@@ -54,6 +54,7 @@ function WebIOPi() {
 		var gpio = Object();
 		gpio.value = 0;
 		gpio.func = "IN";
+		gpio.mapped = false;
 		this.GPIO[i] = gpio;
 	}
 
@@ -163,6 +164,10 @@ WebIOPi.prototype.map = function (pin, type, value) {
 	w().PINS[pin] = Object();
 	w().PINS[pin].type = type
 	w().PINS[pin].value = value;
+	
+	if (type.value == w().TYPE.GPIO.value) {
+		w().GPIO[value].mapped = true;
+	}
 }
 
 WebIOPi.prototype.addALT = function (alt, gpio, name) {
@@ -451,13 +456,13 @@ Expert.prototype.createGPIO = function (gpio) {
 Expert.prototype.createList = function (containerId) {
 	var box = $('<div>');
 	
-	$.getJSON(w().context + "*", function(data) {
-		$.each(data["GPIO"], function(gpio, data) {
-			var gpio = w().Expert().createGPIO(gpio);
+	for (i = 0; i<w().GPIO.length; i++) {
+		if (w().GPIO[i].mapped == true) {
+			var gpio = w().Expert().createGPIO(i);
 			box.append(gpio);
-		});
-	});
-	
+		}
+	}
+		
 	if (containerId != undefined) {
 		$("#"+containerId).append(box);
 	}
