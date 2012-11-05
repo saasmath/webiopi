@@ -74,8 +74,8 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             self.context += "/"
         self.start()
         
-    def addMacro(self, name, callback):
-        self.callbacks[name] = callback
+    def addMacro(self, callback):
+        self.callbacks[callback.__name__] = callback
 
     def writeJSON(self, out):
         out.write("{")
