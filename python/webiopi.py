@@ -237,7 +237,10 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_header("Content-type", type);
 #            self.send_header("Content-length", os.path.getsize(realPath))
             self.end_headers()
-            self.wfile.write(data.encode())
+            try:
+                self.wfile.write(data.encode())
+            except UnicodeDecodeError:
+                self.wfile.write(data)
             
 
     def do_POST(self):
