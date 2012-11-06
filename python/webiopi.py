@@ -21,11 +21,14 @@ import time
 import threading
 import errno
 import socket
-import BaseHTTPServer
 import mimetypes as mime
-import _webiopi.GPIO as GPIO
 import re
-from encodings.base64_codec import base64_encode
+import base64
+import _webiopi.GPIO as GPIO
+try:
+    import BaseHTTPServer
+except ImportError:
+    import http.server as BaseHTTPServer
 
 VERSION = '0.5.x'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION
@@ -43,7 +46,7 @@ MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "G
     
 
 def log(message):
-    print SERVER_VERSION, message
+    print("%s %s" % (SERVER_VERSION, message))
 
 def log_socket_error(message):
     log("Socket Error: %s" % message)
@@ -53,11 +56,11 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     def __init__(self, port=8000, login="webiopi", password="raspberry", context="webiopi", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
-        except socket.error, (e_no, e_str):
-            if (e_no == errno.EADDRINUSE):
-                raise Exception("Port %d already in use, try another one" % port)
-            else:
-                raise Exception(e_str)
+        except socket.error as msg:
+#            if (e_no == errno.EADDRINUSE):
+#                raise Exception("Port %d already in use, try another one" % port)
+#            else:
+             raise Exception(msg)
             
         threading.Thread.__init__(self)
         self.port = port
@@ -66,7 +69,11 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.index = index
         self.callbacks = {}
         self.log_enabled = False
-        self.auth = base64_encode("%s:%s"%(login, password))[0][0:-1];
+        abcd = "%s:%s"%(login, password)
+        try:
+            self.auth = base64.b64encode(abcd)
+        except TypeError:
+            self.auth = base64.b64encode(abcd.encode()).decode()
         
         if not self.context.startswith("/"):
             self.context = "/" + self.context
@@ -78,27 +85,28 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.callbacks[callback.__name__] = callback
 
     def writeJSON(self, out):
-        out.write("{")
+        json = "{"
         first = True
         for (alt, value) in FUNCTIONS.items():
             if not first:
-                out.write (", ")
-            out.write('"%s": %d' % (alt, value["enabled"]))
+                json += ", "
+            json += '"%s": %d' % (alt, value["enabled"])
             first = False
         
-        out.write(', "GPIO":{\n')
+        json += ', "GPIO":{\n'
         first = True
         for gpio in range(GPIO.GPIO_COUNT):
             if not first:
-                out.write (", \n")
+                json += ", \n"
 
             function = GPIO.getFunctionString(gpio)
             value = GPIO.input(gpio)
                 
-            out.write('"%d": {"function": "%s", "value": %d}' % (gpio, function, value))
+            json += '"%d": {"function": "%s", "value": %d}' % (gpio, function, value)
             first = False
             
-        out.write("\n}}")
+        json += "\n}}"
+        out.write(json.encode())
 
     def run(self):
         host = "[RaspberryIP]"
@@ -107,16 +115,16 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             s.connect(('8.8.8.8', 53))
             (host, p) = s.getsockname()
             s.close()
-        except socket.error, e:
+        except (socket.error, e):
             pass
 
         self.running = True
         log("Started at http://%s:%s%s" % (host, self.port, self.context))
         try:
             self.serve_forever()
-        except socket.error, (e_no, e_str):
+        except socket.error as msg:
             if self.running:
-                log_socket_error(e_str)
+                log_socket_error(msg)
         log("Stopped")
 
     def stop(self):
@@ -133,7 +141,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         return SERVER_VERSION + ' ' + self.sys_version
     
     def checkAuthentication(self):
-        auth = self.headers.getheader('Authorization')
+        auth = self.headers.get('Authorization')
         if auth != "Basic %s" % self.server.auth:
             self.send_response(401)
             self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
@@ -157,18 +165,18 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.server.writeJSON(self.wfile)
             
         elif relativePath == "map":
-            json = "%s"%MAPPING[GPIO.BOARD_REVISION]
+            json = "%s" % MAPPING[GPIO.BOARD_REVISION]
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(json.replace("'", '"'))
+            self.wfile.write(json.replace("'", '"').encode())
 
         # version
         elif relativePath == "version":
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.end_headers()
-            self.wfile.write(SERVER_VERSION)
+            self.wfile.write(SERVER_VERSION.encode())
 
         # Single GPIO getter
         elif (relativePath.startswith("GPIO/")):
@@ -189,7 +197,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/plain");
             self.end_headers()
-            self.wfile.write(value)
+            self.wfile.write(value.encode())
 
         # handle files
         else:
@@ -222,13 +230,14 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                     return
                 
             (type, encoding) = mime.guess_type(realPath)
-            f = open(realPath);
+            f = open(realPath)
+            data = f.read()
+            f.close()
             self.send_response(200)
             self.send_header("Content-type", type);
-            self.send_header("Content-length", os.path.getsize(realPath))
+#            self.send_header("Content-length", os.path.getsize(realPath))
             self.end_headers()
-            self.wfile.write(f.read())
-            f.close()
+            self.wfile.write(data.encode())
             
 
     def do_POST(self):
@@ -258,7 +267,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(value)
+                self.wfile.write(value.encode())
 
             elif (operation == "function"):
                 value = value.lower()
@@ -273,7 +282,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(value)
+                self.wfile.write(value.encode())
 
             elif (operation == "sequence"):
                 if GPIO.getFunction(gpio) != GPIO.OUT:
@@ -288,19 +297,19 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(v)
+                self.wfile.write(v.encode())
                 
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
                 return
         elif (relativePath.startswith("macros/")):
             (mode, fname, value) = relativePath.split("/")
-            if (self.server.callbacks.has_key(fname)):
+            if (fname in self.server.callbacks):
                 callback = self.server.callbacks[fname]
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(callback(value))
+                self.wfile.write(callback(value).encode())
             else:
                 self.send_error(404, fname + " Not Found")
                 return
