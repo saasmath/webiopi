@@ -6,15 +6,14 @@
      Added REST header map
    Removed PHP server
    Python server usable as a library
+   Python 3 support
    Removed RPi.GPIO library dependency
      Merged and improved native code into WebIOPi
      Allows GPIO full access from the Server
      Remove RPi.GPIO mode conflict (RPi or BCM)
-   Added setup.sh script
-     Ease WebIOPi install
+   Added setup script to ease WebIOPi install
      Compile and install python library
      Copy HTML/JS/CSS ressources to /usr/share/webiopi/htdocs
-     Copy documentation to /usr/share/webiopi/doc
    Improved REST API
    Added ability to create custom REST macro
    Added ability to output a bit sequence
