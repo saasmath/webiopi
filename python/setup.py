@@ -18,16 +18,11 @@ setup(name             = 'WebIOPi',
       author           = 'Eric PTAK',
       author_email     = 'trouch@trouch.com',
       description      = 'A package to control Raspberry Pi GPIO from the web',
-      long_description = open('doc/README').read(),
+      long_description = open('../doc/README').read(),
       license          = 'MIT',
       keywords         = 'RaspberryPi GPIO Python REST',
       url              = 'http://code.google.com/p/webiopi/',
       classifiers      = classifiers,
-      package_dir      = {"":"python"},
       py_modules       = ["webiopi"],
-      ext_modules      = [Extension('_webiopi.GPIO', ['python/native/bridge.c', 'python/native/gpio.c', 'python/native/cpuinfo.c'])],
-      data_files       = [
-                          ('/usr/share/webiopi/htdocs', ['htdocs/index.html', 'htdocs/webiopi.js', 'htdocs/webiopi.css', 'htdocs/jquery.js']),
-                          ('/usr/share/webiopi/htdocs/app/expert', ['htdocs/app/expert/index.html', 'htdocs/app/expert/style.css']),
-                         ]
+      ext_modules      = [Extension('_webiopi.GPIO', ['native/bridge.c', 'native/gpio.c', 'native/cpuinfo.c'])],
       )
