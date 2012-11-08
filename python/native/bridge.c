@@ -116,10 +116,9 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
 static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    int channel, value;
-   int period = 0;
-   static char *kwlist[] = {"channel", "value", "period", NULL};
+   static char *kwlist[] = {"channel", "value", NULL};
 
-   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &value, &period))
+   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii", kwlist, &channel, &value))
       return NULL;
 
    if (channel < 0 || channel >= GPIO_COUNT)
@@ -135,11 +134,42 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
    }
 
 //   printf("Output GPIO %d value %d\n", gpio, value);
-   output(channel, value, period);
+   output(channel, value);
 
    Py_INCREF(Py_None);
    return Py_None;
 }
+
+// python function output(channel, value)
+static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel, period;
+  char* sequence;
+  static char *kwlist[] = {"channel", "period", "sequence", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iis", kwlist, &channel, &period, &sequence))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+//   printf("Output GPIO %d value %d\n", gpio, value);
+  outputSequence(channel, period, sequence);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+
 
 // python function value = input(channel)
 static PyObject *py_input(PyObject *self, PyObject *args)
@@ -186,6 +216,7 @@ PyMethodDef python_methods[] = {
    {"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)"},
    {"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0) as string"},
    {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
+   {"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
    {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {NULL, NULL, 0, NULL}
 };

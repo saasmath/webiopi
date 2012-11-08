@@ -120,10 +120,9 @@ int get_function(int gpio)
    return value; // 0=input, 1=output, 4=alt0
 }
 
-void output(int gpio, int value, int period)
+void output(int gpio, int value)
 {
     int offset, shift;
-	struct timespec ts;
     
     if (value) // value == HIGH
         offset = SET_OFFSET + (gpio/32);
@@ -133,11 +132,24 @@ void output(int gpio, int value, int period)
     shift = (gpio%32);
 
     *(gpio_map+offset) = 1 << shift;
-    if (period > 0) {
-    	ts.tv_sec = period/1000;
-    	ts.tv_nsec = (period%1000) * 1000000;
-    	nanosleep(&ts, NULL);
-    }
+}
+
+void outputSequence(int gpio, int period, char* sequence) {
+	int i, value;
+	struct timespec ts;
+	ts.tv_sec = period/1000;
+	ts.tv_nsec = (period%1000) * 1000000;
+
+	for (i=0; sequence[i] != '\0'; i++) {
+		if (sequence[i] == '1') {
+			value = 1;
+		}
+		else {
+			value = 0;
+		}
+		output(gpio, value);
+	    nanosleep(&ts, NULL);
+	}
 }
 
 int input(int gpio)

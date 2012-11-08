@@ -294,13 +294,11 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 (period, sequence) = value.split(",")
                 period = int(period)
-                
-                for v in sequence:
-                    GPIO.output(gpio, int(v), period)
+                GPIO.outputSequence(gpio, period, sequence)
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(v.encode())
+                self.wfile.write(sequence[-1].encode())
                 
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")
