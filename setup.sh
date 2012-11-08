@@ -14,7 +14,7 @@ for python in $SEARCH; do
 		include=`$python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
 		echo -n "Found $version, installing WebIOPi... " 
 		if [ -f "$include/Python.h" ]; then
-			$python setup.py install >/dev/null 2>error.log || echo "Failed"
+			$python setup.py install >/dev/null 2>/dev/null || (echo "Failed" && continue) 
 			echo "OK"
 			INSTALLED="$INSTALLED $python"
 	    else
