@@ -11,7 +11,7 @@ def myMacro(arg):
     return "OK"
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
-server = webiopi.Server(port=8000, login="admin", password="p@ssw0rd")
+server = webiopi.Server(port=8000, login="demo", password="demo")
 
 # Register the macro so you can call it through the [RESTAPI] or [JAVASCRIPT]
 server.addMacro(myMacro)
@@ -21,10 +21,14 @@ GPIO.setFunction(0, GPIO.IN)    # or GPIO.setup(0, GPIO.IN)
 GPIO.setFunction(7, GPIO.OUT)   # or GPIO.setup(7, GPIO.OUT)
 
 # Example loop which toggle GPIO 7 each 5 seconds
+ratio = 0
 try:
     while True:
-        GPIO.output(7, not GPIO.input(7))
-        time.sleep(5)
+        GPIO.pulseRatio(7, ratio)
+        ratio += 0.01
+        if ratio > 1:
+            ratio = 0
+        
 
 # Break the loop by pressing CTRL-C
 except KeyboardInterrupt:

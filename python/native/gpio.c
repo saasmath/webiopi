@@ -211,7 +211,7 @@ void pulseMilli(int gpio, int up, int down) {
 }
 
 //added Eric PTAK - trouch.com
-void pulseMilliRatio(int gpio, float ratio, int width) {
+void pulseMilliRatio(int gpio, int width, float ratio) {
 	int up = ratio*width;
 	int down = width - up;
 	pulseMilli(gpio, up, down);
@@ -230,7 +230,7 @@ void pulseMicro(int gpio, int up, int down) {
 }
 
 //added Eric PTAK - trouch.com
-void pulseMicroRatio(int gpio, float ratio, int width) {
+void pulseMicroRatio(int gpio, int width, float ratio) {
 	int up = ratio*width;
 	int down = width - up;
 	pulseMicro(gpio, up, down);
@@ -253,6 +253,11 @@ void pulseRatio(int gpio, float ratio) {
 //added Eric PTAK - trouch.com
 void* loop(void* data) {
 	int gpio = (int)data;
+	gpio_tspairs[gpio].up.tv_sec = 0;
+	gpio_tspairs[gpio].up.tv_nsec = 0;
+	gpio_tspairs[gpio].down.tv_sec = 0;
+	gpio_tspairs[gpio].down.tv_nsec = 0;
+
 	while (1) {
 		pulseTS(gpio, &gpio_tspairs[gpio].up, &gpio_tspairs[gpio].down);
 	}
@@ -281,6 +286,12 @@ void disableLoop(int gpio) {
 	gpio_threads[gpio] = NULL;
 	output(gpio, 0);
 }
+
+//added Eric PTAK - trouch.com
+int isLoopEnabled(int gpio) {
+	return gpio_threads[gpio] != NULL;
+}
+
 
 void cleanup(void)
 {

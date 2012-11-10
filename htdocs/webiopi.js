@@ -256,6 +256,14 @@ WebIOPi.prototype.createFunctionButton = function (gpio) {
 	return button;
 }
 
+WebIOPi.prototype.createPulseButton = function (id, label, gpio) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().pulse(gpio);
+    });
+    return button;
+}
+
 WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
     var button = webiopi().createButton(id, label);
     button.bind("click", function(event) {
@@ -346,6 +354,46 @@ WebIOPi.prototype.callMacro = function (macro, args, callback) {
 	$.post(w().context + 'macros/' + macro + "/" + args, function(data) {
 		if (callback != undefined) {
 			callback(macro, args, data);
+		}
+	});
+}
+
+WebIOPi.prototype.enableLoop = function(gpio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/loop/enable", function(data) {
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.disableLoop = function(gpio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/loop/disable", function(data) {
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.pulse = function(gpio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/pulse/", function(data) {
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.pulseRatio = function(gpio, ratio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/pulseRatio/" + ratio, function(data) {
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.pulseAngle = function(gpio, angle, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/pulseAngle/" + angle, function(data) {
+		if (callback != undefined) {
+			callback(gpio, data);
 		}
 	});
 }

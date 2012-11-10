@@ -28,13 +28,14 @@ int input(int gpio);
 void output(int gpio, int value);
 void outputSequence(int gpio, int period, char* sequence);
 void pulseMilli(int gpio, int up, int down);
-void pulseMilliRatio(int gpio, float ratio, int width);
+void pulseMilliRatio(int gpio, int width, float ratio);
 void pulseMicro(int gpio, int up, int down);
-void pulseMicroRatio(int gpio, float ratio, int width);
+void pulseMicroRatio(int gpio, int width, float ratio);
 void pulseAngle(int gpio, float angle);
 void pulseRatio(int gpio, float ratio);
 void enableLoop(int gpio);
 void disableLoop(int gpio);
+int isLoopEnabled(int gpio);
 
 void cleanup(void);
 

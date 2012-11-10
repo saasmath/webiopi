@@ -185,11 +185,20 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             value = None
             if (operation == "value"):
-                value = GPIO.input(gpio)
+                if GPIO.input(gpio):
+                    value = "1"
+                else:
+                    value = "0"
     
             elif (operation == "function"):
                 value = GPIO.getFunctionString(gpio)
     
+            elif (operation == "loop"):
+                if GPIO.isLoopEnabled(gpio):
+                    value = "enabled"
+                else:
+                    value = "disabled"
+                
             else:
                 self.send_error(404, operation + " Not Found")
                 return
@@ -299,6 +308,45 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
                 self.wfile.write(sequence[-1].encode())
+                
+            elif (operation == "loop"):
+                if value == "enable":
+                    GPIO.enableLoop(gpio)
+                elif value == "disable":
+                    GPIO.disableLoop(gpio)
+                
+                if GPIO.isLoopEnabled(gpio):
+                    result = "enabled"
+                else:
+                    result = "disabled"
+                
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(result.encode())
+                
+            elif (operation == "pulse"):
+                GPIO.pulse(gpio)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write("OK".encode())
+                
+            elif (operation == "pulseRatio"):
+                ratio = float(value)
+                GPIO.pulseRatio(gpio, ratio)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(value.encode())
+                
+            elif (operation == "pulseAngle"):
+                angle = float(value)
+                GPIO.pulseAngle(gpio, angle)
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain");
+                self.end_headers()
+                self.wfile.write(value.encode())
                 
             else: # operation unknown
                 self.send_error(404, operation + " Not Found")

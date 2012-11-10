@@ -199,9 +199,9 @@ static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kw
 {
   int channel, width;
   float ratio;
-  static char *kwlist[] = {"channel", "ratio", "width", NULL};
+  static char *kwlist[] = {"channel", "width", "ratio", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ifi", kwlist, &channel, &ratio, &width))
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iif", kwlist, &channel, &width, &ratio))
 	 return NULL;
 
   if (channel < 0 || channel >= GPIO_COUNT)
@@ -216,7 +216,7 @@ static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-  pulseMilliRatio(channel, ratio, width);
+  pulseMilliRatio(channel, width, ratio);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -253,9 +253,9 @@ static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kw
 {
   int channel, width;
   float ratio;
-  static char *kwlist[] = {"channel", "ratio", "width", NULL};
+  static char *kwlist[] = {"channel", "width", "ratio", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ifi", kwlist, &channel, &ratio, &width))
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iif", kwlist, &channel, &width, &ratio))
 	 return NULL;
 
   if (channel < 0 || channel >= GPIO_COUNT)
@@ -270,7 +270,7 @@ static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-  pulseMicroRatio(channel, ratio, width);
+  pulseMicroRatio(channel, width, ratio);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -330,6 +330,17 @@ static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
   return Py_None;
 }
 
+static PyObject *py_pulse(PyObject *self, PyObject *args)
+{
+   int channel;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+
+   pulseRatio(channel, 0.5);
+   return Py_None;
+}
+
 static PyObject *py_enableLoop(PyObject *self, PyObject *args)
 {
    int channel;
@@ -353,6 +364,19 @@ static PyObject *py_disableLoop(PyObject *self, PyObject *args)
 
 
 
+static PyObject *py_isLoopEnabled(PyObject *self, PyObject *args)
+{
+   int channel;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+
+   if (isLoopEnabled(channel))
+      Py_RETURN_TRUE;
+   else
+      Py_RETURN_FALSE;
+}
+
 // python function value = input(channel)
 static PyObject *py_input(PyObject *self, PyObject *args)
 {
@@ -360,7 +384,7 @@ static PyObject *py_input(PyObject *self, PyObject *args)
 
    if (!PyArg_ParseTuple(args, "i", &channel))
       return NULL;
-   //   printf("Input GPIO %d\n", gpio);
+
    if (input(channel))
       Py_RETURN_TRUE;
    else
@@ -400,14 +424,16 @@ PyMethodDef python_methods[] = {
    {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
    {"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
-   {"pulseMilli", (PyCFunction)py_pulseMilli, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"pulseMilliRatio", (PyCFunction)py_pulseMilliRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"pulseMicro", (PyCFunction)py_pulseMicro, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"pulseMicroRatio", (PyCFunction)py_pulseMicroRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
-   {"enableLoop", py_enableLoop, METH_VARARGS, "Input from a GPIO channel"},
-   {"disableLoop", py_disableLoop, METH_VARARGS, "Input from a GPIO channel"},
+   {"pulseMilli", (PyCFunction)py_pulseMilli, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using milliseconds for both HIGH and LOW state widths"},
+   {"pulseMilliRatio", (PyCFunction)py_pulseMilliRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using millisecond for the total width and a ratio (duty cycle) for the HIGH state width"},
+   {"pulseMicro", (PyCFunction)py_pulseMicro, METH_VARARGS | METH_KEYWORDS, "Output a PWM pulse to a GPIO channel using microseconds for both HIGH and LOW state widths"},
+   {"pulseMicroRatio", (PyCFunction)py_pulseMicroRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using microseconds for the total width and a ratio (duty cycle) for the HIGH state width"},
+   {"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using an angle"},
+   {"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using a ratio (duty cycle) with the default 50Hz signal"},
+   {"pulse", py_pulse, METH_VARARGS, "Output a PWM to a GPIO channel using a 50% ratio (duty cycle) with the default 50Hz signal"},
+   {"enableLoop", py_enableLoop, METH_VARARGS, "Enable software PWM loop for a GPIO channel"},
+   {"disableLoop", py_disableLoop, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
+   {"isLoopEnabled", py_isLoopEnabled, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
    {NULL, NULL, 0, NULL}
 };
 
