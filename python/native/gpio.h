@@ -33,9 +33,9 @@ void pulseMicro(int gpio, int up, int down);
 void pulseMicroRatio(int gpio, int width, float ratio);
 void pulseAngle(int gpio, float angle);
 void pulseRatio(int gpio, float ratio);
-void enableLoop(int gpio);
-void disableLoop(int gpio);
-int isLoopEnabled(int gpio);
+void enablePWM(int gpio);
+void disablePWM(int gpio);
+int isPWMEnabled(int gpio);
 
 void cleanup(void);
 

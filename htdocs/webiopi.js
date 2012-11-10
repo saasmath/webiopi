@@ -358,16 +358,16 @@ WebIOPi.prototype.callMacro = function (macro, args, callback) {
 	});
 }
 
-WebIOPi.prototype.enableLoop = function(gpio, callback) {
-	$.post(w().context + 'GPIO/' + gpio + "/loop/enable", function(data) {
+WebIOPi.prototype.enablePWM = function(gpio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/pwm/enable", function(data) {
 		if (callback != undefined) {
 			callback(gpio, data);
 		}
 	});
 }
 
-WebIOPi.prototype.disableLoop = function(gpio, callback) {
-	$.post(w().context + 'GPIO/' + gpio + "/loop/disable", function(data) {
+WebIOPi.prototype.disablePWM = function(gpio, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/pwm/disable", function(data) {
 		if (callback != undefined) {
 			callback(gpio, data);
 		}

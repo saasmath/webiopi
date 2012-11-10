@@ -341,37 +341,37 @@ static PyObject *py_pulse(PyObject *self, PyObject *args)
    return Py_None;
 }
 
-static PyObject *py_enableLoop(PyObject *self, PyObject *args)
+static PyObject *py_enablePWM(PyObject *self, PyObject *args)
 {
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
       return NULL;
 
-   enableLoop(channel);
+   enablePWM(channel);
    return Py_None;
 }
 
-static PyObject *py_disableLoop(PyObject *self, PyObject *args)
+static PyObject *py_disablePWM(PyObject *self, PyObject *args)
 {
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
       return NULL;
-   disableLoop(channel);
+   disablePWM(channel);
    return Py_None;
 }
 
 
 
-static PyObject *py_isLoopEnabled(PyObject *self, PyObject *args)
+static PyObject *py_isPWMEnabled(PyObject *self, PyObject *args)
 {
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
       return NULL;
 
-   if (isLoopEnabled(channel))
+   if (isPWMEnabled(channel))
       Py_RETURN_TRUE;
    else
       Py_RETURN_FALSE;
@@ -431,9 +431,9 @@ PyMethodDef python_methods[] = {
    {"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using an angle"},
    {"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using a ratio (duty cycle) with the default 50Hz signal"},
    {"pulse", py_pulse, METH_VARARGS, "Output a PWM to a GPIO channel using a 50% ratio (duty cycle) with the default 50Hz signal"},
-   {"enableLoop", py_enableLoop, METH_VARARGS, "Enable software PWM loop for a GPIO channel"},
-   {"disableLoop", py_disableLoop, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
-   {"isLoopEnabled", py_isLoopEnabled, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
+   {"enablePWM", py_enablePWM, METH_VARARGS, "Enable software PWM loop for a GPIO channel"},
+   {"disablePWM", py_disablePWM, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
+   {"isPWMEnabled", py_isPWMEnabled, METH_VARARGS, "Returns software PWM state"},
    {NULL, NULL, 0, NULL}
 };
 

@@ -251,7 +251,7 @@ void pulseRatio(int gpio, float ratio) {
 }
 
 //added Eric PTAK - trouch.com
-void* loop(void* data) {
+void* pwmLoop(void* data) {
 	int gpio = (int)data;
 	gpio_tspairs[gpio].up.tv_sec = 0;
 	gpio_tspairs[gpio].up.tv_nsec = 0;
@@ -264,19 +264,19 @@ void* loop(void* data) {
 }
 
 //added Eric PTAK - trouch.com
-void enableLoop(int gpio) {
+void enablePWM(int gpio) {
 	pthread_t *thread = gpio_threads[gpio];
 	if (thread != NULL) {
 		return;
 	}
 
 	thread = (pthread_t*) malloc(sizeof(pthread_t));
-	pthread_create(thread, NULL, loop, (void*)gpio);
+	pthread_create(thread, NULL, pwmLoop, (void*)gpio);
 	gpio_threads[gpio] = thread;
 }
 
 //added Eric PTAK - trouch.com
-void disableLoop(int gpio) {
+void disablePWM(int gpio) {
 	pthread_t *thread = gpio_threads[gpio];
 	if (thread == NULL) {
 		return;
@@ -288,7 +288,7 @@ void disableLoop(int gpio) {
 }
 
 //added Eric PTAK - trouch.com
-int isLoopEnabled(int gpio) {
+int isPWMEnabled(int gpio) {
 	return gpio_threads[gpio] != NULL;
 }
 

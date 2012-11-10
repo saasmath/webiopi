@@ -193,8 +193,8 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif (operation == "function"):
                 value = GPIO.getFunctionString(gpio)
     
-            elif (operation == "loop"):
-                if GPIO.isLoopEnabled(gpio):
+            elif (operation == "pwm"):
+                if GPIO.isPWMEnabled(gpio):
                     value = "enabled"
                 else:
                     value = "disabled"
@@ -309,13 +309,13 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(sequence[-1].encode())
                 
-            elif (operation == "loop"):
+            elif (operation == "pwm"):
                 if value == "enable":
-                    GPIO.enableLoop(gpio)
+                    GPIO.enablePWM(gpio)
                 elif value == "disable":
-                    GPIO.disableLoop(gpio)
+                    GPIO.disablePWM(gpio)
                 
-                if GPIO.isLoopEnabled(gpio):
+                if GPIO.isPWMEnabled(gpio):
                     result = "enabled"
                 else:
                     result = "disabled"
