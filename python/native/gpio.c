@@ -23,9 +23,11 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <time.h>
+#include <pthread.h>
 #include "gpio.h"
 
 #define BCM2708_PERI_BASE   0x20000000
@@ -46,6 +48,15 @@ SOFTWARE.
 #define BLOCK_SIZE (4*1024)
 
 static volatile uint32_t *gpio_map;
+
+struct tspair {
+	struct timespec up;
+	struct timespec down;
+};
+
+static struct tspair gpio_tspairs[GPIO_COUNT];
+
+static pthread_t *gpio_threads[GPIO_COUNT];
 
 void short_wait(void)
 {
@@ -100,6 +111,7 @@ void set_pullupdn(int gpio, int pud)
     *(gpio_map+clk_offset) = 0;
 }
 
+//updated Eric PTAK - trouch.com
 void set_function(int gpio, int direction, int pud)
 {
     int offset = FSEL_OFFSET + (gpio/10);
@@ -109,7 +121,7 @@ void set_function(int gpio, int direction, int pud)
 	*(gpio_map+offset) = (*(gpio_map+offset) & ~(7<<shift)) | (direction<<shift);
 }
 
-// Contribution by Eric Ptak <trouch@trouch.com>
+//added Eric PTAK - trouch.com
 int get_function(int gpio)
 {
    int offset = FSEL_OFFSET + (gpio/10);
@@ -118,6 +130,17 @@ int get_function(int gpio)
    value >>= shift;
    value &= 7;
    return value; // 0=input, 1=output, 4=alt0
+}
+
+//updated Eric PTAK - trouch.com
+int input(int gpio)
+{
+   int offset, value, mask;
+
+   offset = PINLEVEL_OFFSET + (gpio/32);
+   mask = (1 << gpio%32);
+   value = *(gpio_map+offset) & mask;
+   return value;
 }
 
 void output(int gpio, int value)
@@ -134,6 +157,7 @@ void output(int gpio, int value)
     *(gpio_map+offset) = 1 << shift;
 }
 
+//added Eric PTAK - trouch.com
 void outputSequence(int gpio, int period, char* sequence) {
 	int i, value;
 	struct timespec ts;
@@ -152,14 +176,110 @@ void outputSequence(int gpio, int period, char* sequence) {
 	}
 }
 
-int input(int gpio)
-{
-   int offset, value, mask;
-   
-   offset = PINLEVEL_OFFSET + (gpio/32);
-   mask = (1 << gpio%32);
-   value = *(gpio_map+offset) & mask;
-   return value;
+//added Eric PTAK - trouch.com
+void pulseTS(int gpio, struct timespec *up, struct timespec *down) {
+	if ((up->tv_sec > 0) || (up->tv_nsec > 0)) {
+		output(gpio, 1);
+		nanosleep(up, NULL);
+	}
+
+    output(gpio, 0);
+    nanosleep(down, NULL);
+}
+
+//added Eric PTAK - trouch.com
+void pulseOrSaveTS(int gpio, struct timespec *up, struct timespec *down) {
+	if (gpio_threads[gpio] != NULL) {
+		memcpy(&gpio_tspairs[gpio].up, up, sizeof(struct timespec));
+		memcpy(&gpio_tspairs[gpio].down, down, sizeof(struct timespec));
+	}
+	else {
+		pulseTS(gpio, up, down);
+	}
+}
+
+//added Eric PTAK - trouch.com
+void pulseMilli(int gpio, int up, int down) {
+	struct timespec tsUP, tsDOWN;
+
+	tsUP.tv_sec = up/1000;
+	tsUP.tv_nsec = (up%1000) * 1000000;
+
+	tsDOWN.tv_sec = down/1000;
+	tsDOWN.tv_nsec = (down%1000) * 1000000;
+	pulseOrSaveTS(gpio, &tsUP, &tsDOWN);
+}
+
+//added Eric PTAK - trouch.com
+void pulseMilliRatio(int gpio, float ratio, int width) {
+	int up = ratio*width;
+	int down = width - up;
+	pulseMilli(gpio, up, down);
+}
+
+//added Eric PTAK - trouch.com
+void pulseMicro(int gpio, int up, int down) {
+	struct timespec tsUP, tsDOWN;
+
+	tsUP.tv_sec = 0;
+	tsUP.tv_nsec = up * 1000;
+
+	tsDOWN.tv_sec = 0;
+	tsDOWN.tv_nsec = down * 1000;
+	pulseOrSaveTS(gpio, &tsUP, &tsDOWN);
+}
+
+//added Eric PTAK - trouch.com
+void pulseMicroRatio(int gpio, float ratio, int width) {
+	int up = ratio*width;
+	int down = width - up;
+	pulseMicro(gpio, up, down);
+}
+
+//added Eric PTAK - trouch.com
+void pulseAngle(int gpio, float angle) {
+	int up = 1520 + (angle*400)/45;
+	int down = 20000-up;
+	pulseMicro(gpio, up, down);
+}
+
+//added Eric PTAK - trouch.com
+void pulseRatio(int gpio, float ratio) {
+	int up = ratio * 20000;
+	int down = 20000 - up;
+	pulseMicro(gpio, up, down);
+}
+
+//added Eric PTAK - trouch.com
+void* loop(void* data) {
+	int gpio = (int)data;
+	while (1) {
+		pulseTS(gpio, &gpio_tspairs[gpio].up, &gpio_tspairs[gpio].down);
+	}
+}
+
+//added Eric PTAK - trouch.com
+void enableLoop(int gpio) {
+	pthread_t *thread = gpio_threads[gpio];
+	if (thread != NULL) {
+		return;
+	}
+
+	thread = (pthread_t*) malloc(sizeof(pthread_t));
+	pthread_create(thread, NULL, loop, (void*)gpio);
+	gpio_threads[gpio] = thread;
+}
+
+//added Eric PTAK - trouch.com
+void disableLoop(int gpio) {
+	pthread_t *thread = gpio_threads[gpio];
+	if (thread == NULL) {
+		return;
+	}
+
+	pthread_cancel(*thread);
+	gpio_threads[gpio] = NULL;
+	output(gpio, 0);
 }
 
 void cleanup(void)

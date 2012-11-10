@@ -22,11 +22,20 @@ SOFTWARE.
 */
 
 int setup(void);
-void set_function(int gpio, int direction, int pud);
 int get_function(int gpio);
+void set_function(int gpio, int direction, int pud);
+int input(int gpio);
 void output(int gpio, int value);
 void outputSequence(int gpio, int period, char* sequence);
-int input(int gpio);
+void pulseMilli(int gpio, int up, int down);
+void pulseMilliRatio(int gpio, float ratio, int width);
+void pulseMicro(int gpio, int up, int down);
+void pulseMicroRatio(int gpio, float ratio, int width);
+void pulseAngle(int gpio, float angle);
+void pulseRatio(int gpio, float ratio);
+void enableLoop(int gpio);
+void disableLoop(int gpio);
+
 void cleanup(void);
 
 #define SETUP_OK          0

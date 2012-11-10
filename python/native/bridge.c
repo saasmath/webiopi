@@ -133,7 +133,6 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
       return NULL;
    }
 
-//   printf("Output GPIO %d value %d\n", gpio, value);
    output(channel, value);
 
    Py_INCREF(Py_None);
@@ -162,11 +161,194 @@ static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-//   printf("Output GPIO %d value %d\n", gpio, value);
   outputSequence(channel, period, sequence);
 
   Py_INCREF(Py_None);
   return Py_None;
+}
+
+
+static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel, up, down;
+  static char *kwlist[] = {"channel", "up", "down", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iii", kwlist, &channel, &up, &down))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseMilli(channel, up, down);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+
+static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel, width;
+  float ratio;
+  static char *kwlist[] = {"channel", "ratio", "width", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ifi", kwlist, &channel, &ratio, &width))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseMilliRatio(channel, ratio, width);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+
+static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel, up, down;
+  static char *kwlist[] = {"channel", "up", "down", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iii", kwlist, &channel, &up, &down))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseMicro(channel, up, down);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel, width;
+  float ratio;
+  static char *kwlist[] = {"channel", "ratio", "width", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ifi", kwlist, &channel, &ratio, &width))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseMicroRatio(channel, ratio, width);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel;
+  float angle;
+  static char *kwlist[] = {"channel", "angle", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "if", kwlist, &channel, &angle))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseAngle(channel, angle);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+  int channel;
+  float ratio;
+  static char *kwlist[] = {"channel", "ratio", NULL};
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "if", kwlist, &channel, &ratio))
+	 return NULL;
+
+  if (channel < 0 || channel >= GPIO_COUNT)
+  {
+	 PyErr_SetString(_InvalidChannelException, "The channel sent is invalid on a Raspberry Pi");
+	 return NULL;
+  }
+
+  if (get_function(channel) != OUTPUT)
+  {
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 return NULL;
+  }
+
+  pulseRatio(channel, ratio);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *py_enableLoop(PyObject *self, PyObject *args)
+{
+   int channel;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+
+   enableLoop(channel);
+   return Py_None;
+}
+
+static PyObject *py_disableLoop(PyObject *self, PyObject *args)
+{
+   int channel;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+   disableLoop(channel);
+   return Py_None;
 }
 
 
@@ -212,12 +394,20 @@ static PyObject *py_get_function_string(PyObject *self, PyObject *args)
 }
 
 PyMethodDef python_methods[] = {
-   {"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
    {"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)"},
    {"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0) as string"},
+   {"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
+   {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
    {"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
-   {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
+   {"pulseMilli", (PyCFunction)py_pulseMilli, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"pulseMilliRatio", (PyCFunction)py_pulseMilliRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"pulseMicro", (PyCFunction)py_pulseMicro, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"pulseMicroRatio", (PyCFunction)py_pulseMicroRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a single pulse to a GPIO channel"},
+   {"enableLoop", py_enableLoop, METH_VARARGS, "Input from a GPIO channel"},
+   {"disableLoop", py_disableLoop, METH_VARARGS, "Input from a GPIO channel"},
    {NULL, NULL, 0, NULL}
 };
 
