@@ -21,7 +21,7 @@
         button = webiopi().createGPIOButton(7, "LED");
         content.append(button); // append button to content div
         
-        button = webiopi().createPulseButton("pulse", "_|_", 7);
+        button = webiopi().createPulseButton("pulse", "Pulse", 7);
         content.append(button); // append button to content div
 
         // create a button which output a bit sequence on GPIO 7 with a 100ms period 
@@ -34,7 +34,7 @@
         content.append(button); // append button to content div
 
         // you can also create a button which calls a different function for mouse down and up events
-        button = webiopi().createButton("moment", "Moment.", mousedown, mouseup);
+        button = webiopi().createButton("hold", "Hold", mousedown, mouseup);
         content.append(button);
         
         // create a button which call myMacro with "1,2,3" as argument
