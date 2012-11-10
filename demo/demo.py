@@ -3,7 +3,7 @@ import webiopi
 import time
 
 # I use the integrated GPIO lib, but you can use RPi.GPIO
-GPIO = webiopi.GPIO # or import RPi.GPIO as GPIO
+GPIO = webiopi.GPIO
 
 # A custom macro which prints out the arg received and return OK
 def myMacro(arg):
@@ -17,10 +17,10 @@ server = webiopi.Server(port=8000, login="demo", password="demo")
 server.addMacro(myMacro)
 
 # Setup GPIOs
-GPIO.setFunction(7, GPIO.IN)     # or GPIO.setup(7, GPIO.IN)
-GPIO.setFunction(9, GPIO.OUT)    # or GPIO.setup(9, GPIO.OUT)
-GPIO.setFunction(10, GPIO.OUT)   # or GPIO.setup(10, GPIO.OUT)
-GPIO.setFunction(11, GPIO.OUT)   # or GPIO.setup(11, GPIO.OUT)
+GPIO.setFunction(7, GPIO.IN)
+GPIO.setFunction(9, GPIO.OUT)
+GPIO.setFunction(10, GPIO.OUT)
+GPIO.setFunction(11, GPIO.OUT)
 
 # Enable PWM
 GPIO.enablePWM(10)
@@ -48,7 +48,7 @@ GPIO.disablePWM(10)
 GPIO.disablePWM(11)
 
 # Reset GPIO functions
-GPIO.setFunction(7, GPIO.IN)     # or GPIO.setup(7, GPIO.IN)
-GPIO.setFunction(9, GPIO.IN)     # or GPIO.setup(9, GPIO.IN)
-GPIO.setFunction(10, GPIO.IN)    # or GPIO.setup(10, GPIO.IN)
-GPIO.setFunction(11, GPIO.IN)    # or GPIO.setup(11, GPIO.IN)
+GPIO.setFunction(7, GPIO.IN)
+GPIO.setFunction(9, GPIO.IN)
+GPIO.setFunction(10, GPIO.IN)
+GPIO.setFunction(11, GPIO.IN)
