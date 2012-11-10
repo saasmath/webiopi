@@ -27,8 +27,8 @@ GPIO.enablePWM(10)
 GPIO.enablePWM(11)
 
 # output PWM
-GPIO.pulseRatio(10, 0.25) # 25% duty cycle on GPIO 10 
-GPIO.pulseAngle(11, 0)    # servo neutral on GPIO 11
+GPIO.pulseRatio(10, 0.25) # 25% duty cycle on GPIO 10 (float ratio from 0.0 to 1.0)
+GPIO.pulseAngle(11, 0)    # servo neutral on GPIO 11 (float angle from -45 to +45)
 
 # Example loop which toggle GPIO 9 each 5 seconds
 try:
