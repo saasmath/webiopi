@@ -46,14 +46,15 @@ void cleanup(void);
 
 #define GPIO_COUNT 54
 
-#define INPUT	0
-#define OUTPUT	1
+#define IN		0
+#define OUT		1
+#define ALT5	2
+#define ALT4	3
 #define ALT0	4
 #define ALT1	5
 #define ALT2	6
 #define ALT3	7
-#define ALT4	3
-#define ALT5	2
+#define PWM		8
 
 #define LOW		0
 #define HIGH	1

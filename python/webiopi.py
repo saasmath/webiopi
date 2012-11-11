@@ -284,9 +284,14 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif (operation == "function"):
                 value = value.lower()
                 if value == "in":
+                    GPIO.disablePWM(gpio)
                     GPIO.setFunction(gpio, GPIO.IN)
                 elif value == "out":
+                    GPIO.disablePWM(gpio)
                     GPIO.setFunction(gpio, GPIO.OUT)
+                elif value == "pwm":
+                    GPIO.setFunction(gpio, GPIO.OUT)
+                    GPIO.enablePWM(gpio)
                 else:
                     self.send_error(400, "Bad Function")
                     return

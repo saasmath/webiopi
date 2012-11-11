@@ -36,14 +36,15 @@ static PyObject *_gpioCount;
 static PyObject *_low;
 static PyObject *_high;
 
-static PyObject *_input;
-static PyObject *_output;
+static PyObject *_in;
+static PyObject *_out;
 static PyObject *_alt0;
 static PyObject *_alt1;
 static PyObject *_alt2;
 static PyObject *_alt3;
 static PyObject *_alt4;
 static PyObject *_alt5;
+static PyObject *_pwm;
 
 static PyObject *_pud_off;
 static PyObject *_pud_up;
@@ -51,7 +52,7 @@ static PyObject *_pud_down;
 
 static PyObject *_board_revision;
 
-static char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3"};
+static char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3", "PWM"};
 
 
 // setup function run on import of the RPi.GPIO module
@@ -85,13 +86,13 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &direction, &pud))
       return NULL;
 
-   if (direction != INPUT && direction != OUTPUT)
+   if (direction != IN && direction != OUT)
    {
       PyErr_SetString(_InvalidDirectionException, "An invalid direction was passed to setup()");
       return NULL;
    }
 
-   if (direction == OUTPUT)
+   if (direction == OUT)
       pud = PUD_OFF;
 
    if (pud != PUD_OFF && pud != PUD_DOWN && pud != PUD_UP)
@@ -127,9 +128,9 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
       return NULL;
    }
 
-   if (get_function(channel) != OUTPUT)
+   if (get_function(channel) != OUT)
    {
-      PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+      PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT");
       return NULL;
    }
 
@@ -155,9 +156,9 @@ static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  if (get_function(channel) != OUT)
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT");
 	 return NULL;
   }
 
@@ -170,7 +171,7 @@ static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel, up, down;
+  int channel, function, up, down;
   static char *kwlist[] = {"channel", "up", "down", NULL};
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iii", kwlist, &channel, &up, &down))
@@ -182,9 +183,10 @@ static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -197,7 +199,7 @@ static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel, width;
+  int channel, function, width;
   float ratio;
   static char *kwlist[] = {"channel", "width", "ratio", NULL};
 
@@ -210,9 +212,10 @@ static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -225,7 +228,7 @@ static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel, up, down;
+  int channel, function, up, down;
   static char *kwlist[] = {"channel", "up", "down", NULL};
 
   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iii", kwlist, &channel, &up, &down))
@@ -237,9 +240,10 @@ static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -251,7 +255,7 @@ static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel, width;
+  int channel, function, width;
   float ratio;
   static char *kwlist[] = {"channel", "width", "ratio", NULL};
 
@@ -264,9 +268,10 @@ static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kw
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -278,7 +283,7 @@ static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel;
+  int channel, function;
   float angle;
   static char *kwlist[] = {"channel", "angle", NULL};
 
@@ -291,9 +296,10 @@ static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -305,7 +311,7 @@ static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  int channel;
+  int channel, function;
   float ratio;
   static char *kwlist[] = {"channel", "ratio", NULL};
 
@@ -318,9 +324,10 @@ static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 	 return NULL;
   }
 
-  if (get_function(channel) != OUTPUT)
+  function = get_function(channel);
+  if ((function != OUT) && (function != PWM))
   {
-	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUTPUT");
+	 PyErr_SetString(_InvalidDirectionException, "The GPIO channel has not been set up as an OUT or PWM");
 	 return NULL;
   }
 
@@ -420,7 +427,7 @@ static PyObject *py_get_function_string(PyObject *self, PyObject *args)
 PyMethodDef python_methods[] = {
    {"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)"},
    {"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0) as string"},
-   {"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
+   {"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
    {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
    {"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
@@ -486,29 +493,32 @@ PyMODINIT_FUNC initGPIO(void)
    _high = Py_BuildValue("i", HIGH);
    PyModule_AddObject(module, "HIGH", _high);
 
-   _input = Py_BuildValue("i", INPUT);
-   PyModule_AddObject(module, "IN", _input);
+   _in = Py_BuildValue("i", IN);
+   PyModule_AddObject(module, "IN", _in);
    
-   _output = Py_BuildValue("i", OUTPUT);
-   PyModule_AddObject(module, "OUT", _output);
+   _out = Py_BuildValue("i", OUT);
+   PyModule_AddObject(module, "OUT", _out);
 
    _alt0 = Py_BuildValue("i", ALT0);
    PyModule_AddObject(module, "ALT0", _alt0);
 
    _alt1 = Py_BuildValue("i", ALT1);
-   PyModule_AddObject(module, "ALT0", _alt1);
+   PyModule_AddObject(module, "ALT1", _alt1);
 
    _alt2 = Py_BuildValue("i", ALT2);
-   PyModule_AddObject(module, "ALT0", _alt2);
+   PyModule_AddObject(module, "ALT2", _alt2);
 
    _alt3 = Py_BuildValue("i", ALT3);
-   PyModule_AddObject(module, "ALT0", _alt3);
+   PyModule_AddObject(module, "ALT3", _alt3);
 
    _alt4 = Py_BuildValue("i", ALT4);
-   PyModule_AddObject(module, "ALT0", _alt4);
+   PyModule_AddObject(module, "ALT4", _alt4);
 
    _alt5 = Py_BuildValue("i", ALT5);
-   PyModule_AddObject(module, "ALT0", _alt5);
+   PyModule_AddObject(module, "ALT5", _alt5);
+
+   _pwm = Py_BuildValue("i", PWM);
+   PyModule_AddObject(module, "PWM", _pwm);
 
    _pud_off = Py_BuildValue("i", PUD_OFF);
    PyModule_AddObject(module, "PUD_OFF", _pud_off);

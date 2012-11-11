@@ -129,6 +129,9 @@ int get_function(int gpio)
    int value = *(gpio_map+offset);
    value >>= shift;
    value &= 7;
+   if ((value == OUT) && isPWMEnabled(gpio)) {
+	   value = PWM;
+   }
    return value; // 0=input, 1=output, 4=alt0
 }
 
