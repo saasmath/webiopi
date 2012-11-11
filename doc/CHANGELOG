@@ -16,14 +16,15 @@
    Improved security
    Improved file serving
    Improved REST API
-   Added URL to use custom REST macro
-   Added URL to output a binary sequence
-   Added URL to use the software PWM output
+   Added ability to use custom REST macro
+   Added ability to output a single pulse
+   Added ability to output a binary sequence
+   Added software PWM
 
 ===Javascript Library===
    Improved and simplified
    Added ability to create custom buttons with one or two callbacks (mousedown and mouseup)
-   Added helpers for new REST functions (macro, sequence, pwm, ...)
+   Added helpers for new REST functions (macro, pulse, sequence, PWM, ...)
 
 ===Other changes===  
    PHP Server discontinued

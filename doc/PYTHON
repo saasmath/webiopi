@@ -7,28 +7,30 @@ import webiopi
 import time
 
 # I use the integrated GPIO lib, but you can use RPi.GPIO
-GPIO = webiopi.GPIO # or import RPi.GPIO as GPIO
+GPIO = webiopi.GPIO
 
 # A custom macro which prints out the arg received and return OK
 def myMacro(arg):
-    print "myMacro(%s)" % arg
+    print("myMacro(%s)" % arg)
     return "OK"
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
-server = webiopi.Server(port=8000, login="admin", password="p@ssw0rd")
+server = webiopi.Server(port=8000, login="webiopi", password="raspberry")
 
 # Register the macro so you can call it through the [RESTAPI] or [JAVASCRIPT]
 server.addMacro(myMacro)
 
-# Setup GPIO 0 and 7
-GPIO.setFunction(0, GPIO.IN)    # or GPIO.setup(0, GPIO.IN)
-GPIO.setFunction(7, GPIO.OUT)   # or GPIO.setup(7, GPIO.OUT)
+# Setup GPIOs
+GPIO.setFunction(1, GPIO.IN)
+GPIO.setFunction(7, GPIO.OUT)
+GPIO.setFunction(8, GPIO.PWM)
+GPIO.setFunction(9, GPIO.PWM)
 
-# Example loop which toggle GPIO 7 each 5 seconds
+# Example loop which toggle GPIO 9 each 5 seconds
 try:
     while True:
         GPIO.output(7, not GPIO.input(7))
-        time.sleep(5)
+        time.sleep(5)        
 
 # Break the loop by pressing CTRL-C
 except KeyboardInterrupt:
@@ -36,4 +38,9 @@ except KeyboardInterrupt:
 
 # Stops the server
 server.stop()
-GPIO.setFunction(7, GPIO.IN)    # or GPIO.setup(7, GPIO.IN)
+
+# Reset GPIO functions
+GPIO.setFunction(1, GPIO.IN)
+GPIO.setFunction(7, GPIO.IN)
+GPIO.setFunction(8, GPIO.IN)
+GPIO.setFunction(9, GPIO.IN)
