@@ -183,101 +183,9 @@ WebIOPi.prototype.updateValue = function (gpio, value) {
 	$("#gpio"+gpio).attr("class", style);
 }
 
-WebIOPi.prototype.setValue = function (gpio, value, callback) {
-	if (w().GPIO[gpio].func.toUpperCase()=="OUT") {
-		$.post(w().context + 'GPIO/' + gpio + "/value/" + value, function(data) {
-			w().updateValue(gpio, data);
-			if (callback != undefined) {
-				callback(gpio, data);
-			}
-		});
-	}
-	else {
-		console.log(w().GPIO[gpio].func);
-	}
-}
-
-WebIOPi.prototype.toggleValue = function (gpio) {
-	var value = (w().GPIO[gpio].value == 1) ? 0 : 1;
-	w().setValue(gpio, value);
-}
-
-WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
-	var button = $('<input type="submit" class="Button">');
-	button.attr("id", id);
-	button.val(label);
-	if ((callback != undefined) && (callbackUp == undefined)) {
-		button.bind("click", callback);
-	}
-	else if ((callback != undefined) && (callbackUp != undefined)) {
-		button.bind("mousedown", callback);
-		button.bind("mouseup", callbackUp);
-	}
-	return button;
-}
-
-WebIOPi.prototype.createGPIOButton = function (gpio, label) {
-	var button = w().createButton("gpio" + gpio, label);
-	button.bind("click", function(event) {
-		w().toggleValue(gpio);
-	});
-	return button;
-}
-
-WebIOPi.prototype.setLabel = function (id, label) {
-	$("#" + id).val(label);
-}
-
 WebIOPi.prototype.updateFunction = function (gpio, func) {
 	w().GPIO[gpio].func = func;
 	$("#function"+gpio).val(func);
-}
-
-WebIOPi.prototype.setFunction = function (gpio, func, callback) {
-	$.post(w().context + 'GPIO/' + gpio + "/function/" + func, function(data) {
-		w().updateFunction(gpio, data);
-		if (callback != undefined) {
-			callback(gpio, data);
-		}
-	});
-}
-
-WebIOPi.prototype.toggleFunction = function (gpio) {
-	var value = (w().GPIO[gpio].func == "IN") ? "OUT" : "IN";
-	w().setFunction(gpio, value)
-}
-
-WebIOPi.prototype.createFunctionButton = function (gpio) {
-	var button = w().createButton("function" + gpio, " ");
-	button.attr("class", "FunctionBasic");
-	button.bind("click", function(event) {
-		w().toggleFunction(gpio);
-	});
-	return button;
-}
-
-WebIOPi.prototype.createPulseButton = function (id, label, gpio) {
-    var button = webiopi().createButton(id, label);
-    button.bind("click", function(event) {
-        webiopi().pulse(gpio);
-    });
-    return button;
-}
-
-WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
-    var button = webiopi().createButton(id, label);
-    button.bind("click", function(event) {
-        webiopi().callMacro(macro, args);
-    });
-    return button;
-}
-
-WebIOPi.prototype.createSequenceButton = function (id, label, gpio, period, sequence) {
-    var button = webiopi().createButton(id, label);
-    button.bind("click", function(event) {
-        webiopi().outputSequence(gpio, period, sequence);
-    });
-    return button;
 }
 
 WebIOPi.prototype.updateALT = function (alt, enable) {
@@ -341,6 +249,39 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
+WebIOPi.prototype.setValue = function (gpio, value, callback) {
+	if (w().GPIO[gpio].func.toUpperCase()=="OUT") {
+		$.post(w().context + 'GPIO/' + gpio + "/value/" + value, function(data) {
+			w().updateValue(gpio, data);
+			if (callback != undefined) {
+				callback(gpio, data);
+			}
+		});
+	}
+	else {
+		console.log(w().GPIO[gpio].func);
+	}
+}
+
+WebIOPi.prototype.setFunction = function (gpio, func, callback) {
+	$.post(w().context + 'GPIO/' + gpio + "/function/" + func, function(data) {
+		w().updateFunction(gpio, data);
+		if (callback != undefined) {
+			callback(gpio, data);
+		}
+	});
+}
+
+WebIOPi.prototype.toggleValue = function (gpio) {
+	var value = (w().GPIO[gpio].value == 1) ? 0 : 1;
+	w().setValue(gpio, value);
+}
+
+WebIOPi.prototype.toggleFunction = function (gpio) {
+	var value = (w().GPIO[gpio].func == "IN") ? "OUT" : "IN";
+	w().setFunction(gpio, value)
+}
+
 WebIOPi.prototype.outputSequence = function (gpio, period, sequence, callback) {
 	$.post(w().context + 'GPIO/' + gpio + "/sequence/" + period + "," + sequence, function(data) {
 		w().updateValue(gpio, data);
@@ -396,6 +337,65 @@ WebIOPi.prototype.pulseAngle = function(gpio, angle, callback) {
 			callback(gpio, data);
 		}
 	});
+}
+
+WebIOPi.prototype.setLabel = function (id, label) {
+	$("#" + id).val(label);
+}
+
+WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
+	var button = $('<input type="submit" class="Button">');
+	button.attr("id", id);
+	button.val(label);
+	if ((callback != undefined) && (callbackUp == undefined)) {
+		button.bind("click", callback);
+	}
+	else if ((callback != undefined) && (callbackUp != undefined)) {
+		button.bind("mousedown", callback);
+		button.bind("mouseup", callbackUp);
+	}
+	return button;
+}
+
+WebIOPi.prototype.createGPIOButton = function (gpio, label) {
+	var button = w().createButton("gpio" + gpio, label);
+	button.bind("click", function(event) {
+		w().toggleValue(gpio);
+	});
+	return button;
+}
+
+WebIOPi.prototype.createFunctionButton = function (gpio) {
+	var button = w().createButton("function" + gpio, " ");
+	button.attr("class", "FunctionBasic");
+	button.bind("click", function(event) {
+		w().toggleFunction(gpio);
+	});
+	return button;
+}
+
+WebIOPi.prototype.createPulseButton = function (id, label, gpio) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().pulse(gpio);
+    });
+    return button;
+}
+
+WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().callMacro(macro, args);
+    });
+    return button;
+}
+
+WebIOPi.prototype.createSequenceButton = function (id, label, gpio, period, sequence) {
+    var button = webiopi().createButton(id, label);
+    button.bind("click", function(event) {
+        webiopi().outputSequence(gpio, period, sequence);
+    });
+    return button;
 }
 
 WebIOPi.prototype.createRatioSlider = function(gpio, value) {

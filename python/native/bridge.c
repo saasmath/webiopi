@@ -76,6 +76,32 @@ static int module_setup(void)
    }
 }
 
+// python function value = gpio_function(gpio)
+static PyObject *py_get_function(PyObject *self, PyObject *args)
+{
+   int gpio, f;
+
+   if (!PyArg_ParseTuple(args, "i", &gpio))
+      return NULL;
+
+   f = get_function(gpio);
+   return Py_BuildValue("i", f);
+}
+
+// python function value = gpio_function(gpio)
+static PyObject *py_get_function_string(PyObject *self, PyObject *args)
+{
+   int gpio, f;
+   char *str;
+
+   if (!PyArg_ParseTuple(args, "i", &gpio))
+      return NULL;
+
+   f = get_function(gpio);
+   str = FUNCTIONS[f];
+   return Py_BuildValue("s", str);
+}
+
 // python function setup(channel, direction, pull_up_down=PUD_OFF)
 static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -111,6 +137,20 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
 
    Py_INCREF(Py_None);
    return Py_None;
+}
+
+// python function value = input(channel)
+static PyObject *py_input(PyObject *self, PyObject *args)
+{
+   int channel;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+
+   if (input(channel))
+      Py_RETURN_TRUE;
+   else
+      Py_RETURN_FALSE;
 }
 
 // python function output(channel, value)
@@ -382,46 +422,6 @@ static PyObject *py_isPWMEnabled(PyObject *self, PyObject *args)
       Py_RETURN_TRUE;
    else
       Py_RETURN_FALSE;
-}
-
-// python function value = input(channel)
-static PyObject *py_input(PyObject *self, PyObject *args)
-{
-   int channel;
-
-   if (!PyArg_ParseTuple(args, "i", &channel))
-      return NULL;
-
-   if (input(channel))
-      Py_RETURN_TRUE;
-   else
-      Py_RETURN_FALSE;
-}
-
-// python function value = gpio_function(gpio)
-static PyObject *py_get_function(PyObject *self, PyObject *args)
-{
-   int gpio, f;
-
-   if (!PyArg_ParseTuple(args, "i", &gpio))
-      return NULL;
-      
-   f = get_function(gpio);
-   return Py_BuildValue("i", f);
-}
-
-// python function value = gpio_function(gpio)
-static PyObject *py_get_function_string(PyObject *self, PyObject *args)
-{
-   int gpio, f;
-   char *str;
-
-   if (!PyArg_ParseTuple(args, "i", &gpio))
-      return NULL;
-
-   f = get_function(gpio);
-   str = FUNCTIONS[f];
-   return Py_BuildValue("s", str);
 }
 
 PyMethodDef python_methods[] = {
