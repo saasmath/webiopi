@@ -186,6 +186,7 @@ WebIOPi.prototype.updateValue = function (gpio, value) {
 WebIOPi.prototype.updateFunction = function (gpio, func) {
 	w().GPIO[gpio].func = func;
 	$("#function"+gpio).val(func);
+	$("#function"+gpio).text(func);
 }
 
 WebIOPi.prototype.updateALT = function (alt, enable) {
@@ -439,6 +440,7 @@ RPiHeader.prototype.getPinCell = function (pin) {
 	else {
 		var button = $('<button type="button">');
 		button.val(pin);
+		button.text(pin);
 		button.attr("class", w().PINS[pin].type.style);
 	}
 	cell.append(button);
