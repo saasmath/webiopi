@@ -39,10 +39,6 @@ except KeyboardInterrupt:
 # Stops the server
 server.stop()
 
-# Disable PWM
-GPIO.disablePWM(10)
-GPIO.disablePWM(11)
-
 # Reset GPIO functions
 GPIO.setFunction(7, GPIO.IN)
 GPIO.setFunction(9, GPIO.IN)
