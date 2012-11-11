@@ -35,7 +35,7 @@ try:
 except KeyboardInterrupt:
     pass
 
-# Stops the server
+# Stop the server
 server.stop()
 
 # Reset GPIO functions
