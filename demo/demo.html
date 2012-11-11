@@ -13,6 +13,8 @@
 		var content, button;
 		content = $("#content");
 		
+		webiopi().enablePWM(7);
+		
 		 // create a "SWITCH" labeled button for GPIO 0
         button = webiopi().createGPIOButton(0, "SWITCH");
         content.append(button); // append button to content div
@@ -25,26 +27,35 @@
         content.append(button); // append button to content div
 
         // create a button which output a bit sequence on GPIO 7 with a 100ms period 
-        button = webiopi().createSequenceButton("sos", "S.O.S", 7, 100, "01010100110011001100101010");
+        button = webiopi().createSequenceButton("sos", "S.O.S 1", 7, 100, "01010100110011001100101010");
         content.append(button); // append button to content div
         
         // the previous button will always output the same sequence
         // you can also create a simple button with your own function 
-        button = webiopi().createButton("sos2", "S.O.S", outputSequence);
+        button = webiopi().createButton("sos2", "S.O.S 2", outputSequence);
+        content.append(button); // append button to content div
+
+        // create a button which call myMacro with "1,2,3" as argument
+        button = webiopi().createMacroButton("macro", "Macro 1", "myMacro", "1,2,3");
+        content.append(button); // append button to content div
+
+        // the previous button will always call myMacro with the same "1,2,3" argument
+        // you can also create a simple button with your own function 
+        button = webiopi().createButton("macro2", "Macro 2", callMacro);
         content.append(button); // append button to content div
 
         // you can also create a button which calls a different function for mouse down and up events
         button = webiopi().createButton("hold", "Hold", mousedown, mouseup);
         content.append(button);
         
-        // create a button which call myMacro with "1,2,3" as argument
-        button = webiopi().createMacroButton("macro", "Macro", "myMacro", "1,2,3");
-        content.append(button); // append button to content div
-
-        // the previous button will always call myMacro with the same "1,2,3" argument
-        // you can also create a simple button with your own function 
-        button = webiopi().createButton("macro2", "Macro", callMacro);
-        content.append(button); // append button to content div
+        // Only for Chrome and Safari, create a slider that pulse out a 0-100% ratio (duty cycle) on GPIO 7
+        button = webiopi().createRatioSlider(7);
+        content.append(button);
+        
+        // Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 7
+        button = webiopi().createAngleSlider(7);
+        content.append(button);
+        
 	});
 	
 	function mousedown() {
@@ -74,6 +85,7 @@
 	function macroCallback(macro, args, data) {
     	alert(macro + " returned with " + data);
     }
+	
 	</script>
 </head>
 <body>

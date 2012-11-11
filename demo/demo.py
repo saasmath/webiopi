@@ -19,12 +19,8 @@ server.addMacro(myMacro)
 # Setup GPIOs
 GPIO.setFunction(7, GPIO.IN)
 GPIO.setFunction(9, GPIO.OUT)
-GPIO.setFunction(10, GPIO.OUT)
-GPIO.setFunction(11, GPIO.OUT)
-
-# Enable PWM
-GPIO.enablePWM(10)
-GPIO.enablePWM(11)
+GPIO.setFunction(10, GPIO.PWM)
+GPIO.setFunction(11, GPIO.PWM)
 
 # output PWM
 GPIO.pulseRatio(10, 0.25) # 25% duty cycle on GPIO 10 (float ratio from 0.0 to 1.0)

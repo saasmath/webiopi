@@ -398,6 +398,24 @@ WebIOPi.prototype.pulseAngle = function(gpio, angle, callback) {
 	});
 }
 
+WebIOPi.prototype.createRatioSlider = function(gpio) {
+	var slider = $('<input type="range" min="0.0" max="1.0" step="0.01">');
+	slider.attr("id", "ratioSlider"+gpio);
+	slider.bind("change", function() {
+		w().pulseRatio(gpio, slider.val());
+	});
+	return slider;
+}
+
+WebIOPi.prototype.createAngleSlider = function(gpio) {
+	var slider = $('<input type="range" min="-45.0" max="45.0" step="1">');
+	slider.attr("id", "angleSlider"+gpio);
+	slider.bind("change", function() {
+		w().pulseAngle(gpio, slider.val());
+	});
+	return slider;
+}
+
 WebIOPi.prototype.RPiHeader = function () {
 	if (w()._header == undefined) {
 		w()._header = new RPiHeader();
