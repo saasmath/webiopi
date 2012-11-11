@@ -46,7 +46,7 @@ function WebIOPi() {
 			I2C0: {name: "I2C0", enabled: false, gpios: []},
 			I2C1: {name: "I2C1", enabled: false, gpios: []},
 			SPI0: {name: "SPI0", enabled: false, gpios: []},
-			UART0: {name: "UART0", enabled: false, gpios: []},
+			UART0: {name: "UART0", enabled: false, gpios: []}
 		};
 		
 	// init GPIOs
