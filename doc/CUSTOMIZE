@@ -104,7 +104,8 @@ This is the included demo/demo.html :
 =CSS styling=
 Once you wrote your HTML file with your Javascript code, you may want to add some CSS rules, in order change colors, size, positioning... It's very simple as you follow the naming convention to write your CSS file.
 
-Pin state buttons (LOW/HIGH) are HTML input[type="submit"], and inherit the input CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
+Pin state buttons (LOW/HIGH) are HTML `<button>`, and inherit the button CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
+   Default : Generic buttons
    LOW : GPIO in low state
    HIGH : GPIO in high state
    GND : Ground
@@ -114,11 +115,10 @@ Pin state buttons (LOW/HIGH) are HTML input[type="submit"], and inherit the inpu
    SPI0
    I2C0
    I2C1
-   Button : Generic buttons
 
 With the included RPi header and expert webapps, you can also customize function button and descriptions :
 
-Pin function buttons (IN/OUT/...) are also HTML input[type="submit"], with id from function0 to function53. Two classes are also used :
+Pin function buttons (IN/OUT/...) are HTML `<input type="submit">`, with id from function0 to function53. Two classes are also used :
    .FunctionBasic : Used when GPIO is Input or Output
    .FunctionSpecial : Used when GPIO is in ALTx (default is hidden)
 
@@ -128,7 +128,7 @@ Pin descriptions are made of HTML div, with id from name0 to name53, with a sing
 Included demo/demo.css :
 @CHARSET "UTF-8";
 
-input {
+button {
 	display: block;
 	margin: 5px 5px 5px 5px;
 	width: 150px;
@@ -138,6 +138,10 @@ input {
 	color: black;
 }
 
+input[type="range"] {
+	display: block;
+}
+
 #gpio7.LOW {
 	background-color: White;
 }
@@ -145,6 +149,8 @@ input {
 #gpio7.HIGH {
 	background-color: Red;
 }
+
+
 
 Will display big buttons arranged in a column. It also changes the background color of the GPIO 7 for both low and high states.
 
