@@ -102,7 +102,7 @@ This is the included demo/demo.html :
 
 
 =CSS styling=
-Once you wrote your HTML file with your Javascript code, you may want to add some CSS rules, in order change colors, size, positioning... Is's very simple as you follow the naming convention to write your CSS file.
+Once you wrote your HTML file with your Javascript code, you may want to add some CSS rules, in order change colors, size, positioning... It's very simple as you follow the naming convention to write your CSS file.
 
 Pin state buttons (LOW/HIGH) are HTML input[type="submit"], and inherit the input CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
    LOW : GPIO in low state
@@ -122,7 +122,7 @@ Pin function buttons (IN/OUT/...) are also HTML input[type="submit"], with id fr
    .FunctionBasic : Used when GPIO is Input or Output
    .FunctionSpecial : Used when GPIO is in ALTx (default is hidden)
 
-Pin descriptions are made of hTMl div, with id from name0 to name53, with a single class :
+Pin descriptions are made of HTML div, with id from name0 to name53, with a single class :
    .Description : Text on the left/right of each pin
 
 Included demo/demo.css :
