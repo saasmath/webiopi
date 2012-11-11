@@ -1,13 +1,14 @@
 This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
 
-WebIOPi UI customization is easy but requires some JS and CSS knowledge. 
+WebIOPi UI customization is easy but requires some Javascript and CSS knowledge. 
 
 =HTML/Javascript=
 The WebIOPi Javascript library allows you to make your own interface easily, only requiring one single script tag to include /webiopi.js
 
 WebIOPi will automatically load and add required jquery.js and webiopi.css into your HTML file at runtime !
-Then you can use the [JAVASCRIPT] library to build the interface, creating buttons and registering callbacks. Check [PYTHON] for the related demo.py script with server macro example.
+Then you can use the [JAVASCRIPT Javascript library] to build the interface, creating buttons and registering callbacks. Check [PYTHON Python example] for the related server script.
 
+This is the included demo/demo.html :
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -55,12 +56,12 @@ Then you can use the [JAVASCRIPT] library to build the interface, creating butto
 		button = webiopi().createButton("hold", "Hold", mousedown, mouseup);
 		content.append(button);
 		
-		// Only for Chrome and Safari, create a slider that pulse out a 0-100% ratio (duty cycle) on GPIO 8
-		button = webiopi().createRatioSlider(8);
+		// Only for Chrome and Safari, create a slider that pulse out a 0-100% duty cycle ratio on GPIO 8
+		button = webiopi().createRatioSlider(8, 0.5); // initialized to 50% duty cycle ratio
 		content.append(button);
 		       
 		// Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 9
-		button = webiopi().createAngleSlider(9);
+		button = webiopi().createAngleSlider(9, 0); // initialized to 0° (neutral)
 		content.append(button);
 	});
 		
@@ -100,27 +101,30 @@ Then you can use the [JAVASCRIPT] library to build the interface, creating butto
 </html>
 
 
-=CSS naming=
-RPi pins buttons are html inputs (type=submit), and inherit the input CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
-   .LOW : GPIO in low state
-   .HIGH : GPIO in high state
-   .DNC : Do not connect
-   .GND : Ground
-   .V33 : 3.3V
-   .V50 : 5.0V
-   .UART0
-   .SPI0
-   .I2C0
-   .I2C1
+=CSS styling=
+Once you wrote your HTML file with your Javascript code, you may want to add some CSS rules, in order change colors, size, positioning... Is's very simple as you follow the naming convention to write your CSS file.
 
-RPi pins Functions buttons are also html inputs, with id from function0 to function53. Two classes are also used :
-   .FunctionBasic : When GPIO is Input or Output
-   .FunctionSpecial : When GPIO is in ALTx (default hidden)
+Pin state buttons (LOW/HIGH) are HTML input[type="submit"], and inherit the input CSS style. Their id are from gpio0 to gpio53. There is also two classes for both low and high states, and also somes for non GPIO pins :
+   LOW : GPIO in low state
+   HIGH : GPIO in high state
+   GND : Ground
+   V33 : 3.3V
+   V50 : 5.0V
+   UART0
+   SPI0
+   I2C0
+   I2C1
+   Button : Generic buttons
 
-RPi pins descriptions are made of html div, id from name0 to name53, with a single class :
+With the included RPi header and expert webapps, you can also customize function button and descriptions :
+
+Pin function buttons (IN/OUT/...) are also HTML input[type="submit"], with id from function0 to function53. Two classes are also used :
+   .FunctionBasic : Used when GPIO is Input or Output
+   .FunctionSpecial : Used when GPIO is in ALTx (default is hidden)
+
+Pin descriptions are made of hTMl div, with id from name0 to name53, with a single class :
    .Description : Text on the left/right of each pin
 
-=Example=
 Included demo/demo.css :
 @CHARSET "UTF-8";
 
@@ -142,7 +146,7 @@ input {
 	background-color: Red;
 }
 
-will display the GPIOs 0 and 7, with two bigs buttons in the upper-left corner. It also changes the background color of the GPIO 7 for both low and high states.
+Will display big buttons arranged in a column. It also changes the background color of the GPIO 7 for both low and high states.
 
 
-Start the associated demo.py script then open a browser to http://raspberrypi/webiopi/demo.html
+Start the associated demo.py script in the demo folder then open a browser to http://raspberrypi/webiopi/demo.html
