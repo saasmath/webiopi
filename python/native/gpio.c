@@ -194,8 +194,10 @@ void pulseTS(int gpio, struct timespec *up, struct timespec *down) {
 		nanosleep(up, NULL);
 	}
 
-    output(gpio, 0);
-    nanosleep(down, NULL);
+	if ((down->tv_sec > 0) || (down->tv_nsec > 0)) {
+		output(gpio, 0);
+		nanosleep(down, NULL);
+	}
 }
 
 //added Eric PTAK - trouch.com
