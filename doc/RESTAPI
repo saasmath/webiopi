@@ -17,8 +17,8 @@ Errors returned by the WebAPI are understandable when the HTTP call is not valid
      To get GPIO 0 function : HTTP GET /GPIO/0/function
 
 =Set GPIO function=
-   HTTP POST /GPIO/(gpioNumber)/function/("in" or "out")
-     Returns new setup : "in" or "out"
+   HTTP POST /GPIO/(gpioNumber)/function/("in" or "out" or "pwm")
+     Returns new setup : "in" or "out" or "pwm"
    Examples:
      To set GPIO 0 as input : HTTP POST /GPIO/0/function/in
      To set GPIO 1 as output : HTTP POST /GPIO/1/function/out
@@ -36,11 +36,29 @@ Errors returned by the WebAPI are understandable when the HTTP call is not valid
      To raise GPIO 0 : HTTP POST /GPIO/0/value/1
      To fall GPIO 1 : HTTP POST /GPIO/1/value/0
 
+=Output a single pulse=
+   HTTP POST /GPIO/(gpioNumber)/pulse/
+     Returns last bit
+   Examples :
+     To output a single pulse on GPIO 0 : HTTP POST /GPIO/0/pulse/
+
 =Output bit sequence=
    HTTP POST /GPIO/(gpioNumber)/sequence/(delay),(sequence)
      Returns last bit
    Examples :
      To output a pulse on GPIO 0 with a 10ms delay : HTTP POST /GPIO/0/sequence/10,010
+
+=Output PWM with a duty cycle ratio=
+   HTTP POST /GPIO/(gpioNumber)/pulseRatio/(ratio)
+     Returns value
+   Examples :
+     To output a PWM with a 50% ratio : HTTP POST /GPIO/0/pulseRatio/0.5
+
+=Output PWM with an angle for servos=
+   HTTP POST /GPIO/(gpioNumber)/pulseAngle/(angle)
+     Returns value
+   Examples :
+     To output a PWM for a 0° angle (neutral) : HTTP POST /GPIO/0/pulseAngle/0
 
 =Call a macro on the server=
    HTTP POST /macros/(macro)/(args)
