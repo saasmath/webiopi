@@ -8,7 +8,7 @@ Now download WebIOPi at http://code.google.com/p/webiopi/downloads/list
 Then extract and install WebIOPi :
 $ tar xvzf WebIOPi-X.Y.tar.gz
 $ cd WebIOPi-X.Y
-$ sudo ./setup.sh
+$ sudo ./setup
 
 Finally, run Python using webiopi module :
 $ sudo python -m webiopi [port]
