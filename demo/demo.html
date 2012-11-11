@@ -8,12 +8,13 @@
 	<link rel="stylesheet" type="text/css" href="demo.css" />
 	<script type="text/javascript">
 	webiopi().ready(function() {
-		webiopi().setFunction(7, "OUT");
+
+		//webiopi().setFunction(7, "OUT");
 		
 		var content, button;
 		content = $("#content");
 		
-		webiopi().enablePWM(7);
+		//webiopi().enablePWM(7);
 		
 		 // create a "SWITCH" labeled button for GPIO 0
         button = webiopi().createGPIOButton(0, "SWITCH");
@@ -48,12 +49,12 @@
         button = webiopi().createButton("hold", "Hold", mousedown, mouseup);
         content.append(button);
         
-        // Only for Chrome and Safari, create a slider that pulse out a 0-100% ratio (duty cycle) on GPIO 7
-        button = webiopi().createRatioSlider(7);
+        // Only for Chrome and Safari, create a slider that pulse out a 0-100% ratio (duty cycle) on GPIO 8
+        button = webiopi().createRatioSlider(8);
         content.append(button);
         
-        // Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 7
-        button = webiopi().createAngleSlider(7);
+        // Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 9
+        button = webiopi().createAngleSlider(9);
         content.append(button);
         
 	});
