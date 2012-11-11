@@ -24,6 +24,7 @@
         button = webiopi().createGPIOButton(7, "LED");
         content.append(button); // append button to content div
         
+        // create a button that output a single pulse
         button = webiopi().createPulseButton("pulse", "Pulse", 7);
         content.append(button); // append button to content div
 
