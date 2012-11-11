@@ -29,7 +29,7 @@ if [ -z "$INSTALLED" ]; then
 	if [ -z "$FOUND" ]; then
 		echo "ERROR: WebIOPi cannot be installed - neither python or python3 found"
 	else
-		echo "ERROR: WebIOPi cannot be installed - please install development headers first"
+		echo "ERROR: WebIOPi cannot be installed - please install python development package first"
 	fi
 	exit
 fi
