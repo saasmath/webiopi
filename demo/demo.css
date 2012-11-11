@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-input {
+button {
 	display: block;
 	margin: 5px 5px 5px 5px;
 	width: 150px;
@@ -8,6 +8,10 @@ input {
 	font-size: 24pt;
 	font-weight: bold;
 	color: black;
+}
+
+input[type="range"] {
+	display: block;
 }
 
 #gpio7.LOW {

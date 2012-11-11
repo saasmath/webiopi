@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-input {
+button {
 	-webkit-appearance: none;
 	font-size: 14pt;
 	font-weight: bold;
@@ -15,11 +15,11 @@ input[type="range"] {
 	-webkit-appearance: slider-horizontal;
 }
 
-.Button {
+.Default {
 	background-color: Gray;
 }
 
-.Button:active {
+.Default:active {
 	background-color: Silver;
 }
 

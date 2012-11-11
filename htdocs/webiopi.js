@@ -341,12 +341,13 @@ WebIOPi.prototype.pulseAngle = function(gpio, angle, callback) {
 
 WebIOPi.prototype.setLabel = function (id, label) {
 	$("#" + id).val(label);
+	$("#" + id).text(label);
 }
 
 WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
-	var button = $('<input type="submit" class="Button">');
+	var button = $('<button type="button" class="Default">');
 	button.attr("id", id);
-	button.val(label);
+	button.text(label);
 	if ((callback != undefined) && (callbackUp == undefined)) {
 		button.bind("click", callback);
 	}
@@ -436,7 +437,7 @@ RPiHeader.prototype.getPinCell = function (pin) {
 		button = w().createGPIOButton(w().PINS[pin].value, pin);
 	}
 	else {
-		var button = $('<input type="submit">');
+		var button = $('<button type="button">');
 		button.val(pin);
 		button.attr("class", w().PINS[pin].type.style);
 	}
