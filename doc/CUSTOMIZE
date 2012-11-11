@@ -118,7 +118,7 @@ Pin state buttons (LOW/HIGH) are HTML `<button>`, and inherit the button CSS sty
 
 With the included RPi header and expert webapps, you can also customize function button and descriptions :
 
-Pin function buttons (IN/OUT/...) are HTML `<input type="submit">`, with id from function0 to function53. Two classes are also used :
+Pin function buttons (IN/OUT/...) are also HTML `<button>`, with id from function0 to function53. Two classes are also used :
    .FunctionBasic : Used when GPIO is Input or Output
    .FunctionSpecial : Used when GPIO is in ALTx (default is hidden)
 
