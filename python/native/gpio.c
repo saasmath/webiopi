@@ -112,13 +112,21 @@ void set_pullupdn(int gpio, int pud)
 }
 
 //updated Eric PTAK - trouch.com
-void set_function(int gpio, int direction, int pud)
+void set_function(int gpio, int function, int pud)
 {
+	if (function == PWM) {
+		function = OUT;
+		enablePWM(gpio);
+	}
+	else {
+		disablePWM(gpio);
+	}
+
     int offset = FSEL_OFFSET + (gpio/10);
     int shift = (gpio%10)*3;
 
     set_pullupdn(gpio, pud);
-	*(gpio_map+offset) = (*(gpio_map+offset) & ~(7<<shift)) | (direction<<shift);
+	*(gpio_map+offset) = (*(gpio_map+offset) & ~(7<<shift)) | (function<<shift);
 }
 
 //added Eric PTAK - trouch.com

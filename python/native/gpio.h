@@ -23,7 +23,7 @@ SOFTWARE.
 
 int setup(void);
 int get_function(int gpio);
-void set_function(int gpio, int direction, int pud);
+void set_function(int gpio, int function, int pud);
 int input(int gpio);
 void output(int gpio, int value);
 void outputSequence(int gpio, int period, char* sequence);

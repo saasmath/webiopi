@@ -79,20 +79,20 @@ static int module_setup(void)
 // python function setup(channel, direction, pull_up_down=PUD_OFF)
 static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-   int channel, direction;
+   int channel, function;
    int pud = PUD_OFF;
-   static char *kwlist[] = {"channel", "direction", "pull_up_down", NULL};
+   static char *kwlist[] = {"channel", "function", "pull_up_down", NULL};
    
-   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &direction, &pud))
+   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|i", kwlist, &channel, &function, &pud))
       return NULL;
 
-   if (direction != IN && direction != OUT)
+   if (function != IN && function != OUT && function != PWM)
    {
-      PyErr_SetString(_InvalidDirectionException, "An invalid direction was passed to setup()");
+      PyErr_SetString(_InvalidDirectionException, "An invalid function was passed to setFunction()");
       return NULL;
    }
 
-   if (direction == OUT)
+   if (function == OUT || function == PWM)
       pud = PUD_OFF;
 
    if (pud != PUD_OFF && pud != PUD_DOWN && pud != PUD_UP)
@@ -107,7 +107,7 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
       return NULL;
    }
 
-   set_function(channel, direction, pud);
+   set_function(channel, function, pud);
 
    Py_INCREF(Py_None);
    return Py_None;
