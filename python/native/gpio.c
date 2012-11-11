@@ -266,10 +266,6 @@ void pulseRatio(int gpio, float ratio) {
 //added Eric PTAK - trouch.com
 void* pwmLoop(void* data) {
 	int gpio = (int)data;
-	gpio_tspairs[gpio].up.tv_sec = 0;
-	gpio_tspairs[gpio].up.tv_nsec = 0;
-	gpio_tspairs[gpio].down.tv_sec = 0;
-	gpio_tspairs[gpio].down.tv_nsec = 0;
 
 	while (1) {
 		pulseTS(gpio, &gpio_tspairs[gpio].up, &gpio_tspairs[gpio].down);
@@ -282,6 +278,11 @@ void enablePWM(int gpio) {
 	if (thread != NULL) {
 		return;
 	}
+
+	gpio_tspairs[gpio].up.tv_sec = 0;
+	gpio_tspairs[gpio].up.tv_nsec = 0;
+	gpio_tspairs[gpio].down.tv_sec = 0;
+	gpio_tspairs[gpio].down.tv_nsec = 0;
 
 	thread = (pthread_t*) malloc(sizeof(pthread_t));
 	pthread_create(thread, NULL, pwmLoop, (void*)gpio);
