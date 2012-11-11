@@ -1,5 +1,12 @@
 #!/bin/sh
-for file in $*
+
+if [ -z "$*" ]; then
+	files=`ls`
+else
+	files="$*"
+fi
+
+for file in $files
 	do
 	echo "Downloading $file..." 
 	wget -q http://webiopi.googlecode.com/svn/wiki/$file.wiki &&
