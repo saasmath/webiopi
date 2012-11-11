@@ -53,7 +53,7 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port=8000, login="webiopi", password="raspberry", context="webiopi", index="index.html"):
+    def __init__(self, port, login="webiopi", password="raspberry", context="webiopi", index="index.html"):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error as msg:
