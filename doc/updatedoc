@@ -6,8 +6,7 @@ else
 	files="$*"
 fi
 
-for file in $files
-	do
+for file in $files; do
 	echo "Downloading $file..." 
 	wget -q http://webiopi.googlecode.com/svn/wiki/$file.wiki &&
 	echo "Processing $file..." &&
@@ -18,6 +17,7 @@ for file in $files
 	sed -i '/{{{\|}}}/d' $file &&
 	echo "$file OK" ||
 	echo "$file not on wiki"
-	done
+done
+
 echo "Uploading changes on SVN..."
 svn commit -m "updated doc from wiki"
