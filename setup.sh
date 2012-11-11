@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "Installing WebIOPi..."
+echo "Installing WebIOPi...\n"
 SEARCH="python python3"
 FOUND=""
 INSTALLED=""
@@ -12,13 +12,13 @@ for python in $SEARCH; do
 		FOUND="$FOUND $python"
 		version=`$python -V 2>&1`
 		include=`$python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
-		echo -n "Found $version, installing WebIOPi... " 
+		echo -n "Found $version... " 
 		if [ -f "$include/Python.h" ]; then
-			$python setup.py install >/dev/null 2>/dev/null || (echo "Failed" && continue) 
-			echo "OK"
+			$python setup.py install || (echo "Build for $version failed" && continue) 
+			echo "WebIOPi installed for $version\n"
 			INSTALLED="$INSTALLED $python"
 	    else
-			echo "Failed: missing development headers"
+			echo "Cannot build for $version : missing development headers"
 		fi
 	fi
 done
@@ -34,9 +34,13 @@ if [ -z "$INSTALLED" ]; then
 	exit
 fi
 
-echo -n "Copying resources..." 
+echo -n "Copying resources... " 
 mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
 cp -rf htdocs /usr/share/webiopi
-echo "OK"
-echo
-echo "WebIOPi Install succeed"
+echo "OK\n"
+echo "WebIOPi successfully installed"
+
+for python in $INSTALLED; do
+	version=`$python -V 2>&1`
+	echo "* You can use $version\t: sudo $python -m webiopi"
+done 
