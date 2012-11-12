@@ -60,7 +60,7 @@ function WebIOPi() {
 
 	// get context
 	var scripts = document.getElementsByTagName("script");
-	var styles = document.getElementsByTagName("link");
+	//var styles = document.getElementsByTagName("link");
 
 	var reg = new RegExp("http://" + window.location.host + "(.*)webiopi.js");
 	for(var i = 0; i < scripts.length; i++) {
@@ -78,7 +78,7 @@ function WebIOPi() {
 	style.rel = "stylesheet";
 	style.type = 'text/css';
 	style.href = '/webiopi.css';
-	head.insertBefore(style, styles[0]);
+	head.insertBefore(style, scripts[0]);
 	
 	var jquery = document.createElement('script');
 	jquery.type = 'text/javascript';
