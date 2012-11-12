@@ -6,8 +6,8 @@ import time
 GPIO = webiopi.GPIO
 
 # A custom macro which prints out the arg received and return OK
-def myMacro(arg):
-    print("myMacro(%s)" % arg)
+def myMacro(arg1, arg2, arg3):
+    print("myMacro(%s, %s, %s)" % (arg1, arg2, arg3))
     return "OK"
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
