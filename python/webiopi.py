@@ -203,6 +203,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     value = "disabled"
                 
+            elif (operation == "pulse"):
+                value = GPIO.getPulse(gpio)
+                
             else:
                 self.send_error(404, operation + " Not Found")
                 return
