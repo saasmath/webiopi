@@ -21,24 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-int setup(void);
-int get_function(int gpio);
-void set_function(int gpio, int function, int pud);
-int input(int gpio);
-void output(int gpio, int value);
-void outputSequence(int gpio, int period, char* sequence);
-void pulseMilli(int gpio, int up, int down);
-void pulseMilliRatio(int gpio, int width, float ratio);
-void pulseMicro(int gpio, int up, int down);
-void pulseMicroRatio(int gpio, int width, float ratio);
-void pulseAngle(int gpio, float angle);
-void pulseRatio(int gpio, float ratio);
-void enablePWM(int gpio);
-void disablePWM(int gpio);
-int isPWMEnabled(int gpio);
-
-void cleanup(void);
-
 #define SETUP_OK          0
 #define SETUP_DEVMEM_FAIL 1
 #define SETUP_MALLOC_FAIL 2
@@ -62,3 +44,31 @@ void cleanup(void);
 #define PUD_OFF  0
 #define PUD_DOWN 1
 #define PUD_UP   2
+
+#define RATIO 1
+#define ANGLE 2
+
+struct pulse {
+	int type;
+	float value;
+};
+
+int setup(void);
+int get_function(int gpio);
+void set_function(int gpio, int function, int pud);
+int input(int gpio);
+void output(int gpio, int value);
+void outputSequence(int gpio, int period, char* sequence);
+struct pulse* getPulse(int gpio);
+void pulseMilli(int gpio, int up, int down);
+void pulseMilliRatio(int gpio, int width, float ratio);
+void pulseMicro(int gpio, int up, int down);
+void pulseMicroRatio(int gpio, int width, float ratio);
+void pulseAngle(int gpio, float angle);
+void pulseRatio(int gpio, float ratio);
+void enablePWM(int gpio);
+void disablePWM(int gpio);
+int isPWMEnabled(int gpio);
+
+void cleanup(void);
+

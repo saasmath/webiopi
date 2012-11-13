@@ -101,8 +101,12 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
 
             function = GPIO.getFunctionString(gpio)
             value = GPIO.input(gpio)
-                
-            json += '"%d": {"function": "%s", "value": %d}' % (gpio, function, value)
+                    
+            json += '"%d": {"function": "%s", "value": %d' % (gpio, function, value)
+            if GPIO.getFunction(gpio) == GPIO.PWM:
+                (type, value) = GPIO.getPulse(gpio).split(':')
+                json  += ', "%s": %s' %  (type, value)
+            json += '}'
             first = False
             
         json += "\n}}"

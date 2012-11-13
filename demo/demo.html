@@ -46,11 +46,11 @@
 		content.append(button);
 		
 		// Only for Chrome and Safari, create a slider that pulse out a 0-100% duty cycle ratio on GPIO 8
-		button = webiopi().createRatioSlider(8, 0.5); // initialized to 50% duty cycle ratio
+		button = webiopi().createRatioSlider(8);
 		content.append(button);
 		       
 		// Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 9
-		button = webiopi().createAngleSlider(9, 0); // initialized to 0° (neutral)
+		button = webiopi().createAngleSlider(9);
 		content.append(button);
 	});
 		

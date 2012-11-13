@@ -54,8 +54,8 @@ struct tspair {
 	struct timespec down;
 };
 
+static struct pulse gpio_pulses[GPIO_COUNT];
 static struct tspair gpio_tspairs[GPIO_COUNT];
-
 static pthread_t *gpio_threads[GPIO_COUNT];
 
 void short_wait(void)
@@ -187,6 +187,16 @@ void outputSequence(int gpio, int period, char* sequence) {
 	}
 }
 
+void resetPWM(int gpio) {
+	gpio_pulses[gpio].type = 0;
+	gpio_pulses[gpio].value = 0;
+
+	gpio_tspairs[gpio].up.tv_sec = 0;
+	gpio_tspairs[gpio].up.tv_nsec = 0;
+	gpio_tspairs[gpio].down.tv_sec = 0;
+	gpio_tspairs[gpio].down.tv_nsec = 0;
+}
+
 //added Eric PTAK - trouch.com
 void pulseTS(int gpio, struct timespec *up, struct timespec *down) {
 	if ((up->tv_sec > 0) || (up->tv_nsec > 0)) {
@@ -251,6 +261,8 @@ void pulseMicroRatio(int gpio, int width, float ratio) {
 
 //added Eric PTAK - trouch.com
 void pulseAngle(int gpio, float angle) {
+	gpio_pulses[gpio].type = ANGLE;
+	gpio_pulses[gpio].value = angle;
 	int up = 1520 + (angle*400)/45;
 	int down = 20000-up;
 	pulseMicro(gpio, up, down);
@@ -258,9 +270,15 @@ void pulseAngle(int gpio, float angle) {
 
 //added Eric PTAK - trouch.com
 void pulseRatio(int gpio, float ratio) {
+	gpio_pulses[gpio].type = RATIO;
+	gpio_pulses[gpio].value = ratio;
 	int up = ratio * 20000;
 	int down = 20000 - up;
 	pulseMicro(gpio, up, down);
+}
+
+struct pulse* getPulse(int gpio) {
+	return &gpio_pulses[gpio];
 }
 
 //added Eric PTAK - trouch.com
@@ -279,10 +297,7 @@ void enablePWM(int gpio) {
 		return;
 	}
 
-	gpio_tspairs[gpio].up.tv_sec = 0;
-	gpio_tspairs[gpio].up.tv_nsec = 0;
-	gpio_tspairs[gpio].down.tv_sec = 0;
-	gpio_tspairs[gpio].down.tv_nsec = 0;
+	resetPWM(gpio);
 
 	thread = (pthread_t*) malloc(sizeof(pthread_t));
 	pthread_create(thread, NULL, pwmLoop, (void*)gpio);
@@ -299,6 +314,7 @@ void disablePWM(int gpio) {
 	pthread_cancel(*thread);
 	gpio_threads[gpio] = NULL;
 	output(gpio, 0);
+	resetPWM(gpio);
 }
 
 //added Eric PTAK - trouch.com

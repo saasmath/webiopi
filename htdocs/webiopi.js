@@ -189,6 +189,10 @@ WebIOPi.prototype.updateFunction = function (gpio, func) {
 	$("#function"+gpio).text(func);
 }
 
+WebIOPi.prototype.updateSlider = function (gpio, slider, value) {
+	$("#"+slider+gpio).val(value);
+}
+
 WebIOPi.prototype.updateALT = function (alt, enable) {
 	for (var p in alt.gpios) {
 		gpio = alt.gpios[p].gpio;
@@ -219,6 +223,11 @@ WebIOPi.prototype.updateUI = function () {
 	    	if ((data["function"] == "IN") || (data["function"] == "OUT")) { 
 	    		w().updateValue(gpio, data["value"]);
 	    	}
+	    	else if (data["function"] == "PWM") {
+	    		w().updateSlider(gpio, "ratio", data["ratio"]);
+	    		w().updateSlider(gpio, "angle", data["angle"]);
+	    	}
+	    	
 		});
 	});
 	setTimeout(w().updateUI, 1000);
@@ -400,20 +409,18 @@ WebIOPi.prototype.createSequenceButton = function (id, label, gpio, period, sequ
     return button;
 }
 
-WebIOPi.prototype.createRatioSlider = function(gpio, value) {
+WebIOPi.prototype.createRatioSlider = function(gpio) {
 	var slider = $('<input type="range" min="0.0" max="1.0" step="0.01">');
-	slider.attr("id", "ratioSlider"+gpio);
-	slider.val(value);
+	slider.attr("id", "ratio"+gpio);
 	slider.bind("change", function() {
 		w().pulseRatio(gpio, slider.val());
 	});
 	return slider;
 }
 
-WebIOPi.prototype.createAngleSlider = function(gpio, value) {
+WebIOPi.prototype.createAngleSlider = function(gpio) {
 	var slider = $('<input type="range" min="-45" max="45" step="1">');
-	slider.attr("id", "angleSlider"+gpio);
-	slider.val(value);
+	slider.attr("id", "angle"+gpio);
 	slider.bind("change", function() {
 		w().pulseAngle(gpio, slider.val());
 	});

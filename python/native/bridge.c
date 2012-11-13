@@ -53,6 +53,7 @@ static PyObject *_pud_down;
 static PyObject *_board_revision;
 
 static char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3", "PWM"};
+static char* PWM_MODES[] = {"none", "ratio", "angle"};
 
 
 // setup function run on import of the RPi.GPIO module
@@ -388,6 +389,21 @@ static PyObject *py_pulse(PyObject *self, PyObject *args)
    return Py_None;
 }
 
+static PyObject *py_getPulse(PyObject *self, PyObject *args)
+{
+   int channel;
+   char str[256];
+   struct pulse *p;
+
+   if (!PyArg_ParseTuple(args, "i", &channel))
+      return NULL;
+
+   p = getPulse(channel);
+
+   sprintf(str, "%s:%.2f", PWM_MODES[p->type], p->value);
+   return PyString_FromString(str);
+}
+
 static PyObject *py_enablePWM(PyObject *self, PyObject *args)
 {
    int channel;
@@ -431,6 +447,7 @@ PyMethodDef python_methods[] = {
    {"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
    {"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
    {"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
+   {"getPulse", py_getPulse, METH_VARARGS, "Output a PWM to a GPIO channel using a 50% ratio (duty cycle) with the default 50Hz signal"},
    {"pulseMilli", (PyCFunction)py_pulseMilli, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using milliseconds for both HIGH and LOW state widths"},
    {"pulseMilliRatio", (PyCFunction)py_pulseMilliRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using millisecond for the total width and a ratio (duty cycle) for the HIGH state width"},
    {"pulseMicro", (PyCFunction)py_pulseMicro, METH_VARARGS | METH_KEYWORDS, "Output a PWM pulse to a GPIO channel using microseconds for both HIGH and LOW state widths"},
