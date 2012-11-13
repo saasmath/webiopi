@@ -33,7 +33,7 @@
 		content.append(button); // append button to content div
 		
 		// create a button which call myMacro with "1,2,3" as argument
-		button = webiopi().createMacroButton("macro", "Macro 1", "myMacro", "1,2,3");
+		button = webiopi().createMacroButton("macro", "Macro 1", "myMacro", [1,2,3]);
 		content.append(button); // append button to content div
 		
 		// the previous button will always call myMacro with the same "1,2,3" argument
@@ -73,9 +73,9 @@
 	}
 	
 	function callMacro() {
-		var arg = "1,2,3" // or whatever you want
+		var args = [1,2,3] // or whatever you want
 		// call myMacro(arg)
-		webiopi().callMacro("myMacro", arg, macroCallback);
+		webiopi().callMacro("myMacro", args, macroCallback);
 	}
 	
 	function macroCallback(macro, args, data) {
