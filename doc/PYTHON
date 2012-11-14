@@ -10,8 +10,8 @@ import time
 GPIO = webiopi.GPIO
 
 # A custom macro which prints out the arg received and return OK
-def myMacro(arg):
-    print("myMacro(%s)" % arg)
+def myMacro(arg1, arg2, arg3):
+    print("myMacro(%s, %s, %s)" % (arg1, arg2, arg3))
     return "OK"
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
@@ -26,8 +26,8 @@ GPIO.setFunction(7, GPIO.OUT)
 GPIO.setFunction(8, GPIO.PWM)
 GPIO.setFunction(9, GPIO.PWM)
 
-GPIO.pulseRatio(8, 0.5) # 50% duty cycle ratio
-GPIO.pulseAngle(9, 0)   # neutral
+GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
+GPIO.pulseAngle(9, 0)   # init to neutral
 
 # Example loop which toggle GPIO 9 each 5 seconds
 try:

@@ -18,10 +18,10 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
    Auto-refresh
 
    Login/Password protection
-   [CUSTOMIZE Easily customize UI]
-   [RESTAPI REST API]
-   [JAVASCRIPT Javascript library]
    [PYTHON Server usable as a Python library]
+   [CUSTOMIZE Easily customize UI]
+   [JAVASCRIPT Javascript library]
+   [RESTAPI REST API]
 
 =Restrictions=
    GPIOs 0 and 1 have input pull-up resistor enabled.
@@ -30,14 +30,14 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
    UART, SPI and I2C support will be added as soon as possible.
    Don't forget that GPIOs support only 3.3V, don't plug them to 5V !!!
 
-Check the [ROADMAP] for the upcoming features
+Check the [ROADMAP roadmap] for the upcoming features
 
 =Usage=
-If not already done, follow [INSTALL] instructions.
+If not already done, follow [INSTALL install instructions].
 
-If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost/webiopi/ Don't forget to add :port right after localhost if you use a different port.
+If your are directly using your Raspberry Pi with keyboard/mouse/display plugged,  open a browser to http://localhost:8000/webiopi/
 
-If your Raspberry Pi is connected to your network, you can open a browser to http://raspberrypi/webiopi/ with any device of your network. Replace raspberrypi by its IP and don't forget to add :port right after the IP if you use a different port.
+If your Raspberry Pi is connected to your network, you can open a browser to http://raspberrypi:8000/webiopi/ with any device of your network. Replace raspberrypi by its IP.
 
 You can even add a port redirection on your router (and/or use IPv6) to control your GPIOs over Internet !
 
@@ -49,8 +49,8 @@ Default user is "webiopi" and password is "raspberry"
 
 http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome.png
 
-You can also use the expert app, which gives you an ordered list of GPIOs. It's located at http://localhost/webiopi/app/expert/ (or http://raspberrypi/webiopi/app/expert/)
+You can also use the expert app, which gives you an ordered list of GPIOs. It's located at http://localhost:8000/webiopi/app/expert/ (or http://raspberrypi:8000/webiopi/app/expert/)
 
 http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome-expert.png
 
-You can also create you own server script, to fully customize the behavior, add computing... Check [PYTHON]  and [CUSTOMIZE] for more informations.
+You can also create you own server script, to fully customize the behavior, add computing... Check the [PYTHON Python library] and [CUSTOMIZE customization page] for more informations.
