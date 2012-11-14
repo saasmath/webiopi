@@ -5,7 +5,6 @@
 	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
 	<title>WebIOPi | Demo</title>
 	<script type="text/javascript" src="/webiopi.js"></script>
-	<link rel="stylesheet" type="text/css" href="demo.css" />
 	<script type="text/javascript">
 	webiopi().ready(function() {
 		var content, button;
@@ -83,8 +82,33 @@
 	}
 	
 	</script>
+	<style type="text/css">
+		button {
+			display: block;
+			margin: 5px 5px 5px 5px;
+			width: 160px;
+			height: 45px;
+			font-size: 24pt;
+			font-weight: bold;
+			color: black;
+		}
+		
+		input[type="range"] {
+			display: block;
+			width: 160px;
+			height: 45px;
+		}
+		
+		#gpio7.LOW {
+			background-color: White;
+		}
+		
+		#gpio7.HIGH {
+			background-color: Red;
+		}
+	</style>
 </head>
 <body>
-<div id="content" align="center"></div>
+	<div id="content" align="center"></div>
 </body>
 </html>
