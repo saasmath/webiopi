@@ -363,7 +363,10 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif (relativePath.startswith("macros/")):
             (mode, fname, value) = relativePath.split("/")
             if (fname in self.server.callbacks):
-		args = value.split(",")
+                if ',' in value:
+                    args = value.split(',')
+                else:
+                    args = [value]
                 callback = self.server.callbacks[fname]
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
