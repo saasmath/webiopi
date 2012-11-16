@@ -401,7 +401,11 @@ static PyObject *py_getPulse(PyObject *self, PyObject *args)
    p = getPulse(channel);
 
    sprintf(str, "%s:%.2f", PWM_MODES[p->type], p->value);
+#if PY_MAJOR_VERSION > 2
+   return PyUnicode_FromString(str);
+#else
    return PyString_FromString(str);
+#endif
 }
 
 static PyObject *py_enablePWM(PyObject *self, PyObject *args)
