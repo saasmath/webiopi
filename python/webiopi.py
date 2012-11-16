@@ -30,7 +30,7 @@ try:
 except ImportError:
     import http.server as BaseHTTPServer
 
-VERSION = '0.5.x'
+VERSION = '0.5'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION
 
 FUNCTIONS = {
