@@ -6,7 +6,7 @@ It's useful to start enjoying GPIOs and also to debug some circuits without writ
 
 It also allows to control your Pi's GPIOs over Internet, so it's a good starting point for home remote control.
 
-You can also [CUSTOMIZE create] your own web interface using the included [JAVASCRIPT Javascript library], or the [RESTAPI REST API]. And you can even use the WebIOPi power inside your own Python script using the [PYTHON Server Library].
+You can also [CUSTOMIZE create your own web interface] using the included [JAVASCRIPT Javascript library], or the [RESTAPI REST API]. And you can even use the WebIOPi power inside your own Python script using the [PYTHON Server Library].
 
 WebIOPi has been developed on a Raspbian wheezy, but should work on others distribs.
 
