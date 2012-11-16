@@ -1,14 +1,18 @@
-This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
+WebIOPi 0.5 install instructions
 
-You will need Python development headers. On Raspbian, open a terminal :
+You will need Python development headers. On Raspbian, open a terminal.
+If you plan to use Python 2.X :
 $ sudo aptitude install python-dev
+or/and if you plan to use Python 3.X
+$ sudo aptitude install python3-dev
 
-Now download WebIOPi at http://code.google.com/p/webiopi/downloads/list
 
-Then extract and install WebIOPi :
-$ tar xvzf WebIOPi-X.Y.tar.gz
-$ cd WebIOPi-X.Y
+Now download, then extract and install WebIOPi :
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.5.tar.gz
+$ tar xvzf WebIOPi-0.5tar.gz
+$ cd WebIOPi-0.5
 $ sudo ./setup.sh
+
 
 Finally, run Python using webiopi module :
 $ sudo python -m webiopi [port]

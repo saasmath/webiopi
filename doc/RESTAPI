@@ -1,4 +1,4 @@
-This page is being updated for the upcoming release. Please refer to the doc included in the WebIOPi 0.3 archive
+WebIOPi 0.5 REST API
 
 The included REST API allows you to make you own client, using HTTP REST calls. You can you use it to achieve several tasks :
 <wiki:toc maxdepth="3" />

@@ -5,9 +5,13 @@
   # Follow additional instruction bellow matching your versions
 
 =0.3 => 0.5=
-   PHP Server removed, so delete all old files (/var/www/webiopi for instance)
+   Remove www-data from sudoers (sudo visudo)
+   Remove webiopi rewrite rules in /etc/lighttpd/lighttpd.conf
+   `<input type="submit">` have been replaced by `<button>`
+     Correct customs CSS files
    "Direction" has been replaced by "Function" everywhere in REST API and  Javascript.
-     Correct Javascript call (setDirection->setFunction for instance)
+     Correct customs Javascript call (setDirection -> setFunction for instance)
+     Correct customs CSS and HTML ids (directionX -> functionX)
    CSS class "DirectionEnabled" become "FunctionBasic" (IN and OUT functions)
    CSS class "DirectionDisabled" become "FunctionSpecial" (ALTx functions)
 
