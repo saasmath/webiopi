@@ -35,13 +35,20 @@ if [ -z "$INSTALLED" ]; then
 	exit
 fi
 
+for python in $INSTALLED; do
+	echo $python > /dev/null
+done 
+
 echo -n "Copying resources... " 
 mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
 cp -rf htdocs /usr/share/webiopi
+cp -rf python/webiopi.py.init /etc/init.d/webiopi
+chmod 0755 /etc/init.d/webiopi
+sed -i "s/python/$python/g" /etc/init.d/webiopi
 echo "OK\n"
 echo "WebIOPi successfully installed"
 
 for python in $INSTALLED; do
 	version=`$python -V 2>&1`
 	echo "* You can use it with $version\t: sudo $python -m webiopi"
-done 
+done
