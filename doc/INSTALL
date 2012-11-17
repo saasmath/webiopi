@@ -9,7 +9,7 @@ $ sudo aptitude install python3-dev
 
 Now download, then extract and install WebIOPi :
 $ wget http://webiopi.googlecode.com/files/WebIOPi-0.5.tar.gz
-$ tar xvzf WebIOPi-0.5tar.gz
+$ tar xvzf WebIOPi-0.5.tar.gz
 $ cd WebIOPi-0.5
 $ sudo ./setup.sh
 
