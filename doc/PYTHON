@@ -29,7 +29,7 @@ GPIO.setFunction(9, GPIO.PWM)
 GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
 GPIO.pulseAngle(9, 0)   # init to neutral
 
-# Example loop which toggle GPIO 9 each 5 seconds
+# Example loop which toggle GPIO 7 each 5 seconds
 try:
     while True:
         GPIO.output(7, not GPIO.input(7))
