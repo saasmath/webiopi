@@ -30,7 +30,7 @@ try:
 except ImportError:
     import http.server as BaseHTTPServer
 
-VERSION = '0.5.1'
+VERSION = '0.5.x'
 SERVER_VERSION = 'WebIOPi/Python/' + VERSION
 
 FUNCTIONS = {
@@ -379,6 +379,18 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         else: # path unknowns
             self.send_error(404, "Not Found")
             
+def runLoop(func=None):
+    try:
+        while True:
+            if func != None:
+                func()
+            else:
+                time.sleep(1)
+            
+    except KeyboardInterrupt:
+        pass
+    
+            
 def main(argv):
     port = 8000
 
@@ -386,13 +398,7 @@ def main(argv):
         port = int(argv[1])
     
     server = Server(port)
-    try:
-        while True:
-            time.sleep(10)
-            
-    except KeyboardInterrupt:
-        pass
-    
+    runLoop()
     server.stop()
 
 if __name__ == "__main__":
