@@ -302,6 +302,9 @@ WebIOPi.prototype.outputSequence = function (gpio, period, sequence, callback) {
 }
 
 WebIOPi.prototype.callMacro = function (macro, args, callback) {
+	if (args == undefined) {
+		args = "";
+	}
 	$.post(w().context + 'macros/' + macro + "/" + args, function(data) {
 		if (callback != undefined) {
 			callback(macro, args, data);

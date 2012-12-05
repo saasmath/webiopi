@@ -363,15 +363,22 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif (relativePath.startswith("macros/")):
             (mode, fname, value) = relativePath.split("/")
             if (fname in self.server.callbacks):
+                callback = self.server.callbacks[fname]
+
                 if ',' in value:
                     args = value.split(',')
+                    result = callback(*args)
+                elif len(value) > 0:
+                    result = callback(value)
                 else:
-                    args = [value]
-                callback = self.server.callbacks[fname]
+                    result = callback()
+                     
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain");
                 self.end_headers()
-                self.wfile.write(callback(*args).encode())
+                if result:
+                    result = "%s" % result
+                    self.wfile.write(result.encode())
             else:
                 self.send_error(404, fname + " Not Found")
                 return
