@@ -10,6 +10,12 @@ def myMacro(arg1, arg2, arg3):
     print("myMacro(%s, %s, %s)" % (arg1, arg2, arg3))
     return "OK"
 
+# Example loop which toggle GPIO 7 each 5 seconds
+def loop():
+    GPIO.output(7, not GPIO.input(7))
+    time.sleep(5)        
+    
+
 # Instantiate the server on the port 8000, it starts immediately in its own thread
 server = webiopi.Server(port=8000, login="webiopi", password="raspberry")
 
@@ -25,15 +31,8 @@ GPIO.setFunction(9, GPIO.PWM)
 GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
 GPIO.pulseAngle(9, 0)   # init to neutral
 
-# Example loop which toggle GPIO 9 each 5 seconds
-try:
-    while True:
-        GPIO.output(7, not GPIO.input(7))
-        time.sleep(5)        
-
-# Break the loop by pressing CTRL-C
-except KeyboardInterrupt:
-    pass
+# run our loop
+webiopi.runLoop(loop)
 
 # Stop the server
 server.stop()
