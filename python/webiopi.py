@@ -246,7 +246,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                     return
                 
             (type, encoding) = mime.guess_type(realPath)
-            f = open(realPath)
+            f = open(realPath, encoding="utf-8")
             data = f.read()
             f.close()
             self.send_response(200)
@@ -254,7 +254,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 #            self.send_header("Content-length", os.path.getsize(realPath))
             self.end_headers()
             try:
-                self.wfile.write(data.encode())
+                self.wfile.write(data.encode(encoding="utf-8"))
             except UnicodeDecodeError:
                 self.wfile.write(data)
             
