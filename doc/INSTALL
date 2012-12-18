@@ -1,5 +1,7 @@
 WebIOPi 0.5.1 install instructions
 
+Please check [UPGRADE upgrade instructions] if you are upgrading from a previous WebIOPi version.
+
 You will need Python development headers. On Raspbian, open a terminal.
 If you plan to use Python 2.X :
 $ sudo aptitude install python-dev

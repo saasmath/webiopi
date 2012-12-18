@@ -1,15 +1,1 @@
-Check [CHANGELOG] for changes included in the next version.
-
-=Confirmed, undated, by priority=
-   UART/SPI/I2C support
-   Parallel BUS helper
-   Logic analyzer
-
-=Unconfirmed, depends on hardware/software possibilities=
-   Edge detection
-   Long-polling/Bayeux/Cometd and/or WebSocket
-
-=Unconfirmed, depends on users needs=
-   WiringPi server side lib
-   Java server side lib
-   Resume PHP development
+Check [http://code.google.com/p/webiopi/issues/list?can=2&q=enhancement bug tracker] for planned features and enhancements
