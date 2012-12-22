@@ -168,6 +168,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.server.writeJSON(self.wfile)
             
+        # RPi header map
         elif relativePath == "map":
             json = "%s" % MAPPING[GPIO.BOARD_REVISION]
             self.send_response(200)
@@ -175,12 +176,20 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.replace("'", '"').encode())
 
-        # version
+        # server version
         elif relativePath == "version":
             self.send_response(200)
             self.send_header("Content-type", "text/plain")
             self.end_headers()
             self.wfile.write(SERVER_VERSION.encode())
+
+        # board revision
+        elif relativePath == "revision":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            revision = "%s" % GPIO.BOARD_REVISION
+            self.wfile.write(revision.encode())
 
         # Single GPIO getter
         elif (relativePath.startswith("GPIO/")):
