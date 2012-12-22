@@ -77,7 +77,7 @@ static int module_setup(void)
    }
 }
 
-// python function value = gpio_function(gpio)
+// python function getFunction(gpio)
 static PyObject *py_get_function(PyObject *self, PyObject *args)
 {
    int gpio, f;
@@ -89,7 +89,7 @@ static PyObject *py_get_function(PyObject *self, PyObject *args)
    return Py_BuildValue("i", f);
 }
 
-// python function value = gpio_function(gpio)
+// python function getFunctionString(gpio)
 static PyObject *py_get_function_string(PyObject *self, PyObject *args)
 {
    int gpio, f;
@@ -103,7 +103,7 @@ static PyObject *py_get_function_string(PyObject *self, PyObject *args)
    return Py_BuildValue("s", str);
 }
 
-// python function setup(channel, direction, pull_up_down=PUD_OFF)
+// python function setFunction(channel, direction, pull_up_down=PUD_OFF)
 static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    int channel, function;
@@ -181,7 +181,7 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
    return Py_None;
 }
 
-// python function output(channel, value)
+// python function outputSequence(channel, period, sequence)
 static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kwargs)
 {
   int channel, period;
