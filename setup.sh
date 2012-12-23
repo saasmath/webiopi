@@ -8,28 +8,28 @@ echo "Installing WebIOPi...\n"
 cd python
 
 for python in $SEARCH; do
-	program=`which $python`
+	program="/usr/bin/$python"
 	if [ -x $program ]; then
 		FOUND="$FOUND $python"
 		version=`$python -V 2>&1`
 		include=`$python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
-		echo "Found $version... " 
-		
+		echo "Found $version... "
+
 		if [ ! -f "$include/Python.h" ]; then
 			echo "Trying to install $python-dev using apt-get"
 			apt-get install -y "$python-dev"
 		fi
-			
+
 		if [ -f "$include/Python.h" ]; then
 			echo "Trying to install WebIOPi for $version"
 			$python setup.py install
 			if [ "$?" -ne "0" ]; then
 				echo "Build for $version failed\n"
 				continue
-			fi 
+			fi
 			echo "WebIOPi installed for $version\n"
 			INSTALLED="$INSTALLED $python"
-	    else
+		else
 			echo "Cannot install for $version : missing development headers\n"
 		fi
 	fi
