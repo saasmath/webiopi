@@ -25,6 +25,7 @@ import mimetypes as mime
 import re
 import base64
 import _webiopi.GPIO as GPIO
+import codecs
 try:
     import BaseHTTPServer
 except ImportError:
@@ -255,7 +256,7 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                     return
                 
             (type, encoding) = mime.guess_type(realPath)
-            f = open(realPath, encoding="utf-8")
+            f = codecs.open(realPath, encoding="utf-8")
             data = f.read()
             f.close()
             self.send_response(200)
