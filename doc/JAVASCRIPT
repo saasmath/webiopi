@@ -1,4 +1,4 @@
-WebIOPi 0.5 Javascript library
+WebIOPi 0.5.x Javascript library
 
 You can use the included Javascript library to build your own interface. You will find an example on the [CUSTOMIZE] page.
 
@@ -27,10 +27,10 @@ Set the output value of a GPIO.
 Toggle value of a GPIO.
    (int) gpio : GPIO number from 0 to 53
 
-=WebIOPi.callMacro(macro, args[, callback])=
+=WebIOPi.callMacro(macro, [args[, callback]])=
 Call a macro on the server.
    (string) macro : name of the macro to call
-   (string) arg : string argument
+   (string) arg (optional) : array containing arguments
    (function) callback (optional) : function called when result received from the server
 
 =WebIOPi.outputSequence(gpio, period, sequence[, callback])=

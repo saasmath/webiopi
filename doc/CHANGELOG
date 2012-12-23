@@ -1,6 +1,16 @@
-=Current version : 0.5 (11/16/12)=
+=Current version : 0.5.2 (12/21/12)=
 
-==0.5 (11/16/12)==
+==trunk==
+   Added revision board URI
+
+==0.5.2 (12/21/12 - PiStore only)==
+   Fixed blank page and file handling when server start at boot
+   Improved macros handling to allow zeo, one or more args
+   Added server loop helper
+   Improved setup.sh for the PiStore
+   Added play.sh for the PiStore to open the browser
+
+==0.5.1 (11/16/12)==
 ===New Features===
    REV 2 boards support
    Added setup script to ease WebIOPi install
