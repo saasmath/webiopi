@@ -35,7 +35,7 @@ GPIO.setFunction(9, GPIO.PWM)
 GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
 GPIO.pulseAngle(9, 0)   # init to neutral
 
-# run our loop
+# run our loop until CTRL-C is pressed
 webiopi.runLoop(loop)
 
 # Stop the server

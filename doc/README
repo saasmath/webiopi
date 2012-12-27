@@ -1,4 +1,4 @@
-WebIOPi 0.5 : Features, Restrictions, Usages
+WebIOPi 0.5 : Features, Usages
 
 WebIOPi is a web application which allows you to control your Raspberry Pi's GPIO. Just install it on your Pi, and use any browser from your network. Click/tap the in/out buttons to change GPIO direction, and click/tap on each output pin button to change their state. 
 
@@ -8,7 +8,7 @@ It also allows to control your Pi's GPIOs over Internet, so it's a good starting
 
 You can also [CUSTOMIZE create your own web interface] using the included [JAVASCRIPT Javascript library], or the [RESTAPI REST API]. And you can even use the WebIOPi power inside your own Python script using the [PYTHON Server Library].
 
-WebIOPi has been developed on a Raspbian wheezy, but should work on others distribs.
+WebIOPi has been developed on Raspbian wheezy, but should work on others distribs.
 
 =Features=
    HTML/Javascript client and Python server
@@ -22,13 +22,6 @@ WebIOPi has been developed on a Raspbian wheezy, but should work on others distr
    [CUSTOMIZE Easily customize UI]
    [JAVASCRIPT Javascript library]
    [RESTAPI REST API]
-
-=Restrictions=
-   GPIOs 0 and 1 have input pull-up resistor enabled.
-   UART0 and I2C1 are enabled but unusable for now.
-     GPIOs 2, 3, 14 and 15 are disabled
-   UART, SPI and I2C support will be added as soon as possible.
-   Don't forget that GPIOs support only 3.3V, don't plug them to 5V !!!
 
 Check the [ROADMAP roadmap] for the upcoming features
 
