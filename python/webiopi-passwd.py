@@ -14,7 +14,7 @@ if len(sys.argv)  == 2:
         print("\tfile\tSave hash to file")
         sys.exit()
     else:
-        f = open(file, "w+")
+        f = open(file, "w")
 
 _LOGIN      = "Enter Login: "
 _PASSWORD   = "Enter Password: "
