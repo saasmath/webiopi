@@ -26,6 +26,8 @@ import re
 import base64
 import _webiopi.GPIO as GPIO
 import codecs
+import hashlib
+from opcode import haslocal
 try:
     import BaseHTTPServer
 except ImportError:
@@ -45,6 +47,13 @@ MAPPING = [[], [], []]
 MAPPING[1] = ["V33", "V50", 0, "V50", 1, "GND", 4, 14, "GND", 15, 17, 18, 21, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
 MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
     
+def encodeAuth(login, password):
+    abcd = "%s:%s" % (login, password)
+    try:
+        b = base64.b64encode(abcd)
+    except TypeError:
+        b = base64.b64encode(abcd.encode())
+    return hashlib.sha256(b).hexdigest()
 
 def log(message):
     print("%s %s" % (SERVER_VERSION, message))
@@ -54,7 +63,7 @@ def log_socket_error(message):
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port, login="webiopi", password="raspberry", context="webiopi", index="index.html"):
+    def __init__(self, port, login="webiopi", password="raspberry", context="webiopi", index="index.html", passwdfile=None):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
         except socket.error as msg:
@@ -70,12 +79,18 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.index = index
         self.callbacks = {}
         self.log_enabled = False
-        abcd = "%s:%s"%(login, password)
-        try:
-            self.auth = base64.b64encode(abcd)
-        except TypeError:
-            self.auth = base64.b64encode(abcd.encode()).decode()
+        self.auth = None
         
+        if passwdfile != None and os.path.exists(passwdfile):
+            print("Using stored login/password in %s" % passwdfile)
+            f = open(passwdfile)
+            self.auth = f.read().strip(" \r\n")
+            f.close()
+            
+        elif login != None and password != None:
+            print("Using login/password")
+            self.auth = encodeAuth(login, password)
+            
         if not self.context.startswith("/"):
             self.context = "/" + self.context
         if not self.context.endswith("/"):
@@ -146,16 +161,31 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         return SERVER_VERSION + ' ' + self.sys_version
     
     def checkAuthentication(self):
-        auth = self.headers.get('Authorization')
-        if auth != "Basic %s" % self.server.auth:
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
-            self.end_headers();
+        if self.server.auth == None or len(self.server.auth) == 0:
+            return True
+        
+        authHeader = self.headers.get('Authorization')
+        if authHeader == None:
+            return False
+        
+        if not authHeader.startswith("Basic "):
+            return False
+        
+        auth = authHeader.replace("Basic ", "")
+        try:
+            hash = hashlib.sha256(auth).hexdigest()
+        except TypeError:
+            hash = hashlib.sha256(auth.encode()).hexdigest()
+            
+        if hash != self.server.auth:
             return False
         return True
         
     def do_GET(self):
         if not self.checkAuthentication():
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+            self.end_headers();
             return
         
         relativePath = self.path.replace(self.server.context, "/")
@@ -271,6 +301,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self.checkAuthentication():
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+            self.end_headers();
             return
 
         relativePath = self.path.replace(self.server.context, "")
@@ -410,11 +443,12 @@ def runLoop(func=None):
             
 def main(argv):
     port = 8000
+    passwdfile = "/etc/webiopi/passwd"
 
     if len(argv)  == 2:
         port = int(argv[1])
     
-    server = Server(port)
+    server = Server(port=port, passwdfile=passwdfile)
     runLoop()
     server.stop()
 

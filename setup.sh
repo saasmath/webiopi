@@ -54,11 +54,17 @@ done
 echo "Copying resources..."
 mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
 cp -rf htdocs /usr/share/webiopi
+if [ ! -f "/etc/webiopi/passwd" ]; then
+	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
+	cp python/passwd /etc/webiopi/passwd
+fi
+cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
 cp -rf python/webiopi.py.init /etc/init.d/webiopi
 echo
 echo "Setting up startup script..."
 chmod 0755 /etc/init.d/webiopi
 sed -i "s/python/$python/g" /etc/init.d/webiopi
+sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
 update-rc.d webiopi defaults
 echo
 echo "Starting WebIOPi..."
