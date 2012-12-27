@@ -18,6 +18,7 @@ def loop():
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
 server = webiopi.Server(port=8000, login="webiopi", password="raspberry")
+# or     webiopi.Server(port=8000, passwdfile="/etc/webiopi/passwd")
 
 # Register the macro so you can call it through the [RESTAPI] or [JAVASCRIPT]
 server.addMacro(myMacro)
