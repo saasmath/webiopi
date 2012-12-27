@@ -55,31 +55,39 @@ static PyObject *_board_revision;
 static char* FUNCTIONS[] = {"IN", "OUT", "ALT5", "ALT4", "ALT0", "ALT1", "ALT2", "ALT3", "PWM"};
 static char* PWM_MODES[] = {"none", "ratio", "angle"};
 
+static int module_state = -1;
+
 
 // setup function run on import of the RPi.GPIO module
 static int module_setup(void)
 {
-   int result;
 
-   result = setup();
-   if (result == SETUP_DEVMEM_FAIL)
+	if (module_state == SETUP_OK) {
+		return SETUP_OK;
+	}
+
+   module_state = setup();
+   if (module_state == SETUP_DEVMEM_FAIL)
    {
       PyErr_SetString(_SetupException, "No access to /dev/mem.  Try running as root!");
-      return SETUP_DEVMEM_FAIL;
-   } else if (result == SETUP_MALLOC_FAIL) {
+   } else if (module_state == SETUP_MALLOC_FAIL) {
       PyErr_NoMemory();
       return SETUP_MALLOC_FAIL;
-   } else if (result == SETUP_MMAP_FAIL) {
+   } else if (module_state == SETUP_MMAP_FAIL) {
       PyErr_SetString(_SetupException, "Mmap failed on module import");
       return SETUP_MALLOC_FAIL;
-   } else { // result == SETUP_OK
-      return SETUP_OK;
    }
+
+	return module_state;
 }
 
 // python function getFunction(gpio)
 static PyObject *py_get_function(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int gpio, f;
 
    if (!PyArg_ParseTuple(args, "i", &gpio))
@@ -92,6 +100,10 @@ static PyObject *py_get_function(PyObject *self, PyObject *args)
 // python function getFunctionString(gpio)
 static PyObject *py_get_function_string(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int gpio, f;
    char *str;
 
@@ -106,6 +118,10 @@ static PyObject *py_get_function_string(PyObject *self, PyObject *args)
 // python function setFunction(channel, direction, pull_up_down=PUD_OFF)
 static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel, function;
    int pud = PUD_OFF;
    static char *kwlist[] = {"channel", "function", "pull_up_down", NULL};
@@ -143,6 +159,10 @@ static PyObject *py_set_function(PyObject *self, PyObject *args, PyObject *kwarg
 // python function value = input(channel)
 static PyObject *py_input(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
@@ -157,6 +177,10 @@ static PyObject *py_input(PyObject *self, PyObject *args)
 // python function output(channel, value)
 static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel, value;
    static char *kwlist[] = {"channel", "value", NULL};
 
@@ -184,6 +208,10 @@ static PyObject *py_output(PyObject *self, PyObject *args, PyObject *kwargs)
 // python function outputSequence(channel, period, sequence)
 static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, period;
   char* sequence;
   static char *kwlist[] = {"channel", "period", "sequence", NULL};
@@ -212,6 +240,10 @@ static PyObject *py_output_sequence(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function, up, down;
   static char *kwlist[] = {"channel", "up", "down", NULL};
 
@@ -240,6 +272,10 @@ static PyObject *py_pulseMilli(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function, width;
   float ratio;
   static char *kwlist[] = {"channel", "width", "ratio", NULL};
@@ -269,6 +305,10 @@ static PyObject *py_pulseMilliRatio(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function, up, down;
   static char *kwlist[] = {"channel", "up", "down", NULL};
 
@@ -296,6 +336,10 @@ static PyObject *py_pulseMicro(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function, width;
   float ratio;
   static char *kwlist[] = {"channel", "width", "ratio", NULL};
@@ -324,6 +368,10 @@ static PyObject *py_pulseMicroRatio(PyObject *self, PyObject *args, PyObject *kw
 
 static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function;
   float angle;
   static char *kwlist[] = {"channel", "angle", NULL};
@@ -352,6 +400,10 @@ static PyObject *py_pulseAngle(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
   int channel, function;
   float ratio;
   static char *kwlist[] = {"channel", "ratio", NULL};
@@ -380,6 +432,10 @@ static PyObject *py_pulseRatio(PyObject *self, PyObject *args, PyObject *kwargs)
 
 static PyObject *py_pulse(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
@@ -391,6 +447,10 @@ static PyObject *py_pulse(PyObject *self, PyObject *args)
 
 static PyObject *py_getPulse(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
    char str[256];
    struct pulse *p;
@@ -410,6 +470,10 @@ static PyObject *py_getPulse(PyObject *self, PyObject *args)
 
 static PyObject *py_enablePWM(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
@@ -421,6 +485,10 @@ static PyObject *py_enablePWM(PyObject *self, PyObject *args)
 
 static PyObject *py_disablePWM(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
@@ -433,6 +501,10 @@ static PyObject *py_disablePWM(PyObject *self, PyObject *args)
 
 static PyObject *py_isPWMEnabled(PyObject *self, PyObject *args)
 {
+	if (module_setup() != SETUP_OK) {
+		return NULL;
+	}
+
    int channel;
 
    if (!PyArg_ParseTuple(args, "i", &channel))
@@ -565,16 +637,6 @@ PyMODINIT_FUNC initGPIO(void)
    _board_revision = Py_BuildValue("i", revision);
    PyModule_AddObject(module, "BOARD_REVISION", _board_revision);
    
-   // set up mmaped areas
-   if (module_setup() != SETUP_OK )
-   {
-#if PY_MAJOR_VERSION > 2
-      return NULL;
-#else
-      return;
-#endif
-   }
-      
    if (Py_AtExit(cleanup) != 0)
    {
      cleanup();
