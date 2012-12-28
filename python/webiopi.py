@@ -27,7 +27,8 @@ import base64
 import _webiopi.GPIO as GPIO
 import codecs
 import hashlib
-from opcode import haslocal
+import fcntl
+import termios
 try:
     import BaseHTTPServer
 except ImportError:
