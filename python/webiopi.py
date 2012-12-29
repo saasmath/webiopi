@@ -475,9 +475,9 @@ class Serial:
         
     def write(self, string):
         os.write(self.fd, string)
-        
-    def read(self):
-        return os.read(self.fd)
+
+    def read(self, bytecount=1):
+        return os.read(self.fd, bytecount)
 
 def main(argv):
     port = 8000
