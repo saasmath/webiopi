@@ -326,95 +326,93 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
             
-            if (operation == "value"):
-                if GPIO.getFunction(gpio) != GPIO.OUT:
-                    self.send_error(400, "Not Output")
-                    return;
-                if (value == "0"):
-                    GPIO.output(gpio, GPIO.LOW)
-                elif (value == "1"):
-                    GPIO.output(gpio, GPIO.HIGH)
-                else:
-                    self.send_error(400, "Bad Value")
-                    return
+            try:
+                if (operation == "value"):
+                    if (value == "0"):
+                        GPIO.output(gpio, GPIO.LOW)
+                    elif (value == "1"):
+                        GPIO.output(gpio, GPIO.HIGH)
+                    else:
+                        self.send_error(400, "Bad Value")
+                        return
+        
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(value.encode())
     
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(value.encode())
-
-            elif (operation == "function"):
-                value = value.lower()
-                if value == "in":
-                    GPIO.setFunction(gpio, GPIO.IN)
-                elif value == "out":
-                    GPIO.setFunction(gpio, GPIO.OUT)
-                elif value == "pwm":
-                    GPIO.setFunction(gpio, GPIO.PWM)
-                else:
-                    self.send_error(400, "Bad Function")
+                elif (operation == "function"):
+                    value = value.lower()
+                    if value == "in":
+                        GPIO.setFunction(gpio, GPIO.IN)
+                    elif value == "out":
+                        GPIO.setFunction(gpio, GPIO.OUT)
+                    elif value == "pwm":
+                        GPIO.setFunction(gpio, GPIO.PWM)
+                    else:
+                        self.send_error(400, "Bad Function")
+                        return
+                    value = GPIO.getFunctionString(gpio)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(value.encode())
+    
+                elif (operation == "sequence"):
+                    (period, sequence) = value.split(",")
+                    period = int(period)
+                    GPIO.outputSequence(gpio, period, sequence)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(sequence[-1].encode())
+                    
+                elif (operation == "pwm"):
+                    if value == "enable":
+                        GPIO.enablePWM(gpio)
+                    elif value == "disable":
+                        GPIO.disablePWM(gpio)
+                    
+                    if GPIO.isPWMEnabled(gpio):
+                        result = "enabled"
+                    else:
+                        result = "disabled"
+                    
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(result.encode())
+                    
+                elif (operation == "pulse"):
+                    GPIO.pulse(gpio)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write("OK".encode())
+                    
+                elif (operation == "pulseRatio"):
+                    ratio = float(value)
+                    GPIO.pulseRatio(gpio, ratio)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(value.encode())
+                    
+                elif (operation == "pulseAngle"):
+                    angle = float(value)
+                    GPIO.pulseAngle(gpio, angle)
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain");
+                    self.end_headers()
+                    self.wfile.write(value.encode())
+                    
+                else: # operation unknown
+                    self.send_error(404, operation + " Not Found")
                     return
-                value = GPIO.getFunctionString(gpio)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(value.encode())
-
-            elif (operation == "sequence"):
-                if GPIO.getFunction(gpio) != GPIO.OUT:
-                    self.send_error(400, "Not Output")
-                    return;
-
-                (period, sequence) = value.split(",")
-                period = int(period)
-                GPIO.outputSequence(gpio, period, sequence)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(sequence[-1].encode())
-                
-            elif (operation == "pwm"):
-                if value == "enable":
-                    GPIO.enablePWM(gpio)
-                elif value == "disable":
-                    GPIO.disablePWM(gpio)
-                
-                if GPIO.isPWMEnabled(gpio):
-                    result = "enabled"
-                else:
-                    result = "disabled"
-                
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(result.encode())
-                
-            elif (operation == "pulse"):
-                GPIO.pulse(gpio)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write("OK".encode())
-                
-            elif (operation == "pulseRatio"):
-                ratio = float(value)
-                GPIO.pulseRatio(gpio, ratio)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(value.encode())
-                
-            elif (operation == "pulseAngle"):
-                angle = float(value)
-                GPIO.pulseAngle(gpio, angle)
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                self.wfile.write(value.encode())
-                
-            else: # operation unknown
-                self.send_error(404, operation + " Not Found")
+            except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException) as e:
+                self.send_error(403, "%s" % e)
                 return
+                
         elif (relativePath.startswith("macros/")):
             (mode, fname, value) = relativePath.split("/")
             if (fname in self.server.callbacks):
