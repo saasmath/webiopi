@@ -18,24 +18,30 @@
 import os
 import sys
 import time
-import threading
 import errno
 import socket
+import threading
+
 import mimetypes as mime
 import re
 import base64
-import _webiopi.GPIO as GPIO
 import codecs
 import hashlib
+
 import fcntl
 import termios
-try:
-    import BaseHTTPServer
-except ImportError:
+
+import _webiopi.GPIO as GPIO
+
+PYTHON_MAJOR = sys.version_info.major
+
+if PYTHON_MAJOR >= 3:
     import http.server as BaseHTTPServer
+else:
+    import BaseHTTPServer
 
 VERSION = '0.5.x'
-SERVER_VERSION = 'WebIOPi/Python/' + VERSION
+SERVER_VERSION = "WebIOPi/Python%d/%s" % (PYTHON_MAJOR, VERSION)
 
 FUNCTIONS = {
     "I2C0": {"enabled": False, "gpio": {0:"SDA", 1:"SCL"}},
@@ -64,10 +70,10 @@ def runLoop(func=None):
 
 def encodeAuth(login, password):
     abcd = "%s:%s" % (login, password)
-    try:
-        b = base64.b64encode(abcd)
-    except TypeError:
+    if PYTHON_MAJOR >= 3:
         b = base64.b64encode(abcd.encode())
+    else:
+        b = base64.b64encode(abcd)
     return hashlib.sha256(b).hexdigest()
 
 
@@ -350,10 +356,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return False
         
         auth = authHeader.replace("Basic ", "")
-        try:
-            hash = hashlib.sha256(auth).hexdigest()
-        except TypeError:
+        if PYTHON_MAJOR >= 3:
             hash = hashlib.sha256(auth.encode()).hexdigest()
+        else:
+            hash = hashlib.sha256(auth).hexdigest()
             
         if hash == self.server.auth:
             return True
@@ -409,10 +415,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-type", type);
 #            self.send_header("Content-length", os.path.getsize(realPath))
         self.end_headers()
-        try:
-            self.wfile.write(data.encode(encoding="utf-8"))
-        except UnicodeDecodeError:
-            self.wfile.write(data)
+        self.wfile.write(data.encode(encoding="utf-8"))
         
     def processRequest(self):
         if not self.checkAuthentication():
