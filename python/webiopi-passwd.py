@@ -13,9 +13,10 @@ if len(sys.argv)  == 2:
         print("\t-h")
         print("\tfile\tSave hash to file")
         sys.exit()
-    else:
-        f = open(file, "w")
+else:
+    file = "/etc/webiopi/passwd"       
 
+f = open(file, "w")
 _LOGIN      = "Enter Login: "
 _PASSWORD   = "Enter Password: "
 _CONFIRM    = "Confirm password: "
