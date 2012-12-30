@@ -47,6 +47,9 @@ FUNCTIONS = {
 MAPPING = [[], [], []]
 MAPPING[1] = ["V33", "V50", 0, "V50", 1, "GND", 4, 14, "GND", 15, 17, 18, 21, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
 MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
+
+M_PLAIN = "text/plain"
+M_JSON  = "application/json"
     
 def runLoop(func=None):
     try:
@@ -67,17 +70,24 @@ def encodeAuth(login, password):
         b = base64.b64encode(abcd.encode())
     return hashlib.sha256(b).hexdigest()
 
+
 def log(message):
     print("%s %s" % (SERVER_VERSION, message))
 
+def warn(message):
+    log("Warning - %s" % message)
+
+def error(message):
+    log("Error - %s" % message)
+
 def log_socket_error(message):
-    log("Socket Error: %s" % message)
+    log("Socket Error - %s" % message)
 
 class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     
-    def __init__(self, port, login="webiopi", password="raspberry", context="webiopi", index="index.html", passwdfile=None):
+    def __init__(self, port, context="webiopi", index="index.html", login=None, password=None, passwdfile=None):
         try:
-            BaseHTTPServer.HTTPServer.__init__(self, ("", port), Handler)
+            BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
         except socket.error as msg:
 #            if (e_no == errno.EADDRINUSE):
 #                raise Exception("Port %d already in use, try another one" % port)
@@ -85,6 +95,7 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
              raise Exception(msg)
             
         threading.Thread.__init__(self)
+        self.handler = RESTHandler(self)
         self.port = port
         self.context = context
         self.docroot = "/usr/share/webiopi/htdocs"
@@ -93,15 +104,24 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.log_enabled = False
         self.auth = None
         
-        if passwdfile != None and os.path.exists(passwdfile):
-            print("Using stored login/password in %s" % passwdfile)
-            f = open(passwdfile)
-            self.auth = f.read().strip(" \r\n")
-            f.close()
+        if passwdfile != None:
+            if os.path.exists(passwdfile):
+                f = open(passwdfile)
+                self.auth = f.read().strip(" \r\n")
+                f.close()
+                if len(self.auth) > 0:
+                    log("Passwd file loaded : %s" % passwdfile)
+                else:
+                    log("Passwd file is empty : %s" % passwdfile)
+            else:
+                error("Failed to load passwd file : %s not found" % passwdfile)
             
-        elif login != None and password != None:
-            print("Using login/password")
+        elif login != None or password != None:
             self.auth = encodeAuth(login, password)
+            log("HTTP access protected using login/password")
+            
+        if self.auth == None or len(self.auth) == 0:
+            warn("HTTP access unprotected")
             
         if not self.context.startswith("/"):
             self.context = "/" + self.context
@@ -112,7 +132,34 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
     def addMacro(self, callback):
         self.callbacks[callback.__name__] = callback
 
-    def writeJSON(self, out):
+    def run(self):
+        host = "[RaspberryIP]"
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(('8.8.8.8', 53))
+            (host, p) = s.getsockname()
+            s.close()
+        except (socket.error, e):
+            pass
+
+        self.running = True
+        log("Started at http://%s:%s%s" % (host, self.port, self.context))
+        try:
+            self.serve_forever()
+        except socket.error as msg:
+            if self.running:
+                log_socket_error(msg)
+        log("Stopped")
+
+    def stop(self):
+        self.running = False
+        self.server_close()
+        
+class RESTHandler():
+    def __init__(self, server):
+        self.server = server
+
+    def getJSON(self):
         json = "{"
         first = True
         for (alt, value) in FUNCTIONS.items():
@@ -138,33 +185,152 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             first = False
             
         json += "\n}}"
-        out.write(json.encode())
+        return json
 
-    def run(self):
-        host = "[RaspberryIP]"
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            s.connect(('8.8.8.8', 53))
-            (host, p) = s.getsockname()
-            s.close()
-        except (socket.error, e):
-            pass
+    def do_GET(self, relativePath):
+        # JSON full state
+        if relativePath == "*":
+            return (200, self.getJSON(), M_JSON)
+            
+        # RPi header map
+        elif relativePath == "map":
+            json = "%s" % MAPPING[GPIO.BOARD_REVISION]
+            json = json.replace("'", '"')
+            return (200, json, M_JSON)
 
-        self.running = True
-        log("Started at http://%s:%s%s" % (host, self.port, self.context))
-        try:
-            self.serve_forever()
-        except socket.error as msg:
-            if self.running:
-                log_socket_error(msg)
-        log("Stopped")
+        # server version
+        elif relativePath == "version":
+            return (200, SERVER_VERSION, M_PLAIN)
 
-    def stop(self):
-        self.running = False
-        self.server_close()
+        # board revision
+        elif relativePath == "revision":
+            revision = "%s" % GPIO.BOARD_REVISION
+            return (200, revision, M_PLAIN)
+
+        # Single GPIO getter
+        elif relativePath.startswith("GPIO/"):
+            (mode, s_gpio, operation) = relativePath.split("/")
+            gpio = int(s_gpio)
+
+            value = None
+            if operation == "value":
+                if GPIO.input(gpio):
+                    value = "1"
+                else:
+                    value = "0"
     
+            elif operation == "function":
+                value = GPIO.getFunctionString(gpio)
+    
+            elif operation == "pwm":
+                if GPIO.isPWMEnabled(gpio):
+                    value = "enabled"
+                else:
+                    value = "disabled"
+                
+            elif operation == "pulse":
+                value = GPIO.getPulse(gpio)
+                
+            else:
+                return (404, operation + " Not Found", M_PLAIN)
+                
+            return (200, value, M_PLAIN)
+
+        else:
+            return (0, None, None)
+
+    def do_POST(self, relativePath):
+        if relativePath.startswith("GPIO/"):
+            (mode, s_gpio, operation, value) = relativePath.split("/")
+            gpio = int(s_gpio)
+            
+            if operation == "value":
+                if value == "0":
+                    GPIO.output(gpio, GPIO.LOW)
+                elif value == "1":
+                    GPIO.output(gpio, GPIO.HIGH)
+                else:
+                    return (400, "Bad Value", M_PLAIN)
+    
+                return (200, value, M_PLAIN)
+
+            elif operation == "function":
+                value = value.lower()
+                if value == "in":
+                    GPIO.setFunction(gpio, GPIO.IN)
+                elif value == "out":
+                    GPIO.setFunction(gpio, GPIO.OUT)
+                elif value == "pwm":
+                    GPIO.setFunction(gpio, GPIO.PWM)
+                else:
+                    return (400, "Bad Function", M_PLAIN)
+
+                value = GPIO.getFunctionString(gpio)
+                return (200, value, M_PLAIN)
+
+            elif operation == "sequence":
+                (period, sequence) = value.split(",")
+                period = int(period)
+                GPIO.outputSequence(gpio, period, sequence)
+                return (200, sequence[-1], M_PLAIN)
+                
+            elif operation == "pwm":
+                if value == "enable":
+                    GPIO.enablePWM(gpio)
+                elif value == "disable":
+                    GPIO.disablePWM(gpio)
+                
+                if GPIO.isPWMEnabled(gpio):
+                    result = "enabled"
+                else:
+                    result = "disabled"
+                
+                return (200, result, M_PLAIN)
+                
+            elif operation == "pulse":
+                GPIO.pulse(gpio)
+                return (200, "OK", M_PLAIN)
+                
+            elif operation == "pulseRatio":
+                ratio = float(value)
+                GPIO.pulseRatio(gpio, ratio)
+                return (200, value, M_PLAIN)
+                
+            elif operation == "pulseAngle":
+                angle = float(value)
+                GPIO.pulseAngle(gpio, angle)
+                return (200, value, M_PLAIN)
+                
+            else: # operation unknown
+                return (404, operation + " Not Found", M_PLAIN)
+                
+        elif relativePath.startswith("macros/"):
+            (mode, fname, value) = relativePath.split("/")
+            if fname in self.server.callbacks:
+                callback = self.server.callbacks[fname]
+
+                if ',' in value:
+                    args = value.split(',')
+                    result = callback(*args)
+                elif len(value) > 0:
+                    result = callback(value)
+                else:
+                    result = callback()
+                     
+                response = ""
+                if result:
+                    response = "%s" % result
+                return (200, response, M_PLAIN)
+                    
+            else:
+                return (404, fname + " Not Found", M_PLAIN)
+                
+        else: # path unknowns
+            return (0, None, None)
+
+
         
-class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         if self.server.log_enabled:
             log(format % args)
@@ -189,255 +355,100 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         except TypeError:
             hash = hashlib.sha256(auth.encode()).hexdigest()
             
-        if hash != self.server.auth:
-            return False
-        return True
-        
-    def do_GET(self):
-        if not self.checkAuthentication():
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+        if hash == self.server.auth:
+            return True
+        return False
+
+    def requestAuthentication(self):
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+        self.end_headers();
+    
+    def sendResponse(self, code, body=None, type="text/plain"):
+        if code >= 400:
+            if body != None:
+                self.send_error(code, body)
+            else:
+                self.send_error(code)
+        else:
+            self.send_response(code)
+            self.send_header("Content-type", type);
             self.end_headers();
-            return
+            self.wfile.write(body.encode())
+            
+    def serveFile(self, relativePath):
+        if relativePath == "":
+            relativePath = self.server.index
+                        
+        realPath = relativePath;
+        
+        if not os.path.exists(realPath):
+            realPath = self.server.docroot + os.sep + relativePath
+            
+        if not os.path.exists(realPath):
+            return self.sendResponse(404, "Not Found")
+
+        realPath = os.path.realpath(realPath)
+        
+        if realPath.endswith(".py"):
+            return self.sendResponse(403, "Not Authorized")
+        
+        if not (realPath.startswith(self.server.docroot) or realPath.startswith(os.getcwd())):
+            return self.sendResponse(403, "Not Authorized")
+            
+        if os.path.isdir(realPath):
+            realPath += os.sep + self.server.index;
+            if not os.path.exists(realPath):
+                return self.sendResponse(403, "Not Authorized")
+            
+        (type, encoding) = mime.guess_type(realPath)
+        f = codecs.open(realPath, encoding="utf-8")
+        data = f.read()
+        f.close()
+        self.send_response(200)
+        self.send_header("Content-type", type);
+#            self.send_header("Content-length", os.path.getsize(realPath))
+        self.end_headers()
+        try:
+            self.wfile.write(data.encode(encoding="utf-8"))
+        except UnicodeDecodeError:
+            self.wfile.write(data)
+        
+    def processRequest(self):
+        if not self.checkAuthentication():
+            return self.requestAuthentication()
         
         relativePath = self.path.replace(self.server.context, "/")
-        if (relativePath.startswith("/")):
+        if relativePath.startswith("/"):
             relativePath = relativePath[1:];
 
-        # JSON full state
-        if relativePath == "*":
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.server.writeJSON(self.wfile)
-            
-        # RPi header map
-        elif relativePath == "map":
-            json = "%s" % MAPPING[GPIO.BOARD_REVISION]
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.replace("'", '"').encode())
-
-        # server version
-        elif relativePath == "version":
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            self.wfile.write(SERVER_VERSION.encode())
-
-        # board revision
-        elif relativePath == "revision":
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            revision = "%s" % GPIO.BOARD_REVISION
-            self.wfile.write(revision.encode())
-
-        # Single GPIO getter
-        elif (relativePath.startswith("GPIO/")):
-            (mode, s_gpio, operation) = relativePath.split("/")
-            gpio = int(s_gpio)
-
-            value = None
-            if (operation == "value"):
-                if GPIO.input(gpio):
-                    value = "1"
-                else:
-                    value = "0"
-    
-            elif (operation == "function"):
-                value = GPIO.getFunctionString(gpio)
-    
-            elif (operation == "pwm"):
-                if GPIO.isPWMEnabled(gpio):
-                    value = "enabled"
-                else:
-                    value = "disabled"
-                
-            elif (operation == "pulse"):
-                value = GPIO.getPulse(gpio)
-                
+        try:
+            if self.command == "GET":
+                (code, body, type) = self.server.handler.do_GET(relativePath)
+            elif self.command == "POST":
+                (code, body, type) = self.server.handler.do_POST(relativePath)
             else:
-                self.send_error(404, operation + " Not Found")
-                return
-                
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain");
-            self.end_headers()
-            self.wfile.write(value.encode())
+                (code, body, type) = (405, None, None)
+            
+            if code > 0:
+                self.sendResponse(code, body, type)
+            else:
+                if self.command == "GET":
+                    self.serveFile(relativePath)
+                else:
+                    self.sendResponse(404)
 
-        # handle files
-        else:
-            if relativePath == "":
-                relativePath = self.server.index
-                            
-            realPath = relativePath;
+        except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
+            self.sendResponse(403, "%s" % e)
+        except Exception as e:
+            self.sendResponse(500)
+            raise e
             
-            if not os.path.exists(realPath):
-                realPath = self.server.docroot + os.sep + relativePath
-                
-            if not os.path.exists(realPath):
-                self.send_error(404, "Not Found")
-                return
-
-            realPath = os.path.realpath(realPath)
-            
-            if realPath.endswith(".py"):
-                self.send_error(403, "Not Authorized")
-                return
-            
-            if not (realPath.startswith(self.server.docroot) or realPath.startswith(os.getcwd())):
-                self.send_error(403, "Not Authorized")
-                return
-                
-            if (os.path.isdir(realPath)):
-                realPath += os.sep + self.server.index;
-                if not os.path.exists(realPath):
-                    self.send_error(403, "Not Authorized")
-                    return
-                
-            (type, encoding) = mime.guess_type(realPath)
-            f = codecs.open(realPath, encoding="utf-8")
-            data = f.read()
-            f.close()
-            self.send_response(200)
-            self.send_header("Content-type", type);
-#            self.send_header("Content-length", os.path.getsize(realPath))
-            self.end_headers()
-            try:
-                self.wfile.write(data.encode(encoding="utf-8"))
-            except UnicodeDecodeError:
-                self.wfile.write(data)
-            
+    def do_GET(self):
+        self.processRequest()
 
     def do_POST(self):
-        if not self.checkAuthentication():
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
-            self.end_headers();
-            return
-
-        relativePath = self.path.replace(self.server.context, "")
-        if (relativePath.startswith("/")):
-            relativePath = relativePath[1:];
-
-        if (relativePath.startswith("GPIO/")):
-            (mode, s_gpio, operation, value) = relativePath.split("/")
-            gpio = int(s_gpio)
-            
-            try:
-                if (operation == "value"):
-                    if (value == "0"):
-                        GPIO.output(gpio, GPIO.LOW)
-                    elif (value == "1"):
-                        GPIO.output(gpio, GPIO.HIGH)
-                    else:
-                        self.send_error(400, "Bad Value")
-                        return
-        
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(value.encode())
-    
-                elif (operation == "function"):
-                    value = value.lower()
-                    if value == "in":
-                        GPIO.setFunction(gpio, GPIO.IN)
-                    elif value == "out":
-                        GPIO.setFunction(gpio, GPIO.OUT)
-                    elif value == "pwm":
-                        GPIO.setFunction(gpio, GPIO.PWM)
-                    else:
-                        self.send_error(400, "Bad Function")
-                        return
-                    value = GPIO.getFunctionString(gpio)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(value.encode())
-    
-                elif (operation == "sequence"):
-                    (period, sequence) = value.split(",")
-                    period = int(period)
-                    GPIO.outputSequence(gpio, period, sequence)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(sequence[-1].encode())
-                    
-                elif (operation == "pwm"):
-                    if value == "enable":
-                        GPIO.enablePWM(gpio)
-                    elif value == "disable":
-                        GPIO.disablePWM(gpio)
-                    
-                    if GPIO.isPWMEnabled(gpio):
-                        result = "enabled"
-                    else:
-                        result = "disabled"
-                    
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(result.encode())
-                    
-                elif (operation == "pulse"):
-                    GPIO.pulse(gpio)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write("OK".encode())
-                    
-                elif (operation == "pulseRatio"):
-                    ratio = float(value)
-                    GPIO.pulseRatio(gpio, ratio)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(value.encode())
-                    
-                elif (operation == "pulseAngle"):
-                    angle = float(value)
-                    GPIO.pulseAngle(gpio, angle)
-                    self.send_response(200)
-                    self.send_header("Content-type", "text/plain");
-                    self.end_headers()
-                    self.wfile.write(value.encode())
-                    
-                else: # operation unknown
-                    self.send_error(404, operation + " Not Found")
-                    return
-            except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException) as e:
-                self.send_error(403, "%s" % e)
-                return
-                
-        elif (relativePath.startswith("macros/")):
-            (mode, fname, value) = relativePath.split("/")
-            if (fname in self.server.callbacks):
-                callback = self.server.callbacks[fname]
-
-                if ',' in value:
-                    args = value.split(',')
-                    result = callback(*args)
-                elif len(value) > 0:
-                    result = callback(value)
-                else:
-                    result = callback()
-                     
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain");
-                self.end_headers()
-                if result:
-                    result = "%s" % result
-                    self.wfile.write(result.encode())
-            else:
-                self.send_error(404, fname + " Not Found")
-                return
-                
-        else: # path unknowns
-            self.send_error(404, "Not Found")
+        self.processRequest()
 
 class Serial:
     def __init__(self, baudrate=9600, port="/dev/ttyAMA0"):
