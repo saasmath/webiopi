@@ -101,12 +101,11 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
              raise Exception(msg)
             
         threading.Thread.__init__(self)
-        self.handler = RESTHandler(self)
+        self.handler = RESTHandler()
         self.port = port
         self.context = context
         self.docroot = "/usr/share/webiopi/htdocs"
         self.index = index
-        self.callbacks = {}
         self.log_enabled = False
         self.auth = None
         
@@ -133,10 +132,11 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
             self.context = "/" + self.context
         if not self.context.endswith("/"):
             self.context += "/"
+
         self.start()
         
     def addMacro(self, callback):
-        self.callbacks[callback.__name__] = callback
+        self.handler.addMacro(callback)
 
     def run(self):
         host = "[RaspberryIP]"
@@ -162,8 +162,11 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
         self.server_close()
         
 class RESTHandler():
-    def __init__(self, server):
-        self.server = server
+    def __init__(self):
+        self.callbacks = {}
+
+    def addMacro(self, callback):
+        self.callbacks[callback.__name__] = callback
 
     def getJSON(self):
         json = "{"
@@ -312,8 +315,8 @@ class RESTHandler():
                 
         elif relativePath.startswith("macros/"):
             (mode, fname, value) = relativePath.split("/")
-            if fname in self.server.callbacks:
-                callback = self.server.callbacks[fname]
+            if fname in self.callbacks:
+                callback = self.callbacks[fname]
 
                 if ',' in value:
                     args = value.split(',')
