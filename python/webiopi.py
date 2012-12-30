@@ -76,7 +76,6 @@ def encodeAuth(login, password):
         b = base64.b64encode(abcd)
     return hashlib.sha256(b).hexdigest()
 
-
 def log(message):
     print("%s %s" % (SERVER_VERSION, message))
 
@@ -86,27 +85,26 @@ def warn(message):
 def error(message):
     log("Error - %s" % message)
 
-def log_socket_error(message):
-    log("Socket Error - %s" % message)
+def getLocalIP():
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(('8.8.8.8', 53))
+            (host, p) = s.getsockname()
+            s.close()
+            return host 
+        except (socket.error, e):
+            return "localhost"
 
-class Server(BaseHTTPServer.HTTPServer, threading.Thread):
+class Server():
     
     def __init__(self, port, context="webiopi", index="index.html", login=None, password=None, passwdfile=None):
-        try:
-            BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
-        except socket.error as msg:
-#            if (e_no == errno.EADDRINUSE):
-#                raise Exception("Port %d already in use, try another one" % port)
-#            else:
-             raise Exception(msg)
-            
-        threading.Thread.__init__(self)
-        self.handler = RESTHandler()
-        self.port = port
-        self.context = context
-        self.docroot = "/usr/share/webiopi/htdocs"
-        self.index = index
         self.log_enabled = False
+        self.handler = RESTHandler()
+        self.host = getLocalIP()
+        self.http_port = port
+
+        self.context = context
+        self.index = index
         self.auth = None
         
         if passwdfile != None:
@@ -115,52 +113,63 @@ class Server(BaseHTTPServer.HTTPServer, threading.Thread):
                 self.auth = f.read().strip(" \r\n")
                 f.close()
                 if len(self.auth) > 0:
-                    log("Passwd file loaded : %s" % passwdfile)
+                    log("Access protected using %s" % passwdfile)
                 else:
                     log("Passwd file is empty : %s" % passwdfile)
             else:
-                error("Failed to load passwd file : %s not found" % passwdfile)
+                error("Passwd file not found : %s" % passwdfile)
             
         elif login != None or password != None:
             self.auth = encodeAuth(login, password)
-            log("HTTP access protected using login/password")
+            log("Access protected using login/password")
             
         if self.auth == None or len(self.auth) == 0:
-            warn("HTTP access unprotected")
+            warn("Access unprotected")
             
         if not self.context.startswith("/"):
             self.context = "/" + self.context
         if not self.context.endswith("/"):
             self.context += "/"
 
-        self.start()
+        self.http_server = HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
+        self.http_server.log_enabled = self.log_enabled
         
     def addMacro(self, callback):
         self.handler.addMacro(callback)
+        
+    def stop(self):
+        self.http_server.stop()
 
+class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
+    def __init__(self, host, port, context, index, handler, auth=None):
+        BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
+        threading.Thread.__init__(self)
+
+        self.docroot = "/usr/share/webiopi/htdocs"
+        self.log_enabled = False
+        self.host = host
+        self.port = port
+        self.context = context
+        self.index = index
+        self.handler = handler
+        self.auth = auth
+
+        self.start()
+            
     def run(self):
-        host = "[RaspberryIP]"
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            s.connect(('8.8.8.8', 53))
-            (host, p) = s.getsockname()
-            s.close()
-        except (socket.error, e):
-            pass
-
+        log("HTTP Server started at http://%s:%s%s" % (self.host, self.port, self.context))
         self.running = True
-        log("Started at http://%s:%s%s" % (host, self.port, self.context))
         try:
             self.serve_forever()
-        except socket.error as msg:
+        except Exception as e:
             if self.running:
-                log_socket_error(msg)
-        log("Stopped")
+                error("%s" % e)
+        log("HTTP Server stopped")
 
     def stop(self):
         self.running = False
         self.server_close()
-        
+
 class RESTHandler():
     def __init__(self):
         self.callbacks = {}
