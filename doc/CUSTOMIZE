@@ -6,11 +6,13 @@ WebIOPi UI customization is easy but requires some Javascript and CSS knowledge.
 The WebIOPi Javascript library allows you to make your own interface easily, only requiring one single script tag to include /webiopi.js
 
 WebIOPi will automatically load and add required jquery.js and webiopi.css into your HTML file at runtime !
-Then you can use the [JAVASCRIPT Javascript library] to build the interface, creating buttons and registering callbacks. Check [PYTHON Python example] for the related server script.
+Then you can use the [JAVASCRIPT Javascript library] to build the interface, creating buttons and registering callbacks.
 
-This is the included demo/demo.html, which display big buttons arranged in a column. It also changes the background color of the GPIO 7 for both low and high states.
+This example displays big buttons arranged in a column. It also changes the background color of the GPIO 7 for both low and high states. There is two buttons which call a macro and requires to use the associated [PYTHON demo.py] server script. You can use the pre-installed WebIOPi service if you don't plan to use macros.
 
-Start the associated demo.py script in the demo folder then open a browser to http://raspberrypi/webiopi/demo.html
+You have to put both HTML file and Python server script in the same folder and execute the script in that folder to ensure your server will found your HTML file. You can also put your HTML file in /usr/share/webiopi/htdocs
+
+When your WebIOPi service or server script is started, open a browser to http://raspberrypi:8000/webiopi/demo.html
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
