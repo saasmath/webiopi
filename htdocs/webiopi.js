@@ -239,23 +239,23 @@ WebIOPi.prototype.checkVersion = function () {
 	
 	$.get(w().context + "version", function(data) {
 		_gaq.push(['_trackEvent', 'version', data]);
-		version = data.split("/")[2];
-
-		$.get("http://webiopi.trouch.com/version.php", function(data) {
-			var lines = data.split("\n");
-			var c = version.split(".");
-			var n = lines[0].split(".");
-			var updated = false;
-			for (i=0; i<Math.min(c.length, n.length); i++) {
-				if (n[i]>c[i]) {
-					updated = true;
-				}
-			}
-			if (updated || (n.length > c.length)) {
-				var div = $('<div id="update"><a href="' + lines[1] + '">Update available</a></div>');
-				$("body").append(div);
-			}
-		});
+//		version = data.split("/")[2];
+//
+//		$.get("http://webiopi.trouch.com/version.php", function(data) {
+//			var lines = data.split("\n");
+//			var c = version.split(".");
+//			var n = lines[0].split(".");
+//			var updated = false;
+//			for (i=0; i<Math.min(c.length, n.length); i++) {
+//				if (n[i]>c[i]) {
+//					updated = true;
+//				}
+//			}
+//			if (updated || (n.length > c.length)) {
+//				var div = $('<div id="update"><a href="' + lines[1] + '">Update available</a></div>');
+//				$("body").append(div);
+//			}
+//		});
 	});
 }
 
