@@ -438,12 +438,15 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             relativePath = relativePath[1:];
 
         try:
+            result = (None, None, None)
             if self.command == "GET":
-                (code, body, type) = self.server.handler.do_GET(relativePath)
+                result = self.server.handler.do_GET(relativePath)
             elif self.command == "POST":
-                (code, body, type) = self.server.handler.do_POST(relativePath)
+                result = self.server.handler.do_POST(relativePath)
             else:
-                (code, body, type) = (405, None, None)
+                result = (405, None, None)
+                
+            (code, body, type) = result
             
             if code > 0:
                 self.sendResponse(code, body, type)
