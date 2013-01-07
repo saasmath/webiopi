@@ -16,7 +16,7 @@ GPIO.setFunction(9, GPIO.PWM)
 
 GPIO.output(7, GPIO.HIGH)
 GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
-GPIO.pulseAngle(9, 0)   # init to neutral = 0¡
+GPIO.pulseAngle(9, 0)   # init to neutral
 
 # -------------------------------------------------- #
 # Main server part                                   #
