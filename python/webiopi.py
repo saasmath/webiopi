@@ -19,6 +19,7 @@ import os
 import sys
 import time
 import errno
+import signal
 import socket
 import threading
 
@@ -27,9 +28,6 @@ import re
 import base64
 import codecs
 import hashlib
-
-import fcntl
-import termios
 
 import _webiopi.GPIO as GPIO
 
@@ -56,17 +54,22 @@ MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "G
 
 M_PLAIN = "text/plain"
 M_JSON  = "application/json"
+
+__running__ = False
     
 def runLoop(func=None):
-    try:
-        while True:
-            if func != None:
-                func()
-            else:
-                time.sleep(1)
-            
-    except KeyboardInterrupt:
-        pass
+    global __running__
+    __running__ = True
+    if func != None:
+        while __running__:
+            func()
+    else:
+        while __running__:
+            time.sleep(1)
+
+def __signalHandler__(sig, func=None):
+    global __running__
+    __running__ = False
 
 def encodeAuth(login, password):
     abcd = "%s:%s" % (login, password)
@@ -478,6 +481,9 @@ def main(argv):
     server = Server(port=port, passwdfile=passwdfile)
     runLoop()
     server.stop()
+
+signal.signal(signal.SIGINT, __signalHandler__)
+signal.signal(signal.SIGTERM, __signalHandler__)
 
 if __name__ == "__main__":
     main(sys.argv)
