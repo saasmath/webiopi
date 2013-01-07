@@ -1,10 +1,11 @@
-WebIOPi is a REST framework and a webapp which allows you to control your Raspberry Pi's GPIO. Just install it on your Pi, and use any browser from your network. Click/tap the in/out buttons to change GPIO direction, and click/tap on each output pin button to change their state. 
-
+=Introduction=
+WebIOPi is a REST framework and a webapp which allows you to control your Raspberry Pi's GPIO.
+Just install it on your Pi, and use any browser from your network.
 It's useful to start enjoying GPIOs and also to debug some circuits without writing any line of code.
-
 It also allows to control your Pi's GPIOs over Internet, so it's a good starting point for home remote control.
 
-You can also [CUSTOMIZE create your own web interface] using the included [JAVASCRIPT Javascript library], or the [RESTAPI REST API]. And you can even use the WebIOPi power inside your own Python script using the [PYTHON Server Library].
+You can also [CUSTOMIZE create your own web interface] using the included [JAVASCRIPT Javascript library], or the [RESTAPI REST API].
+You can even use the WebIOPi power inside your own Python script using the [PYTHON Server Library].
 
 WebIOPI is developed by Eric PTAK, also known as trouch, french R&D engineer in networks, software, mobility and Internet of Things. 
 
