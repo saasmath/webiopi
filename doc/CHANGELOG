@@ -1,6 +1,6 @@
-=Current version : 0.5.2 (12/21/12)=
+=Current version : 0.5.3 (01/07/13)=
 
-==svn repository trunk==
+==0.5.3 (01/07/13)==
    Added board revision REST URI (submitted by Andreas Riegg)
    Added encrypted passwd file to store credentials used for HTTP authentication
    Added webiopi-passwd command-line program to generate passwd file
