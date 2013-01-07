@@ -38,7 +38,7 @@ if PYTHON_MAJOR >= 3:
 else:
     import BaseHTTPServer
 
-VERSION = '0.5.x'
+VERSION = '0.5.3'
 SERVER_VERSION = "WebIOPi/Python%d/%s" % (PYTHON_MAJOR, VERSION)
 
 FUNCTIONS = {

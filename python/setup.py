@@ -14,7 +14,7 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: System :: Hardware']
 
 setup(name             = 'WebIOPi',
-      version          = '0.5.1',
+      version          = '0.5.3',
       author           = 'Eric PTAK',
       author_email     = 'trouch@trouch.com',
       description      = 'A package to control Raspberry Pi GPIO from the web',
