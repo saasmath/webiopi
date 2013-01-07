@@ -4,11 +4,12 @@
    Added board revision REST URI (submitted by Andreas Riegg)
    Added encrypted passwd file to store credentials used for HTTP authentication
    Added webiopi-passwd command-line program to generate passwd file
+   Moved demo to examples/custom folder, added examples/basic
    Changed /dev/mem access to allow webiopi import without root privileges when not using GPIOs
-   Added Serial class (experimental)
+   Disabled update checker to avoid "Update available" link
+   Improved GPIO error handling
    Fixed encoding issue with python 2.x giving a blank page
    Fixed setup script
-   Improved GPIO error handling
 
 ==0.5.2 (12/21/12 - PiStore only)==
    Fixed blank page and file handling when server start at boot
