@@ -89,7 +89,6 @@ fi
 # Display WebIOPi usages
 echo "WebIOPi successfully installed"
 for python in $INSTALLED; do
-        version=`$python -V 2>&1`
         echo "* To start WebIOPi with $python\t: sudo $python -m webiopi"
 done
 echo
