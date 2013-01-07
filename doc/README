@@ -28,18 +28,12 @@ WebIOPI is developed by Eric PTAK, also known as trouch, french R&D engineer in 
    [JAVASCRIPT Javascript Client Library]
 
 =Install=
-You will need Python development headers. On Raspbian, open a terminal.
-If you plan to use Python 2.X :
-$ sudo aptitude install python-dev
-or/and if you plan to use Python 3.X
-$ sudo aptitude install python3-dev
-
-
-Now download, then extract and install WebIOPi :
-$ wget http://webiopi.googlecode.com/files/WebIOPi-0.5.1.tar.gz
-$ tar xvzf WebIOPi-0.5.1.tar.gz
-$ cd WebIOPi-0.5.1
+You only need Python, either 2.7 or 3.2. Download, then extract and install WebIOPi. The setup script will automatically download and install required files.
+$ wget http://webiopi.googlecode.com/files/WebIOPi-0.5.3.tar.gz
+$ tar xvzf WebIOPi-0.5.3.tar.gz
+$ cd WebIOPi-0.5.3
 $ sudo ./setup.sh
+
 
 
 Finally, run Python using webiopi module :
