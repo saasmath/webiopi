@@ -28,13 +28,14 @@ WebIOPI is developed by Eric PTAK, also known as trouch, french R&D engineer in 
    [JAVASCRIPT Javascript Client Library]
 
 =Install=
-You only need Python, either 2.7 or 3.2. Download, then extract and install WebIOPi. The setup script will automatically download and install required files.
+WebIOPi is developed and tested on Raspbian.
+
+You only need Python, either 2.7 or 3.2. Download, then extract and install WebIOPi. The setup script will automatically download and install required dependencies using apt-get. You may have to manually install GCC and Python development headers if you are not using Raspbian.
+
 $ wget http://webiopi.googlecode.com/files/WebIOPi-0.5.3.tar.gz
 $ tar xvzf WebIOPi-0.5.3.tar.gz
 $ cd WebIOPi-0.5.3
 $ sudo ./setup.sh
-
-
 
 Finally, run Python using webiopi module :
 $ sudo python -m webiopi [port]
@@ -69,10 +70,6 @@ http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome.png
 You can also use the expert app, which gives you an ordered list of GPIOs. It's located at http://localhost:8000/webiopi/app/expert/ (or http://raspberrypi:8000/webiopi/app/expert/)
 
 http://trouch.com/wp-content/uploads/2012/08/webiopi-chrome-expert.png
-
-You can also create you own server script, to fully customize the behavior, add computing... Check the [CUSTOMIZE customization page] for more informations.
-
-http://trouch.com/wp-content/uploads/2012/11/webiopi-architecture.png
 
 <p></p>
 <p align="center"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=s-xclick&hostedbuttonid=79EM7ZV9FQ4HU">https://www.paypal.com/enUS/i/btn/btndonateCCLG.gif</a></p>
