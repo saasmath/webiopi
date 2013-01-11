@@ -423,14 +423,14 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return self.sendResponse(403, "Not Authorized")
             
         (type, encoding) = mime.guess_type(realPath)
-        f = codecs.open(realPath, encoding="utf-8")
+        f = codecs.open(realPath, encoding=encoding)
         data = f.read()
         f.close()
         self.send_response(200)
         self.send_header("Content-type", type);
 #            self.send_header("Content-length", os.path.getsize(realPath))
         self.end_headers()
-        self.wfile.write(data.encode(encoding="utf-8"))
+        self.wfile.write(data)
         
     def processRequest(self):
         if not self.checkAuthentication():
