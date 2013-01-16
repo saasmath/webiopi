@@ -59,7 +59,7 @@ fi
 # Select greater python version
 for python in $INSTALLED; do
 	echo $python > /dev/null
-done 
+done
 
 # Copy mandatory and optional resource files
 
@@ -69,6 +69,7 @@ mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
 cp -rf htdocs /usr/share/webiopi
 cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
 sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
+chmod 0755 /usr/bin/webiopi-passwd
 
 # Add passwd file if it does not exist
 if [ ! -f "/etc/webiopi/passwd" ]; then
