@@ -38,7 +38,6 @@ try :
 except:
     pass
 
-
 PYTHON_MAJOR = sys.version_info.major
 
 if PYTHON_MAJOR >= 3:
@@ -111,7 +110,6 @@ def getLocalIP():
             return "localhost"
 
 class Server():
-    
     def __init__(self, port, context="webiopi", index="index.html", login=None, password=None, passwdfile=None):
         self.log_enabled = False
         self.handler = RESTHandler()
@@ -368,8 +366,6 @@ class RESTHandler():
                 
         else: # path unknowns
             return (0, None, None)
-
-
         
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -572,10 +568,8 @@ class COAPMessage():
     def getOptionHeaderValue(self, value):
         if value > 268:
             return 14
-        
         if value > 12:
             return 13
-        
         return value
     
     def getOptionHeaderExtension(self, value):
@@ -644,7 +638,6 @@ class COAPMessage():
                 if len(p) > 0:
                     lastnumber = self.appendOption(buff, lastnumber, COAPOption.URI_PATH, bytearray(p))
             
-
         buff.append(0xFF)
         
         if self.payload:
@@ -690,7 +683,6 @@ class COAPMessage():
                 length += 255 + ((bytes[index+offset] << 8) | bytes[index+offset+1])
                 offset += 2
 
-            
             number += delta
             valueBytes = bytes[index+offset:index+offset+length]
             # opaque option value
@@ -804,9 +796,6 @@ class COAPResponse(COAPMessage):
     GATEWAY_TIMEOUT         = 164
     PROXYING_NOT_SUPPORTED  = 165
     
-    HTTP_TO_COAP_CODE = {
-                         }
-
     def __init__(self):
         COAPMessage.__init__(self)
 
@@ -831,7 +820,6 @@ class COAPClient():
         return None
 
 class COAPServer(threading.Thread):
-    
     def __init__(self, host, port, handler):
         threading.Thread.__init__(self)
         self.handler = COAPHandler(handler)
@@ -923,8 +911,6 @@ class COAPHandler():
             response.code = COAPResponse.INTERNAL_ERROR
             raise e
         
-        
-
     def do_POST(self, request, response):
         try:
             (code, body, type) = self.handler.do_POST(request.uri_path[1:])
