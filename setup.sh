@@ -72,6 +72,13 @@ cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
 sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
 chmod 0755 /usr/bin/webiopi-passwd
 
+# Add config file if it does not exist
+if [ ! -f "/etc/webiopi/config" ]; then
+	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
+	cp python/config /etc/webiopi/config
+fi
+echo
+
 # Add passwd file if it does not exist
 if [ ! -f "/etc/webiopi/passwd" ]; then
 	mkdir /etc/webiopi 2>/dev/null 1>/dev/null

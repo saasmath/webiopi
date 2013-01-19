@@ -1,0 +1,10 @@
+[HTTP]
+enabled = true
+port = 8000
+passwd-file = /etc/webiopi/passwd
+
+[COAP]
+enabled = true
+port = 5683
+multicast = true
+

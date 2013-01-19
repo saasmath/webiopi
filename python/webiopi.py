@@ -42,8 +42,10 @@ PYTHON_MAJOR = sys.version_info.major
 
 if PYTHON_MAJOR >= 3:
     import http.server as BaseHTTPServer
+    import configparser as parser
 else:
     import BaseHTTPServer
+    import ConfigParser as parser
 
 VERSION = '0.5.3'
 SERVER_VERSION = "WebIOPi/Python%d/%s" % (PYTHON_MAJOR, VERSION)
@@ -110,15 +112,35 @@ def getLocalIP():
             return "localhost"
 
 class Server():
-    def __init__(self, port, context="webiopi", index="index.html", login=None, password=None, passwdfile=None):
+    def __init__(self, port=8000, context="webiopi", index="index.html", login=None, password=None, passwdfile=None, coap=5683, configfile=None):
         self.log_enabled = False
         self.handler = RESTHandler()
         self.host = getLocalIP()
         self.http_port = port
+        if port == None:
+            self.http_enabled = False
+        else:
+            self.http_enabled = True
 
         self.context = context
         self.index = index
         self.auth = None
+        
+        self.coap_port = coap
+        if coap == None:
+            self.coap_enabled = False
+        else:
+            self.coap_enabled = True
+        
+        if configfile != None:
+            config = parser.ConfigParser()
+            config.read(configfile)
+            self.http_enabled = config.getboolean("HTTP", "enabled")
+            self.http_port = config.getint("HTTP", "port")
+            passwdfile = config.get("HTTP", "passwd-file")
+            self.coap_enabled = config.getboolean("COAP", "enabled")
+            self.coap_port = config.getint("COAP", "port")
+            multicast = config.getboolean("COAP", "multicast")
         
         if passwdfile != None:
             if os.path.exists(passwdfile):
@@ -144,20 +166,25 @@ class Server():
         if not self.context.endswith("/"):
             self.context += "/"
 
-        self.http_server = HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
-        self.http_server.log_enabled = self.log_enabled
-        self.coap_server = None
-    
-    def startCOAP(self, multicastEnabled=False):
-        self.coap_server = COAPServer(self.host, 5683, self.handler)
-        if multicastEnabled:
-            self.coap_server.enableMulticast()
+        if self.http_enabled:
+            self.http_server = HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
+            self.http_server.log_enabled = self.log_enabled
+        else:
+            self.http_server = None
         
+        if self.coap_enabled:
+            self.coap_server = COAPServer(self.host, self.coap_port, self.handler)
+            if multicast:
+                self.coap_server.enableMulticast()
+        else:
+            self.coap_server = None
+    
     def addMacro(self, callback):
         self.handler.addMacro(callback)
         
     def stop(self):
-        self.http_server.stop()
+        if self.http_server:
+            self.http_server.stop()
         if self.coap_server:
             self.coap_server.stop()
 
@@ -988,13 +1015,12 @@ class MulticastClient(Client):
 
 def main(argv):
     port = 8000
-    passwdfile = "/etc/webiopi/passwd"
+    configfile = "/etc/webiopi/config"
 
     if len(argv)  == 2:
         port = int(argv[1])
     
-    server = Server(port=port, passwdfile=passwdfile)
-    server.startCOAP(True)
+    server = Server(port=port, configfile=configfile)
     runLoop()
     server.stop()
 
