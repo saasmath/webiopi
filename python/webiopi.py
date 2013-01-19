@@ -30,8 +30,6 @@ import base64
 import codecs
 import hashlib
 
-import httplib
-from urlparse import urlparse
 
 try :
     import _webiopi.GPIO as GPIO
@@ -41,9 +39,13 @@ except:
 PYTHON_MAJOR = sys.version_info.major
 
 if PYTHON_MAJOR >= 3:
+    from urllib.parse import urlparse
+    import http.client as httplib
     import http.server as BaseHTTPServer
     import configparser as parser
 else:
+    from urlparse import urlparse
+    import httplib
     import BaseHTTPServer
     import ConfigParser as parser
 
