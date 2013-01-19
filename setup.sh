@@ -22,6 +22,7 @@ for python in $SEARCH; do
 		# Install required dev header if not present
 		if [ ! -f "$include/Python.h" ]; then
 			echo "Trying to install $python-dev using apt-get"
+			apt-get update
 			apt-get install -y "$python-dev"
 		fi
 
