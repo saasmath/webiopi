@@ -131,8 +131,10 @@ class Server():
         self.coap_port = coap
         if coap == None:
             self.coap_enabled = False
+            multicast = False
         else:
             self.coap_enabled = True
+            multicast = True
         
         if configfile != None:
             config = parser.ConfigParser()
