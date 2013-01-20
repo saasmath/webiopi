@@ -665,12 +665,20 @@ class COAPMessage():
             paths = self.uri_path.split("/")
             for p in paths:
                 if len(p) > 0:
-                    lastnumber = self.appendOption(buff, lastnumber, COAPOption.URI_PATH, bytearray(p))
+                    if PYTHON_MAJOR >= 3:
+                        data = p.encode()
+                    else:
+                        data = bytearray(p)
+                    lastnumber = self.appendOption(buff, lastnumber, COAPOption.URI_PATH, data)
             
         buff.append(0xFF)
         
         if self.payload:
-            for c in bytearray(self.payload):
+            if PYTHON_MAJOR >= 3:
+                data = self.payload.encode()
+            else:
+                data = bytearray(self.payload)
+            for c in data:
                 buff.append(c)
         
         return buff
@@ -680,9 +688,10 @@ class COAPMessage():
         self.type    = (bytes[0] & 0x30) >> 4
         token_length = bytes[0] & 0x0F
         index = 4
-        self.token = bytes[index:index+token_length]
-        index += token_length
+        if token_length > 0:
+            self.token = bytes[index:index+token_length]
 
+        index += token_length
         self.code    = bytes[1]
         self.id      = (bytes[2] << 8) | bytes[3]
         
@@ -725,13 +734,17 @@ class COAPMessage():
                     value |= b
             # string option value
             else:
-                value = str(valueBytes)
+                if PYTHON_MAJOR >= 3:
+                    value = valueBytes.decode()
+                else:
+                    value = str(valueBytes)
             self.options.append({'number': number, 'value': value})
             index += offset + length
 
         index += 1 # skip 0xFF / end-of-options
         
-        self.payload = bytes[index:]
+        if len(bytes) > index:
+            self.payload = bytes[index:]
         
         for option in self.options:
             (number, value) = option.values()
