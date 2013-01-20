@@ -1,5 +1,15 @@
 =Current version : 0.5.3 (01/07/13)=
 
+==trunk==
+   Added CoAP (draft-13) implementation (Server and Client)
+   Added Python WebIOPi Client class (HTTP or CoAP with HTTP fallback)
+   Added Python WebIOPi MulticastClient class (CoAP)
+   Added /etc/webiopi/config file
+   Setup script forces apt-get update
+   Fixed webiopi-passwd missing execution flag when installing with PiStore
+   Fixed binary file serving
+
+
 ==0.5.3 (01/07/13)==
    Added board revision REST URI (submitted by Andreas Riegg)
    Added encrypted passwd file to store credentials used for HTTP authentication
