@@ -14,7 +14,7 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: System :: Hardware']
 
 setup(name             = 'WebIOPi',
-      version          = '0.5.3',
+      version          = '0.5.4',
       author           = 'Eric PTAK',
       author_email     = 'trouch@trouch.com',
       description      = 'A package to control Raspberry Pi GPIO from the web',
@@ -23,6 +23,6 @@ setup(name             = 'WebIOPi',
       keywords         = 'RaspberryPi GPIO Python REST',
       url              = 'http://code.google.com/p/webiopi/',
       classifiers      = classifiers,
-      py_modules       = ["webiopi"],
+      packages         = ["webiopi"],
       ext_modules      = [Extension('_webiopi.GPIO', ['native/bridge.c', 'native/gpio.c', 'native/cpuinfo.c'])],
       )
