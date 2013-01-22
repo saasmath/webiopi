@@ -46,6 +46,6 @@ class Serial:
     def read(self, size=1):
         return os.read(self.fd, size)
         
-    def write(self, string):
-        os.write(self.fd, string)
+    def write(self, bytes):
+        os.write(self.fd, bytes)
         

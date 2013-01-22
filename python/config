@@ -8,3 +8,12 @@ enabled = true
 port = 5683
 multicast = true
 
+[SERIAL]
+# Raspberry native UART on GPIO, uncomment to enable
+# Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
+# And also disable getty on ttyAMA0 in /etc/inittab
+#ttyAMA0 = 9600
+
+# USB serial adapters
+#ttyUSB0 = 9600
+#ttyACM0 = 9600

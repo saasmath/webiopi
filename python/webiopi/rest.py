@@ -1,4 +1,5 @@
 from .utils import *
+from .serial import *
 
 try :
     import _webiopi.GPIO as GPIO
@@ -8,9 +9,19 @@ except:
 class RESTHandler():
     def __init__(self):
         self.callbacks = {}
+        self.serials = {}
+        
+    def stop(self):
+        for device in self.serials:
+            serial = self.serials[device]
+            serial.close()
 
     def addMacro(self, callback):
         self.callbacks[callback.__name__] = callback
+        
+    def addSerial(self, device, speed):
+        serial = Serial(speed, "/dev/%s" % device)
+        self.serials[device] = serial
 
     def getJSON(self):
         json = "{"
@@ -88,11 +99,24 @@ class RESTHandler():
                 return (404, operation + " Not Found", M_PLAIN)
                 
             return (200, value, M_PLAIN)
+        
+        elif relativePath.startswith("serial/"):
+            device = relativePath.replace("serial/", "")
+            if device in self.serials:
+                serial = self.serials[device]
+                if serial.available() > 0:
+                    data = serial.read(serial.available())
+                    return (200, data.decode(), M_PLAIN)
+                else:
+                    return (200, None, None)
+                
+            else:
+                return (404, device + " Not Found", M_PLAIN)
 
         else:
             return (0, None, None)
 
-    def do_POST(self, relativePath):
+    def do_POST(self, relativePath, data):
         if relativePath.startswith("GPIO/"):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
@@ -178,6 +202,15 @@ class RESTHandler():
             else:
                 return (404, fname + " Not Found", M_PLAIN)
                 
+        elif relativePath.startswith("serial/"):
+            device = relativePath.replace("serial/", "")
+            if device in self.serials:
+                serial = self.serials[device]
+                serial.write(data)
+                return (200, None, None)
+            else:
+                return (404, device + " Not Found", M_PLAIN)
+
         else: # path unknowns
             return (0, None, None)
         

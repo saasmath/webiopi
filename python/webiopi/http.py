@@ -88,9 +88,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_error(code)
         else:
             self.send_response(code)
-            self.send_header("Content-type", type);
-            self.end_headers();
-            self.wfile.write(body.encode())
+            if body != None:
+                self.send_header("Content-type", type);
+                self.end_headers();
+                self.wfile.write(body.encode())
             
     def serveFile(self, relativePath):
         if relativePath == "":
@@ -111,7 +112,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         if not (realPath.startswith(self.server.docroot) or realPath.startswith(os.getcwd())):
             return self.sendResponse(403, "Not Authorized")
-            
+        
         if os.path.isdir(realPath):
             realPath += os.sep + self.server.index;
             if not os.path.exists(realPath):
@@ -140,7 +141,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if self.command == "GET":
                 result = self.server.handler.do_GET(relativePath)
             elif self.command == "POST":
-                result = self.server.handler.do_POST(relativePath)
+                length = int(self.headers['content-length'])
+                result = self.server.handler.do_POST(relativePath, self.rfile.read(length))
             else:
                 result = (405, None, None)
                 

@@ -32,15 +32,27 @@ class Server():
             self.coap_enabled = True
             multicast = True
         
-        if configfile != None:
+        if configfile != None and os.path.exists(configfile):
             config = parser.ConfigParser()
+            config.optionxform = str
             config.read(configfile)
-            self.http_enabled = config.getboolean("HTTP", "enabled")
-            self.http_port = config.getint("HTTP", "port")
-            passwdfile = config.get("HTTP", "passwd-file")
-            self.coap_enabled = config.getboolean("COAP", "enabled")
-            self.coap_port = config.getint("COAP", "port")
-            multicast = config.getboolean("COAP", "multicast")
+            
+            if config.has_section("HTTP"):
+                self.http_enabled = config.getboolean("HTTP", "enabled")
+                self.http_port = config.getint("HTTP", "port")
+                passwdfile = config.get("HTTP", "passwd-file")
+
+            if config.has_section("COAP"):
+                self.coap_enabled = config.getboolean("COAP", "enabled")
+                self.coap_port = config.getint("COAP", "port")
+                multicast = config.getboolean("COAP", "multicast")
+
+            if config.has_section("SERIAL"):
+                serials = config.items("SERIAL")
+                for (device, speed) in serials:
+                    speed = int(speed)
+                    if speed > 0:
+                        self.handler.addSerial(device, speed)
         
         if passwdfile != None:
             if os.path.exists(passwdfile):
@@ -87,4 +99,5 @@ class Server():
             self.http_server.stop()
         if self.coap_server:
             self.coap_server.stop()
+        self.handler.stop()
 
