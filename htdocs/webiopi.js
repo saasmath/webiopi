@@ -551,4 +551,18 @@ Expert.prototype.createList = function (containerId) {
 	return box;
 } 
 
+WebIOPi.prototype.Serial = function(device) {
+	return new Serial(device);
+}
 
+function Serial(device) {
+	this.device = device;
+}
+
+Serial.prototype.write = function(data) {
+	$.post(w().context + "serial/" + this.device, data);
+} 
+
+Serial.prototype.read = function(callback) {
+	$.get(w().context + "serial/" + this.device, callback);
+}
