@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
+	<title>WebIOPi | Serial Monitor</title>
+	<script type="text/javascript" src="/webiopi.js"></script>
+	<script type="text/javascript">
+	webiopi().ready(function() {
+		$("#inputText").keyup(function(event){
+		    if(event.keyCode == 13){
+		        sendData();
+		    }
+		});
+		readData();
+	});
+	
+	function readData() {
+		webiopi().Serial("ttyAMA0").read(function(data) {
+			if (data.length > 0) {
+				var d = $("#output").text() + data;
+				$("#output").text(d);
+			}
+		});
+		setTimeout(readData, 100);
+	}
+	
+	function sendData() {
+		var data = $("#inputText").val() + "\n";
+		webiopi().Serial("ttyAMA0").write(data);
+		$("#inputText").val("");
+	}
+	
+	</script>
+	<style type="text/css">
+		#inputText {
+			width: 600px;
+		}
+	</style>
+</head>
+<body>
+<textarea id="output" rows="30" cols="100" disabled="disabled"></textarea><br/>
+<span>Input : </span><input id="inputText" type="text"/>
+</body>
+</html>
