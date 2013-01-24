@@ -3,6 +3,7 @@ import sys
 import fcntl
 
 from .bus import *
+from .utils import BOARD_REVISION
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:
@@ -31,7 +32,10 @@ I2C_SMBUS       = 0x0720    # SMBus transfer */
 
 
 class I2C(Bus):
-    def __init__(self, channel, addr):
+    def __init__(self, addr):
+        channel = 0
+        if BOARD_REVISION > 1:
+            channel = 1
         Bus.__init__(self, ["i2c-bcm2708", "i2c-dev"], "/dev/i2c-%d" % channel)
         fcntl.ioctl(self.fd, I2C_SLAVE, addr)
     

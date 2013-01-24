@@ -5,6 +5,8 @@ import socket
 import base64
 import hashlib
 
+from _webiopi.GPIO import BOARD_REVISION
+
 PYTHON_MAJOR = sys.version_info.major
 
 VERSION = '0.5.4'

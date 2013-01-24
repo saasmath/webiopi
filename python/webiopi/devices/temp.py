@@ -1,8 +1,8 @@
 from ..i2c import I2C
 
 class TMP102(I2C):
-    def __init__(self, channel):
-        I2C.__init__(self, channel, 0b1001000)
+    def __init__(self, addr=0b1001000):
+        I2C.__init__(self, addr)
         
     def getTemperature(self):
         d = bytearray(self.read(2))
