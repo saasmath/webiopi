@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from .utils import VERSION, runLoop
 import _webiopi.GPIO as GPIO
+from .utils import VERSION, runLoop, macro
 from .server import Server
 from .clients import Client, MulticastClient

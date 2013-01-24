@@ -16,7 +16,7 @@
 	});
 	
 	function readData() {
-		webiopi().Serial("ttyAMA0").read(function(data) {
+		webiopi().Serial("serial0").read(function(data) {
 			if (data.length > 0) {
 				var d = $("#output").text() + data;
 				$("#output").text(d);
@@ -27,7 +27,7 @@
 	
 	function sendData() {
 		var data = $("#inputText").val() + "\n";
-		webiopi().Serial("ttyAMA0").write(data);
+		webiopi().Serial("serial0").write(data);
 		$("#inputText").val("");
 	}
 	

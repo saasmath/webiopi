@@ -27,7 +27,7 @@ M_PLAIN = "text/plain"
 M_JSON  = "application/json"
 
 __running__ = False
-    
+
 def runLoop(func=None):
     global __running__
     __running__ = True
@@ -72,6 +72,21 @@ def getLocalIP():
             return host 
         except (socket.error, e):
             return "localhost"
+        
+def route(method="POST", path=None):
+    def wrapper(func):
+        func.routed = True
+        func.method = method
+        if path:
+            func.path = path
+        else:
+            func.path = func.__name__
+        return func
+    return wrapper
+
+def macro(func):
+    func.macro = True
+    return func
 
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)

@@ -1,19 +1,44 @@
 [HTTP]
+# HTTP Server configuration
 enabled = true
 port = 8000
+# File containing sha256(base64("user:password"))
+# Use webiopi-passwd command to generate it
 passwd-file = /etc/webiopi/passwd
 
 [COAP]
+# CoAP Server configuration
 enabled = true
 port = 5683
+# Enable CoAP multicast
+# Binded on 224.0.1.123 
 multicast = true
 
 [SERIAL]
+# Serial lines configuration syntax:
+# name = device baudrate
+#   name: used in the URL mapping
+#   device: tty device name
+#   baudrate: serial speed from 9600 to 115200
+# All tty devices configured here are mapped on REST API /serial/name
+
 # Raspberry native UART on GPIO, uncomment to enable
 # Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
 # And also disable getty on ttyAMA0 in /etc/inittab
-#ttyAMA0 = 9600
+#serial0 = ttyAMA0 9600
 
 # USB serial adapters
-#ttyUSB0 = 9600
-#ttyACM0 = 9600
+#usb0 = ttyUSB0 9600
+#usb1 = ttyACM0 9600
+
+[DEVICES]
+# Specific device configuration syntax:
+# name = device [args...]
+#   name: used in the URL mapping
+#   device: device name
+#   args: (optional) see device implementation doc
+# All devices configured here are mapped on REST API /device/name
+# See device datasheet and implementation doc for the wiring
+
+#temp0 = TMP102
+#weather0 = BMP085

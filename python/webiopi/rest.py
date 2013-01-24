@@ -1,27 +1,50 @@
 from .utils import *
 from .serial import *
+import devices.temp
 
 try :
     import _webiopi.GPIO as GPIO
 except:
     pass
 
+def findDevice(name):
+    for dev in devices.temp.__all__:
+        if dev.__name__.split(".")[-1] == name:
+            return dev
+    return None
+
 class RESTHandler():
     def __init__(self):
         self.callbacks = {}
         self.serials = {}
+        self.devices = {}
         
     def stop(self):
-        for device in self.serials:
-            serial = self.serials[device]
+        for name in self.serials:
+            serial = self.serials[name]
             serial.close()
 
     def addMacro(self, callback):
         self.callbacks[callback.__name__] = callback
         
-    def addSerial(self, device, speed):
+    def addSerial(self, name, device, speed):
         serial = Serial(speed, "/dev/%s" % device)
-        self.serials[device] = serial
+        self.serials[name] = serial
+        
+    def addDevice(self, name, device, args):
+        devClass = findDevice(device)
+        if len(args) > 0:
+            dev = devClass(*args)
+        else:
+            dev = devClass()
+
+        funcs = {"GET": {}, "POST": {}}
+        for att in dir(dev):
+            func = getattr(dev, att)
+            if callable(func) and hasattr(func, "routed"):
+                funcs[func.method][func.path] = func
+        
+        self.devices[name] = {'device': dev, 'functions': funcs}
 
     def getJSON(self):
         json = "{"
@@ -112,6 +135,21 @@ class RESTHandler():
                 
             else:
                 return (404, device + " Not Found", M_PLAIN)
+
+        elif relativePath.startswith("device/"):
+            path = relativePath.replace("device/", "")
+            (deviceName, functionName) = path.split("/")
+            if not deviceName in self.devices:
+                return (404, deviceName + " Not Found", M_PLAIN)
+            funcs = self.devices[deviceName]["functions"]["GET"]
+            if not functionName in funcs:
+                return (404, functionName + " Not Found", M_PLAIN)
+            func = funcs[functionName]
+            result = func()
+            response = None
+            if result:
+                response = str(result)
+            return (200, response, M_PLAIN)
 
         else:
             return (0, None, None)
@@ -213,4 +251,3 @@ class RESTHandler():
 
         else: # path unknowns
             return (0, None, None)
-        

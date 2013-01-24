@@ -49,10 +49,17 @@ class Server():
 
             if config.has_section("SERIAL"):
                 serials = config.items("SERIAL")
-                for (device, speed) in serials:
+                for (name, params) in serials:
+                    (device, speed) = params.split(" ")
                     speed = int(speed)
                     if speed > 0:
-                        self.handler.addSerial(device, speed)
+                        self.handler.addSerial(name, device, speed)
+        
+            if config.has_section("DEVICES"):
+                serials = config.items("DEVICES")
+                for (name, params) in serials:
+                    values = params.split(" ")
+                    self.handler.addDevice(name, values[0], values[1:])
         
         if passwdfile != None:
             if os.path.exists(passwdfile):
