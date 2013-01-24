@@ -33,23 +33,5 @@ I2C_SMBUS       = 0x0720    # SMBus transfer */
 class I2C(Bus):
     def __init__(self, channel, addr):
         Bus.__init__(self, ["i2c-bcm2708", "i2c-dev"], "/dev/i2c-%d" % channel)
-        self.addr = addr
-        
-    def connect(self):
-        self.open()
-        if fcntl.ioctl(self.fd, I2C_SLAVE, self.addr) < 0:
-            self.close()
-            raise Exception("No I2C slave at 0x%02X" % self.addr)
-    
-    def read(self, size=1):
-        self.connect()
-        data = Bus.read(self, size)
-        self.close()
-        return data
-    
-    def write(self, bytes):
-        self.connect()
-        Bus.write(self, bytes)
-        self.close()
-        
+        fcntl.ioctl(self.fd, I2C_SLAVE, addr)
     
