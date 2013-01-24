@@ -1,0 +1,9 @@
+from ..i2c import I2C
+
+class TMP102(I2C):
+    def __init__(self, channel):
+        I2C.__init__(self, channel, 0b1001000)
+        
+    def getTemperature(self):
+        d = bytearray(self.read(2))
+        return ((d[0] << 4) | (d[1] >> 4)) *0.0625
