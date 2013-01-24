@@ -1,4 +1,4 @@
-from .utils import *
+from webiopi.utils import *
 
 import threading
 import socket

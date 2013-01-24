@@ -1,5 +1,5 @@
-from .utils import *
-from .coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
+from webiopi.utils import *
+from webiopi.coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
 
 if PYTHON_MAJOR >= 3:
     import http.client as httplib

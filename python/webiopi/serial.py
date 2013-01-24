@@ -4,7 +4,7 @@ import fcntl
 import struct
 import termios
 
-from .bus import *
+from webiopi.bus import *
 
 TIOCINQ   = hasattr(termios, 'FIONREAD') and termios.FIONREAD or 0x541B
 TIOCM_zero_str = struct.pack('I', 0)

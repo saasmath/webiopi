@@ -1,4 +1,4 @@
-from .server import *
+from webiopi.server import *
 
 def main(argv):
     port = 8000

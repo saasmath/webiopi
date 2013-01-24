@@ -2,8 +2,8 @@ import os
 import sys
 import fcntl
 
-from .bus import *
-from .utils import BOARD_REVISION
+from webiopi.bus import *
+from webiopi.utils import BOARD_REVISION
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:

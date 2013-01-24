@@ -15,6 +15,6 @@
 #   limitations under the License.
 
 import _webiopi.GPIO as GPIO
-from .utils import VERSION, runLoop, macro
-from .server import Server
-from .clients import Client, MulticastClient
+from webiopi.utils import VERSION, runLoop, macro
+from webiopi.server import Server
+from webiopi.clients import Client, MulticastClient

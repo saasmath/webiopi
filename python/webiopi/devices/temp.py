@@ -1,5 +1,5 @@
-from ..utils  import route
-from ..i2c import I2C
+from webiopi.utils import route
+from webiopi.i2c import I2C
 
 
 class TMP102(I2C):

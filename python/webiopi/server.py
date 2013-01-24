@@ -1,8 +1,8 @@
 import os
-from . import rest
-from . import coap
-from . import http
-from .utils import *
+from webiopi import rest
+from webiopi import coap
+from webiopi import http
+from webiopi.utils import *
 
 if PYTHON_MAJOR >= 3:
     import configparser as parser

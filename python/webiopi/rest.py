@@ -1,6 +1,6 @@
-from .utils import *
-from .serial import *
-import devices.temp
+from webiopi.utils import *
+from webiopi.serial import *
+import webiopi.devices.temp
 
 try :
     import _webiopi.GPIO as GPIO
@@ -8,7 +8,7 @@ except:
     pass
 
 def findDevice(name):
-    for dev in devices.temp.__all__:
+    for dev in webiopi.devices.temp.__all__:
         if dev.__name__.split(".")[-1] == name:
             return dev
     return None
