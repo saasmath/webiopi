@@ -23,6 +23,6 @@ setup(name             = 'WebIOPi',
       keywords         = 'RaspberryPi GPIO Python REST',
       url              = 'http://code.google.com/p/webiopi/',
       classifiers      = classifiers,
-      packages         = ["webiopi"],
+      packages         = ["webiopi", "webiopi.devices"],
       ext_modules      = [Extension('_webiopi.GPIO', ['native/bridge.c', 'native/gpio.c', 'native/cpuinfo.c'])],
       )
