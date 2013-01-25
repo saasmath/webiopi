@@ -78,19 +78,21 @@ class COAPMessage():
         length = byte & 0x0F
         return (delta, length)  
         
-    def printString(self):
-        print("Version: %s" % self.version)
-        print("Type: %s" % self.TYPES[self.type])
-        print("code: %s" % self.CODES[self.code])
-        print("Id: %s" % self.id)
-        print("Token: %s" % self.token)
-        print("Options: %s" % len(self.options))
+    def __str__(self):
+        result = []
+        result.append("Version: %s" % self.version)
+        result.append("Type: %s" % self.TYPES[self.type])
+        result.append("code: %s" % self.CODES[self.code])
+        result.append("Id: %s" % self.id)
+        result.append("Token: %s" % self.token)
+        result.append("Options: %s" % len(self.options))
         for option in self.options:
-            print("+ %d: %s" % (option["number"], option["value"]))
+            result.append("+ %d: %s" % (option["number"], option["value"]))
         
-        print("Uri-Path: %s" % self.uri_path)
-        print("Payload: %s" % self.payload)
-        print("")
+        result.append("Uri-Path: %s" % self.uri_path)
+        result.append("Payload: %s" % self.payload)
+        result.append("")
+        return '\n'.join(result)
         
     def getOptionHeaderValue(self, value):
         if value > 268:
@@ -381,21 +383,14 @@ class COAPServer(threading.Thread):
             except Exception as e:
                 continue
             
-#            log("Parsing request...")
             requestBytes = bytearray(request)
-#            printBytes(requestBytes)
             coapRequest = COAPRequest()
             coapRequest.parseByteArray(requestBytes)
             
-#            log("Processing request...")
-#            coapRequest.printString()
             coapResponse = COAPResponse()
             self.processMessage(coapRequest, coapResponse)
-            
-#            log("Sending response...")
-#            coapResponse.printString()
             responseBytes = coapResponse.getBytes()
-#            printBytes(responseBytes)
+
             self.socket.sendto(responseBytes, client)
             
         log("CoAP Server stopped")
