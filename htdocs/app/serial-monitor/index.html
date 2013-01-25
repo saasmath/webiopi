@@ -12,11 +12,21 @@
 		        sendData();
 		    }
 		});
-		readData();
+		$.get("/serial/*", function(data) {
+			var devices = $("#devices");
+			var added = false;
+			for (i in data) {
+				added = true;
+				devices.append($("<option>" + data[i] + "</option>"))
+			}
+			if (added) {
+				readData();
+			}
+		});
 	});
 	
 	function readData() {
-		webiopi().Serial("serial0").read(function(data) {
+		webiopi().Serial($("#devices").val()).read(function(data) {
 			if (data.length > 0) {
 				var d = $("#output").text() + data;
 				$("#output").text(d);
@@ -27,8 +37,12 @@
 	
 	function sendData() {
 		var data = $("#inputText").val() + "\n";
-		webiopi().Serial("serial0").write(data);
+		webiopi().Serial($("#devices").val()).write(data);
 		$("#inputText").val("");
+	}
+	
+	function deviceChanged() {
+		$("#output").text("");
 	}
 	
 	</script>
@@ -39,8 +53,9 @@
 	</style>
 </head>
 <body>
-<span>Serial Input :</span><br/>
+<span>Serial:</span><select id="devices" onchange="deviceChanged()"></select><br/>
+<span>Input:</span><br/>
 <textarea id="output" rows="30" cols="100" disabled="disabled"></textarea><br/>
-<span>Output : </span><input id="inputText" type="text"/>
+<span>Output:</span><input id="inputText" type="text"/>
 </body>
 </html>
