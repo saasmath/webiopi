@@ -33,6 +33,14 @@ I2C_SMBUS       = 0x0720    # SMBus transfer */
 
 class I2C(Bus):
     def __init__(self, addr):
+        if isinstance(addr, str):
+            if addr.startswith("0b"):
+                addr = int(addr, 2)
+            elif addr.startswith("0x"):
+                addr = int(addr, 16)
+            else:
+                addr = int(addr)
+        
         channel = 0
         if BOARD_REVISION > 1:
             channel = 1
