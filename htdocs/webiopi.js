@@ -259,6 +259,16 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
+WebIOPi.prototype.getValue = function (gpio, callback) {
+	if (callback != undefined) {
+		$.get(w().context + 'GPIO/' + gpio + "/value", function(data) {
+			w().updateValue(gpio, data);
+			callback(gpio, data);
+		}
+	}
+	return w().GPIO[gpio].value;
+}
+
 WebIOPi.prototype.setValue = function (gpio, value, callback) {
 	if (w().GPIO[gpio].func.toUpperCase()=="OUT") {
 		$.post(w().context + 'GPIO/' + gpio + "/value/" + value, function(data) {
@@ -273,6 +283,15 @@ WebIOPi.prototype.setValue = function (gpio, value, callback) {
 	}
 }
 
+WebIOPi.prototype.getFunction = function (gpio, callback) {
+	if (callback != undefined) {
+		$.get(w().context + 'GPIO/' + gpio + "/function", function(data) {
+			w().updateFunction(gpio, data);
+			callback(gpio, data);
+		}
+	}
+	return w().GPIO[gpio].func;
+}
 WebIOPi.prototype.setFunction = function (gpio, func, callback) {
 	$.post(w().context + 'GPIO/' + gpio + "/function/" + func, function(data) {
 		w().updateFunction(gpio, data);
