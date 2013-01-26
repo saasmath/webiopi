@@ -1,15 +1,45 @@
 from webiopi.server import *
 
+def displayHelp():
+    print("WebIOPi command-line usage")
+    print("python -m webiopi [-v] [-h] [-c config] [-l log] [port]")
+    exit()
+
 def main(argv):
     port = 8000
-    configfile = "/etc/webiopi/config"
-
-    if len(argv)  == 2:
-        port = int(argv[1])
+    configfile = None
+    logfile = None
     
+    i = 1
+    while i < len(argv):
+        if argv[i] in ["-c", "-C", "--config-file"]:
+            configfile = argv[i+1]
+            i+=1
+        elif argv[i] in ["-l", "-L", "--log-file"]:
+            logfile = argv[i+1]
+            i+=1
+        elif argv[i] in ["-h", "-H", "--help"]:
+            displayHelp()
+        elif argv[i] in ["-v", "--verbose"]:
+            setVerbose()
+        else:
+            try:
+                port = int(argv[i])
+            except ValueError:
+                displayHelp()
+        i+=1
+    
+    if logfile:
+        logToFile(logfile)
+
+    info("Starting %s" % VERSION_STRING)
     server = Server(port=port, configfile=configfile)
     runLoop()
     server.stop()
 
 if __name__ == "__main__":
-    main(sys.argv)
+    try:
+        main(sys.argv)
+    except Exception as e:
+        error(e)
+        exit()

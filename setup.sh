@@ -62,43 +62,43 @@ for python in $INSTALLED; do
 	echo $python > /dev/null
 done
 
-# Copy mandatory and optional resource files
-
-# Mandatory update
 echo "Copying resources..."
 mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
-cp -rf htdocs /usr/share/webiopi
-cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
-sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
-chmod 0755 /usr/bin/webiopi-passwd
+cp -rfv htdocs /usr/share/webiopi
 
 # Add config file if it does not exist
 if [ ! -f "/etc/webiopi/config" ]; then
+	echo "Config file not found, copying..."
 	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
-	cp python/config /etc/webiopi/config
+	cp -v python/config /etc/webiopi/config
 fi
 echo
 
 # Add passwd file if it does not exist
 if [ ! -f "/etc/webiopi/passwd" ]; then
+	echo "Passwd file not found, copying..."
 	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
-	cp python/passwd /etc/webiopi/passwd
+	cp -v python/passwd /etc/webiopi/passwd
 fi
 echo
 
-# Add service/daemon script if it does not exist
-if [ ! -f "/etc/init.d/webiopi" ]; then
-	echo "Setting up startup script..."
-	cp -rf python/webiopi.py.init /etc/init.d/webiopi
-	chmod 0755 /etc/init.d/webiopi
-	sed -i "s/python/$python/g" /etc/init.d/webiopi
-	echo
-fi
+# Add service/daemon script
+#if [ ! -f "/etc/init.d/webiopi" ]; then
+echo "Setting up startup script..."
+cp -rf python/webiopi.py.init /etc/init.d/webiopi
+chmod 0755 /etc/init.d/webiopi
+sed -i "s/python/$python/g" /etc/init.d/webiopi
+echo
+
+# Add webiopi-passwd command
+cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
+sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
+chmod 0755 /usr/bin/webiopi-passwd
 
 # Display WebIOPi usages
 echo "WebIOPi successfully installed"
 for python in $INSTALLED; do
-        echo "* To start WebIOPi with $python\t: sudo $python -m webiopi"
+        echo "* To start WebIOPi with $python\t: sudo $python -m webiopi [-v] [-h] [-c config] [-l log] [port]"
 done
 echo
 echo "* To start WebIOPi at boot\t: sudo update-rc.d webiopi defaults"

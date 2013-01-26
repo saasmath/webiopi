@@ -87,7 +87,7 @@ class RESTHandler():
 
         # server version
         elif relativePath == "version":
-            return (200, SERVER_VERSION, M_PLAIN)
+            return (200, VERSION_STRING, M_PLAIN)
 
         # board revision
         elif relativePath == "revision":

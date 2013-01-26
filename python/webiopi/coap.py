@@ -375,7 +375,7 @@ class COAPServer(threading.Thread):
         self.start()
         
     def run(self):
-        log("CoAP Server binded on coap://%s:%s/" % (self.host, self.port))
+        info("CoAP Server binded on coap://%s:%s/" % (self.host, self.port))
         self.running = True
         while self.running == True:
             try:
@@ -393,14 +393,14 @@ class COAPServer(threading.Thread):
 
             self.socket.sendto(responseBytes, client)
             
-        log("CoAP Server stopped")
+        info("CoAP Server stopped")
     
     def enableMulticast(self):
         while not self.running:
             pass
         mreq = struct.pack("4sl", socket.inet_aton(self.multicast_ip), socket.INADDR_ANY)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        log("CoAP Server binded on coap://%s:%s/ (MULTICAST)" % (self.multicast_ip, self.port))
+        info("CoAP Server binded on coap://%s:%s/ (MULTICAST)" % (self.multicast_ip, self.port))
                 
     def stop(self):
         self.running = False

@@ -5,6 +5,7 @@ import threading
 import re
 import codecs
 import mimetypes as mime
+import logging
 
 if PYTHON_MAJOR >= 3:
     import http.server as BaseHTTPServer
@@ -22,7 +23,6 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
         threading.Thread.__init__(self)
 
         self.docroot = "/usr/share/webiopi/htdocs"
-        self.log_enabled = False
         self.host = host
         self.port = port
         self.context = context
@@ -33,26 +33,30 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
         self.start()
             
     def run(self):
-        log("HTTP Server binded on http://%s:%s%s" % (self.host, self.port, self.context))
+        info("HTTP Server binded on http://%s:%s%s" % (self.host, self.port, self.context))
         self.running = True
         try:
             self.serve_forever()
         except Exception as e:
             if self.running:
                 error("%s" % e)
-        log("HTTP Server stopped")
+        info("HTTP Server stopped")
 
     def stop(self):
         self.running = False
         self.server_close()
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        if self.server.log_enabled:
-            log(format % args)
+    logger = logging.getLogger("HTTP")
 
+    def log_message(self, format, *args):
+        self.logger.debug(format % args)
+    
+    def log_error(self, format, *args):
+        pass
+        
     def version_string(self):
-        return SERVER_VERSION + ' ' + self.sys_version
+        return VERSION_STRING
     
     def checkAuthentication(self):
         if self.server.auth == None or len(self.server.auth) == 0:

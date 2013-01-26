@@ -11,7 +11,6 @@ else:
 
 class Server():
     def __init__(self, port=8000, context="webiopi", index="index.html", login=None, password=None, passwdfile=None, coap_port=5683, configfile=None):
-        self.log_enabled = False
         self.handler = rest.RESTHandler()
         self.host = getLocalIP()
         self.http_port = port
@@ -33,6 +32,7 @@ class Server():
             multicast = True
         
         if configfile != None and os.path.exists(configfile):
+            info("Loading configuration from %s" % configfile)
             config = parser.ConfigParser()
             config.optionxform = str
             config.read(configfile)
@@ -67,15 +67,15 @@ class Server():
                 self.auth = f.read().strip(" \r\n")
                 f.close()
                 if len(self.auth) > 0:
-                    log("Access protected using %s" % passwdfile)
+                    info("Access protected using %s" % passwdfile)
                 else:
-                    log("Passwd file is empty : %s" % passwdfile)
+                    info("Passwd file %s is empty" % passwdfile)
             else:
-                error("Passwd file not found : %s" % passwdfile)
+                error("Passwd file %s not found" % passwdfile)
             
         elif login != None or password != None:
             self.auth = encodeAuth(login, password)
-            log("Access protected using login/password")
+            info("Access protected using login/password")
             
         if self.auth == None or len(self.auth) == 0:
             warn("Access unprotected")
@@ -87,7 +87,6 @@ class Server():
 
         if self.http_enabled:
             self.http_server = http.HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
-            self.http_server.log_enabled = self.log_enabled
         else:
             self.http_server = None
         
