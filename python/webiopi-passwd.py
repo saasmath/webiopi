@@ -34,8 +34,8 @@ while password != password2:
     password = getpass.getpass(_PASSWORD)
     password2 = getpass.getpass(_CONFIRM)
 
-import webiopi
-auth = webiopi.encodeAuth(login, password)
+from webiopi.utils import encodeAuth
+auth = encodeAuth(login, password)
 print("\nHash: %s" % auth)
 if file:
     f.write(auth)
