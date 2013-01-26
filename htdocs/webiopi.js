@@ -264,7 +264,7 @@ WebIOPi.prototype.getValue = function (gpio, callback) {
 		$.get(w().context + 'GPIO/' + gpio + "/value", function(data) {
 			w().updateValue(gpio, data);
 			callback(gpio, data);
-		}
+		});
 	}
 	return w().GPIO[gpio].value;
 }
@@ -288,7 +288,7 @@ WebIOPi.prototype.getFunction = function (gpio, callback) {
 		$.get(w().context + 'GPIO/' + gpio + "/function", function(data) {
 			w().updateFunction(gpio, data);
 			callback(gpio, data);
-		}
+		});
 	}
 	return w().GPIO[gpio].func;
 }
