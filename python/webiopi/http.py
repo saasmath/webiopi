@@ -92,8 +92,9 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_error(code)
         else:
             self.send_response(code)
+            self.send_header("Cache-Control", "no-cache")
             if body != None:
-                self.send_header("Content-type", type);
+                self.send_header("Content-Type", type);
                 self.end_headers();
                 self.wfile.write(body.encode())
             
@@ -127,7 +128,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         data = f.read()
         f.close()
         self.send_response(200)
-        self.send_header("Content-type", type);
+        self.send_header("Content-Type", type);
 #            self.send_header("Content-length", os.path.getsize(realPath))
         self.end_headers()
         self.wfile.write(data)
