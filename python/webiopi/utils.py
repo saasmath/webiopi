@@ -30,9 +30,17 @@ M_JSON  = "application/json"
 
 __running__ = False
 
+def endLoop(signum=0, frame=None):
+    global __running__
+    if __running__:
+        LOGGER.info("Stopping...")
+        __running__ = False
+
 def runLoop(func=None):
     global __running__
     __running__ = True
+    signal.signal(signal.SIGINT, endLoop)
+    signal.signal(signal.SIGTERM, endLoop)
     if func != None:
         while __running__:
             func()
@@ -151,12 +159,4 @@ def checkAllBus():
         if modulesLoaded(bus):
             FUNCTIONS[bus]["enabled"] = True
 
-def signalHandler(sig, func=None):
-    global __running__
-    if __running__:
-        LOGGER.info("Stopping...")
-        __running__ = False
-
-signal.signal(signal.SIGINT, signalHandler)
-signal.signal(signal.SIGTERM, signalHandler)
 checkAllBus()
