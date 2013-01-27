@@ -126,7 +126,7 @@ class RESTHandler():
         elif relativePath.startswith("serial/"):
             device = relativePath.replace("serial/", "")
             if device == "*":
-                return (200, ("%s" % self.serials.keys()).replace("'", '"'), M_JSON)
+                return (200, ("%s" % [a for a in self.serials.keys()]).replace("'", '"'), M_JSON)
             if device in self.serials:
                 serial = self.serials[device]
                 if serial.available() > 0:
