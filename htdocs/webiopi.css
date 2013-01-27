@@ -47,20 +47,20 @@ input[type="range"] {
 	background-color: Orange;
 }
 
-.I2C0 {
+.I2C {
 	background-color: LightBlue;
 }
 
-.I2C1 {
-	background-color: LightBlue;
-}
-
-.SPI0 {
+.SPI {
 	background-color: Purple;
 }
 
-.UART0 {
+.UART {
 	background-color: DarkBlue;
+}
+
+.ONEWIRE {
+	background-color: Blue;
 }
 
 .FunctionBasic {

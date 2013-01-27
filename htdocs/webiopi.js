@@ -43,10 +43,10 @@ function WebIOPi() {
 	};
 	
 	this.ALT = {
-			I2C0: {name: "I2C0", enabled: false, gpios: []},
-			I2C1: {name: "I2C1", enabled: false, gpios: []},
-			SPI0: {name: "SPI0", enabled: false, gpios: []},
-			UART0: {name: "UART0", enabled: false, gpios: []}
+			I2C: {name: "I2C", enabled: false, gpios: []},
+			SPI: {name: "SPI", enabled: false, gpios: []},
+			UART: {name: "UART", enabled: false, gpios: []},
+			ONEWIRE: {name: "ONEWIRE", enabled: false, gpios: []}
 		};
 		
 	// init GPIOs
@@ -104,21 +104,21 @@ function WebIOPi() {
 	head.insertBefore(ga, scripts[0]);
 	
 	// init ALTs
-	this.addALT(this.ALT.I2C0, 0, "SDA");
-	this.addALT(this.ALT.I2C0, 1, "SCL");
+	this.addALT(this.ALT.I2C, 0, "SDA");
+	this.addALT(this.ALT.I2C, 1, "SCL");
+	this.addALT(this.ALT.I2C, 2, "SDA");
+	this.addALT(this.ALT.I2C, 3, "SCL");
 
-	this.addALT(this.ALT.I2C1, 2, "SDA");
-	this.addALT(this.ALT.I2C1, 3, "SCL");
-
-	this.addALT(this.ALT.SPI0,  7, "CE1");
-	this.addALT(this.ALT.SPI0,  8, "CE0");
-	this.addALT(this.ALT.SPI0,  9, "MISO");
-	this.addALT(this.ALT.SPI0, 10, "MOSI");
-	this.addALT(this.ALT.SPI0, 11, "SCLK");
+	this.addALT(this.ALT.SPI,  7, "CE1");
+	this.addALT(this.ALT.SPI,  8, "CE0");
+	this.addALT(this.ALT.SPI,  9, "MISO");
+	this.addALT(this.ALT.SPI, 10, "MOSI");
+	this.addALT(this.ALT.SPI, 11, "SCLK");
 	
-	this.addALT(this.ALT.UART0, 14, "TX");
-	this.addALT(this.ALT.UART0, 15, "RX");
+	this.addALT(this.ALT.UART, 14, "TX");
+	this.addALT(this.ALT.UART, 15, "RX");
 	
+	this.addALT(this.ALT.ONEWIRE, 4, "");
 }
 
 WebIOPi.prototype.init = function() {
@@ -213,14 +213,15 @@ WebIOPi.prototype.updateALT = function (alt, enable) {
 
 WebIOPi.prototype.updateUI = function () {
 	$.getJSON(w().context + "*", function(data) {
-		w().updateALT(w().ALT.I2C0, data["I2C0"]);
-		w().updateALT(w().ALT.I2C1, data["I2C1"]);
-		w().updateALT(w().ALT.SPI0, data["SPI0"]);
-		w().updateALT(w().ALT.UART0, data["UART0"]);
+		w().updateALT(w().ALT.I2C, data["I2C"]);
+		w().updateALT(w().ALT.SPI, data["SPI"]);
+		w().updateALT(w().ALT.UART, data["UART"]);
+		w().updateALT(w().ALT.ONEWIRE, data["ONEWIRE"]);
 		
 		$.each(data["GPIO"], function(gpio, data) {
 	    	w().updateFunction(gpio, data["function"]);
-	    	if ((data["function"] == "IN") || (data["function"] == "OUT")) { 
+	    	if ( ((gpio != 4) && ((data["function"] == "IN") || (data["function"] == "OUT"))
+	    		|| ((gpio == 4) && (w().ALT.ONEWIRE["enabled"] == false)))){
 	    		w().updateValue(gpio, data["value"]);
 	    	}
 	    	else if (data["function"] == "PWM") {

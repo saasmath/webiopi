@@ -5,6 +5,7 @@ import socket
 import base64
 import hashlib
 import logging
+import subprocess
 
 from _webiopi.GPIO import BOARD_REVISION
 
@@ -14,10 +15,10 @@ VERSION = '0.5.4'
 VERSION_STRING = "WebIOPi/%s/Python%d.%d" % (VERSION, sys.version_info.major, sys.version_info.minor)
 
 FUNCTIONS = {
-    "I2C0": {"enabled": False, "gpio": {0:"SDA", 1:"SCL"}},
-    "I2C1": {"enabled": True, "gpio": {2:"SDA", 3:"SCL"}},
-    "SPI0": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}},
-    "UART0": {"enabled": True, "gpio": {14:"TX", 15:"RX"}}
+    "I2C": {"enabled": False, "gpio": {0:"SDA", 1:"SCL", 2:"SDA", 3:"SCL"}, "modules": ["i2c-bcm2708", "i2c-dev"]},
+    "SPI": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}, "modules": ["spi-bcm2708", "spidev"]},
+    "UART": {"enabled": True, "gpio": {14:"TX", 15:"RX"}, "modules": []},
+    "ONEWIRE": {"enabled": False, "gpio": {4:"DATA"}, "modules": ["w1-gpio"]}
 }
 
 MAPPING = [[], [], []]
@@ -106,6 +107,50 @@ def printBytes(bytes):
     for i in range(0, len(bytes)):
         print("%03d: 0x%02X %03d %c" % (i, bytes[i], bytes[i], bytes[i]))
 
+def loadModules(bus):
+    if len(FUNCTIONS[bus]["modules"]) == 0:
+        return
+    
+    if FUNCTIONS[bus]["enabled"] == False and not modulesLoaded(bus):
+        info("Loading %s modules" % bus)
+        for module in FUNCTIONS[bus]["modules"]:
+            subprocess.call(["modprobe", module])
+        FUNCTIONS[bus]["enabled"] = True
+    else:
+        info("%s modules loaded" % bus)
+
+def unloadModules(bus):
+    if len(FUNCTIONS[bus]["modules"]) == 0:
+        return
+
+    info("Unloading %s modules" % bus)
+    for module in FUNCTIONS[bus]["modules"]:
+        subprocess.call(["modprobe", "-r", module])
+    FUNCTIONS[bus]["enabled"] = False
+        
+def __moduleLoaded__(modules, lines):
+    if len(modules) == 0:
+        return True
+    for line in lines:
+        if modules[0].replace("-", "_") == line.split(" ")[0]:
+            return __moduleLoaded__(modules[1:], lines)
+    return False
+
+def modulesLoaded(bus):
+    if not bus in FUNCTIONS or len(FUNCTIONS[bus]["modules"]) == 0:
+        return True
+
+    f = open("/proc/modules")
+    c = f.read()
+    f.close()
+    lines = c.split("\n")
+    return __moduleLoaded__(FUNCTIONS[bus]["modules"], lines)
+
+def checkAllBus():
+    for bus in FUNCTIONS:
+        if modulesLoaded(bus):
+            FUNCTIONS[bus]["enabled"] = True
+
 def signalHandler(sig, func=None):
     global __running__
     if __running__:
@@ -114,4 +159,4 @@ def signalHandler(sig, func=None):
 
 signal.signal(signal.SIGINT, signalHandler)
 signal.signal(signal.SIGTERM, signalHandler)
-
+checkAllBus()

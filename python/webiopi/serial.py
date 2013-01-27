@@ -15,7 +15,7 @@ class Serial(Bus):
         if not hasattr(termios, aname):
             raise Exception("Unsupported baudrate")
 
-        Bus.__init__(self, [], device, os.O_RDWR | os.O_NOCTTY)
+        Bus.__init__(self, "UART", device, os.O_RDWR | os.O_NOCTTY)
         fcntl.fcntl(self.fd, fcntl.F_SETFL, os.O_NDELAY)
         
         backup  = termios.tcgetattr(self.fd)

@@ -3,7 +3,7 @@ import sys
 import fcntl
 
 from webiopi.bus import *
-from webiopi.utils import BOARD_REVISION
+from webiopi.utils import *
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:
@@ -44,6 +44,6 @@ class I2C(Bus):
         channel = 0
         if BOARD_REVISION > 1:
             channel = 1
-        Bus.__init__(self, ["i2c-bcm2708", "i2c-dev"], "/dev/i2c-%d" % channel)
+        Bus.__init__(self, "I2C", "/dev/i2c-%d" % channel)
         fcntl.ioctl(self.fd, I2C_SLAVE, addr)
-    
+        info("I2C binded to 0x%02X slave" % addr)
