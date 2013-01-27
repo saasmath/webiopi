@@ -28,8 +28,18 @@ class Bus():
         if self.fd > 0:
             return os.read(self.fd, size)
         return []
+    
+    def readBytes(self, size=1):
+        return bytearray(self.read(size))
+    
+    def readByte(self):
+        return self.readBytes()[0]
 
-    def write(self, bytes):
+    def write(self, string):
         if self.fd > 0:
-            return os.write(self.fd, bytes)
+            return os.write(self.fd, string)
         return 0
+    
+    def writeBytes(self, *bytes):
+        return self.write(bytearray(bytes))
+    

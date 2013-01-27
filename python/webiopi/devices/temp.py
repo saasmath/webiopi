@@ -8,7 +8,7 @@ class TMP102(I2C):
         
     @route("GET", "temperature")
     def getTemperature(self):
-        d = bytearray(self.read(2))
+        d = self.readBytes(2)
         return int(((d[0] << 4) | (d[1] >> 4)) *0.625) / 10.0
 
 __all__ = [TMP102]
