@@ -10,7 +10,7 @@ class MCP3X0X(SPI):
         self.MSB_MASK = 2**(resolution-8) - 1
         self.MAX = (2**resolution - 1) * 1.0 
 
-    @route("GET", "%(mcpChannel)/value")
+    @route("GET", "%(mcpChannel)d/value", "%d")
     def readChannel(self, mcpChannel, diff=False):
         if not mcpChannel in range(self.channelCount):
             raise Exception("Channel %d out of MCP range [%d-%d]" % (mcpChannel, 0, self.channelCount-1))
@@ -19,7 +19,7 @@ class MCP3X0X(SPI):
         r = self.xfer(data)
         return ((r[1] & self.MSB_MASK) << 8) | r[2]
     
-    @route("GET", "%(mcpChannel)d/scale")
+    @route("GET", "%(mcpChannel)d/scale", "%.02f")
     def scaleChannel(self, mcpChannel, diff=False):
         return self.readChannel(mcpChannel, diff) / self.MAX
     

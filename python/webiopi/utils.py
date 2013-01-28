@@ -66,10 +66,11 @@ def getLocalIP():
         except (socket.error, e):
             return "localhost"
         
-def route(method="POST", path=None):
+def route(method="POST", path=None, format="%s"):
     def wrapper(func):
         func.routed = True
         func.method = method
+        func.format = format
         if path:
             func.path = path
         else:

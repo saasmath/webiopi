@@ -39,5 +39,7 @@ multicast = true
 # All devices configured here are mapped on REST API /device/name
 # See device datasheet and implementation doc for the wiring
 
-#temp0 = TMP102
+#temp0    = TMP102
 #weather0 = BMP085
+#digital0 = PCF8574
+#analog0  = MCP3208

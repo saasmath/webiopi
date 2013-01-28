@@ -54,6 +54,68 @@ class RESTHandler():
         
         self.devices[name] = {'device': dev, 'functions': funcs}
         info("%s mapped to REST API /device/%s" % (dev, name))
+        
+    def extract(self, fmtArray, pathArray, args):
+        if len(fmtArray) != len(pathArray):
+            return False
+        if len(fmtArray) == 0:
+            return True
+        fmt = fmtArray[0]
+        path = pathArray[0]
+        if fmt == path:
+            return self.extract(fmtArray[1:], pathArray[1:], args)
+        if fmt.startswith("%"):
+            
+            fmt = fmt[1:]
+            type = 's'
+            if fmt[0] == '(':
+                if fmt[-1] == ')':
+                    name = fmt[1:-1]
+                elif fmt[-2] == ')':                                   
+                    name = fmt[1:-2]
+                    type = fmt[-1]
+                else:
+                    raise Exception("Missing closing brace")
+            else:
+                name = fmt
+            
+            if type == 's':
+                args[name] = path
+            elif type == 'b':
+                args[name] = int(path, 2)
+            elif type == 'd':
+                args[name] = int(path)
+            elif type == 'x':
+                args[name] = int(path, 16)
+            elif type == 'f':
+                args[name] = float(path)
+            else:
+                raise Exception("Unknown format type : %s" % type)
+            
+            return self.extract(fmtArray[1:], pathArray[1:], args)
+            
+        return False
+
+    def getDeviceRoute(self, method, path):
+        pathArray = path.split("/")
+        deviceName = pathArray[0]
+        if not deviceName in self.devices:
+            return (None, deviceName + " Not Found")
+
+        pathArray = pathArray[1:]
+        funcs = self.devices[deviceName]["functions"][method]
+        functionName = "/".join(pathArray)
+        if functionName in funcs:
+            return (funcs[functionName], {})
+        
+        for fname in funcs:
+            func = funcs[fname]
+            funcPathArray = func.path.split("/")
+            args = {}
+            if self.extract(funcPathArray, pathArray, args):
+                return (func, args) 
+        
+        return (None, functionName + " Not Found")
 
     def getJSON(self):
         json = "{"
@@ -149,17 +211,13 @@ class RESTHandler():
 
         elif relativePath.startswith("device/"):
             path = relativePath.replace("device/", "")
-            (deviceName, functionName) = path.split("/")
-            if not deviceName in self.devices:
-                return (404, deviceName + " Not Found", M_PLAIN)
-            funcs = self.devices[deviceName]["functions"]["GET"]
-            if not functionName in funcs:
-                return (404, functionName + " Not Found", M_PLAIN)
-            func = funcs[functionName]
-            result = func()
+            (func, args) = self.getDeviceRoute("GET", path)
+            if func == None:
+                return (404, args, M_PLAIN)
+            result = func(**args)
             response = None
-            if result:
-                response = str(result)
+            if result != None:
+                response = func.format % result
             return (200, response, M_PLAIN)
 
         else:
@@ -259,6 +317,17 @@ class RESTHandler():
                 return (200, None, None)
             else:
                 return (404, device + " Not Found", M_PLAIN)
+
+        elif relativePath.startswith("device/"):
+            path = relativePath.replace("device/", "")
+            (func, args) = self.getDeviceRoute("POST", path)
+            if func == None:
+                return (404, args, M_PLAIN)
+            result = func(**args)
+            response = None
+            if result != None:
+                response = func.format % result
+            return (200, response, M_PLAIN)
 
         else: # path unknowns
             return (0, None, None)
