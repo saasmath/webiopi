@@ -146,7 +146,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if self.command == "GET":
                 result = self.server.handler.do_GET(relativePath)
             elif self.command == "POST":
-                length = int(self.headers['content-length'])
+                length = 0
+                length_header = 'content-length'
+                if length_header in self.headers:
+                    length = int(self.headers[length_header])
                 result = self.server.handler.do_POST(relativePath, self.rfile.read(length))
             else:
                 result = (405, None, None)
