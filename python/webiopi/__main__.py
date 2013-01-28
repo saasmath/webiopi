@@ -2,13 +2,14 @@ from webiopi.server import *
 
 def displayHelp():
     print("WebIOPi command-line usage")
-    print("python -m webiopi [-v] [-h] [-c config] [-l log] [port]")
+    print("python -m webiopi [-d] [-h] [-c config] [-l log] [port]")
     exit()
 
 def main(argv):
     port = 8000
     configfile = None
     logfile = None
+    setInfo()
     
     i = 1
     while i < len(argv):
@@ -20,8 +21,8 @@ def main(argv):
             i+=1
         elif argv[i] in ["-h", "-H", "--help"]:
             displayHelp()
-        elif argv[i] in ["-v", "--verbose"]:
-            setVerbose()
+        elif argv[i] in ["-d", "--debug"]:
+            setDebug()
         else:
             try:
                 port = int(argv[i])

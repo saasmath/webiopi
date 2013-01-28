@@ -32,7 +32,7 @@ I2C_SMBUS       = 0x0720    # SMBus transfer */
 
 
 class I2C(Bus):
-    def __init__(self, addr):
+    def __init__(self, addr, name="I2C"):
         if isinstance(addr, str):
             if addr.startswith("0b"):
                 addr = int(addr, 2)
@@ -43,10 +43,13 @@ class I2C(Bus):
         self.channel = 0
         if BOARD_REVISION > 1:
             self.channel = 1
-            
+        self.addr = addr
+        self.name = name
+
         Bus.__init__(self, "I2C", "/dev/i2c-%d" % self.channel)
         
-        if fcntl.ioctl(self.fd, I2C_SLAVE, addr):
-            raise Exception("Error bindind to I2C slave")
+        if fcntl.ioctl(self.fd, I2C_SLAVE, self.addr):
+            raise Exception("Error binding %s to I2C slave 0x%02X" % (self.name, self.addr))
         
-        info("I2C binded to 0x%02X slave" % addr)
+    def __str__(self):
+        return "%s(addr=0x%02X)" % (self.name, self.addr)

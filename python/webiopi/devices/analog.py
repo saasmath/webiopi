@@ -4,13 +4,13 @@ from webiopi.spi import SPI
 
 class MCP3X0X(SPI):
     def __init__(self, spiChannel, resolution, channelCount):
-        SPI.__init__(self, spiChannel, 0, 8, 10000)
+        SPI.__init__(self, spiChannel, 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
         self.resolution = resolution
         self.channelCount = channelCount
         self.MSB_MASK = 2**(resolution-8) - 1
         self.MAX = (2**resolution - 1) * 1.0 
 
-    @route("GET", "%(mcpChannel)d/value")
+    @route("GET", "%(mcpChannel)/value")
     def readChannel(self, mcpChannel, diff=False):
         if not mcpChannel in range(self.channelCount):
             raise Exception("Channel %d out of MCP range [%d-%d]" % (mcpChannel, 0, self.channelCount-1))

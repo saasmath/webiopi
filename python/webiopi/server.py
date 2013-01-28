@@ -56,8 +56,8 @@ class Server():
                         self.handler.addSerial(name, device, speed)
         
             if config.has_section("DEVICES"):
-                serials = config.items("DEVICES")
-                for (name, params) in serials:
+                devices = config.items("DEVICES")
+                for (name, params) in devices:
                     values = params.split(" ")
                     self.handler.addDevice(name, values[0], values[1:])
         

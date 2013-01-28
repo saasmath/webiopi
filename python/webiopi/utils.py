@@ -83,7 +83,7 @@ def macro(func):
 
 LOG_FORMATTER = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")        
 ROOT_LOGGER = logging.getLogger()
-ROOT_LOGGER.setLevel(logging.INFO)
+ROOT_LOGGER.setLevel(logging.WARN)
 
 CONSOLE_HANDLER = logging.StreamHandler()
 CONSOLE_HANDLER.setFormatter(LOG_FORMATTER)
@@ -91,7 +91,10 @@ ROOT_LOGGER.addHandler(CONSOLE_HANDLER)
 
 LOGGER = logging.getLogger("WebIOPi")
 
-def setVerbose():
+def setInfo():
+    ROOT_LOGGER.setLevel(logging.INFO)
+
+def setDebug():
     ROOT_LOGGER.setLevel(logging.DEBUG)
 
 def logToFile(filename):
@@ -124,8 +127,6 @@ def loadModules(bus):
         for module in FUNCTIONS[bus]["modules"]:
             subprocess.call(["modprobe", module])
         FUNCTIONS[bus]["enabled"] = True
-    else:
-        info("%s modules loaded" % bus)
 
 def unloadModules(bus):
     if len(FUNCTIONS[bus]["modules"]) == 0:

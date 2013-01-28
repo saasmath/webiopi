@@ -3,7 +3,7 @@ from webiopi.i2c import I2C
 
 class PCF8574(I2C):
     def __init__(self, addr=0x20):
-        I2C.__init__(self, addr)
+        I2C.__init__(self, addr, "PCF8574")
         
     @route("GET", "%(channel)d/value")
     def input(self, channel):

@@ -1,6 +1,10 @@
 from webiopi.utils import *
 from webiopi.serial import *
-import webiopi.devices.temp
+import webiopi.devices.digital as digital
+import webiopi.devices.analog as analog
+import webiopi.devices.temp as temp
+
+DEVICES = [digital, analog, temp]
 
 try :
     import _webiopi.GPIO as GPIO
@@ -8,9 +12,10 @@ except:
     pass
 
 def findDevice(name):
-    for dev in webiopi.devices.temp.__all__:
-        if dev.__name__.split(".")[-1] == name:
-            return dev
+    for devices in DEVICES: 
+        for dev in dir(devices):
+            if dev.split(".")[-1] == name:
+                return getattr(devices, dev)
     return None
 
 class RESTHandler():
@@ -30,9 +35,12 @@ class RESTHandler():
     def addSerial(self, name, device, speed):
         serial = Serial(speed, "/dev/%s" % device)
         self.serials[name] = serial
+        info("%s mapped to REST API /serial/%s" % (serial, name))
         
     def addDevice(self, name, device, args):
         devClass = findDevice(device)
+        if devClass == None:
+            raise Exception("Device driver not found for %s" % device)
         if len(args) > 0:
             dev = devClass(*args)
         else:
@@ -45,6 +53,7 @@ class RESTHandler():
                 funcs[func.method][func.path] = func
         
         self.devices[name] = {'device': dev, 'functions': funcs}
+        info("%s mapped to REST API /device/%s" % (dev, name))
 
     def getJSON(self):
         json = "{"

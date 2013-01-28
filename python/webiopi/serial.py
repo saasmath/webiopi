@@ -14,6 +14,7 @@ class Serial(Bus):
         aname = "B%d" % baudrate
         if not hasattr(termios, aname):
             raise Exception("Unsupported baudrate")
+        self.baudrate = baudrate
 
         Bus.__init__(self, "UART", device, os.O_RDWR | os.O_NOCTTY)
         fcntl.fcntl(self.fd, fcntl.F_SETFL, os.O_NDELAY)
@@ -33,16 +34,19 @@ class Serial(Bus):
         options[2] &= ~termios.CSIZE
         options[2] |= termios.CS8
 
-	# lflag
+        # lflag
         options[3] = 0
 
         speed = getattr(termios, aname)
-        # ispeed
+        # input speed
         options[4] = speed
-        # ospeed
+        # output speed
         options[5] = speed
         
         termios.tcsetattr(self.fd, termios.TCSADRAIN, options)
+        
+    def __str__(self):
+        return "Serial(%s, %dbps)" % (self.device, self.baudrate)
     
     def available(self):
         s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)

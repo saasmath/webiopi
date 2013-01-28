@@ -98,7 +98,7 @@ chmod 0755 /usr/bin/webiopi-passwd
 # Display WebIOPi usages
 echo "WebIOPi successfully installed"
 for python in $INSTALLED; do
-        echo "* To start WebIOPi with $python\t: sudo $python -m webiopi [-v] [-h] [-c config] [-l log] [port]"
+        echo "* To start WebIOPi with $python\t: sudo $python -m webiopi [-d] [-h] [-c config] [-l log] [port]"
 done
 echo
 echo "* To start WebIOPi at boot\t: sudo update-rc.d webiopi defaults"

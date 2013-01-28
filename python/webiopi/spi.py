@@ -71,10 +71,10 @@ SPI_IOC_RD_MAX_SPEED_HZ     = _IOR(SPI_IOC_MAGIC, 4, 4)
 SPI_IOC_WR_MAX_SPEED_HZ     = _IOW(SPI_IOC_MAGIC, 4, 4)
 
 class SPI(Bus):
-    def __init__(self, channel=0, mode=0, bits=8, speed=0):
+    def __init__(self, channel=0, mode=0, bits=8, speed=0, name="SPI"):
         Bus.__init__(self, "SPI", "/dev/spidev0.%d" % channel)
-
         self.channel = channel
+
         val8 = array.array('B', [0])
         val8[0] = mode
         if fcntl.ioctl(self.fd, SPI_IOC_WR_MODE, val8):
@@ -102,7 +102,10 @@ class SPI(Bus):
         self.speed = struct.unpack('I', val32)[0]
         assert((self.speed == speed) or (speed == 0))
         
-        info("SPI channel %d configured with Mode %d, %dbits, %dHz" % (self.channel, self.mode, self.bits, self.speed))
+        self.name = name
+    
+    def __str__(self):
+        return "%s(channel=%d, mode=%d, speed=%dHz)" % (self.name, self.channel, self.mode, self.speed)
         
     def xfer(self, txbuff=None):
         length = len(txbuff)
