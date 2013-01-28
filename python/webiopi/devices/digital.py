@@ -13,9 +13,12 @@ class PCF8574(I2C):
 
     @route("POST", "%(channel)d/value/%(value)d")
     def output(self, channel, value):
-        b  = self.readByte()
-        b &= ~(1 << channel)
-        b |= value << channel
+        mask = 1 << channel
+        b = self.readByte()
+        if value:
+            b |= mask
+        else:
+            b &= ~mask
         self.writeBytes(b)
         return self.input(channel)  
 

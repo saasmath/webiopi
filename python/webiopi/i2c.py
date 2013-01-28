@@ -40,10 +40,13 @@ class I2C(Bus):
                 addr = int(addr, 16)
             else:
                 addr = int(addr)
-        
-        channel = 0
+        self.channel = 0
         if BOARD_REVISION > 1:
-            channel = 1
-        Bus.__init__(self, "I2C", "/dev/i2c-%d" % channel)
-        fcntl.ioctl(self.fd, I2C_SLAVE, addr)
+            self.channel = 1
+            
+        Bus.__init__(self, "I2C", "/dev/i2c-%d" % self.channel)
+        
+        if fcntl.ioctl(self.fd, I2C_SLAVE, addr):
+            raise Exception("Error bindind to I2C slave")
+        
         info("I2C binded to 0x%02X slave" % addr)
