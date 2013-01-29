@@ -1,6 +1,6 @@
 # Imports
 import webiopi
-import time
+webiopi.setDebug()
 
 # Retrieve GPIO lib
 GPIO = webiopi.GPIO
@@ -20,22 +20,22 @@ def myMacroWithoutArgs():
 
 # Example loop which toggle GPIO 7 each 5 seconds
 def loop():
-    GPIO.output(7, not GPIO.input(7))
-    time.sleep(5)        
+    GPIO.output(22, not GPIO.input(22))
+    webiopi.sleep(5)        
 
 # -------------------------------------------------- #
 # Initialization part                                #
 # -------------------------------------------------- #
 
 # Setup GPIOs
-GPIO.setFunction(1, GPIO.IN)
-GPIO.setFunction(7, GPIO.OUT)
-GPIO.setFunction(8, GPIO.PWM)
-GPIO.setFunction(9, GPIO.PWM)
+GPIO.setFunction(21, GPIO.IN)
+GPIO.setFunction(22, GPIO.OUT)
+GPIO.setFunction(23, GPIO.PWM)
+GPIO.setFunction(24, GPIO.PWM)
 
-GPIO.output(7, GPIO.HIGH)
-GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
-GPIO.pulseAngle(9, 0)   # init to neutral
+GPIO.output(22, GPIO.HIGH)
+GPIO.pulseRatio(23, 0.5) # init to 50% duty cycle ratio
+GPIO.pulseAngle(24, 0)   # init to neutral
 
 # -------------------------------------------------- #
 # Main server part                                   #
@@ -43,7 +43,8 @@ GPIO.pulseAngle(9, 0)   # init to neutral
 
 # Instantiate the server on the port 8000, it starts immediately in its own thread
 server = webiopi.Server(port=8000, login="webiopi", password="raspberry")
-# or     webiopi.Server(port=8000, passwdfile="/etc/webiopi/passwd")
+#server = webiopi.Server(port=8000, passwdfile="/etc/webiopi/passwd")
+#server = webiopi.Server(configfile="/etc/webiopi/config")
 
 # Register the macros so you can call it with Javascript and/or REST API
 server.addMacro(myMacroWithArgs)
@@ -69,7 +70,7 @@ webiopi.runLoop(loop)
 server.stop()
 
 # Reset GPIO functions
-GPIO.setFunction(1, GPIO.IN)
-GPIO.setFunction(7, GPIO.IN)
-GPIO.setFunction(8, GPIO.IN)
-GPIO.setFunction(9, GPIO.IN)
+GPIO.setFunction(21, GPIO.IN)
+GPIO.setFunction(22, GPIO.IN)
+GPIO.setFunction(23, GPIO.IN)
+GPIO.setFunction(24, GPIO.IN)

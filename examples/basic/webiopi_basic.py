@@ -1,5 +1,6 @@
 # Imports
 import webiopi
+webiopi.setInfo()
 
 # Retrieve GPIO lib
 GPIO = webiopi.GPIO
@@ -9,14 +10,14 @@ GPIO = webiopi.GPIO
 # -------------------------------------------------- #
 
 # Setup GPIOs
-GPIO.setFunction(1, GPIO.IN)
-GPIO.setFunction(7, GPIO.OUT)
-GPIO.setFunction(8, GPIO.PWM)
-GPIO.setFunction(9, GPIO.PWM)
+GPIO.setFunction(21, GPIO.IN)
+GPIO.setFunction(22, GPIO.OUT)
+GPIO.setFunction(23, GPIO.PWM)
+GPIO.setFunction(24, GPIO.PWM)
 
-GPIO.output(7, GPIO.HIGH)
-GPIO.pulseRatio(8, 0.5) # init to 50% duty cycle ratio
-GPIO.pulseAngle(9, 0)   # init to neutral
+GPIO.output(22, GPIO.HIGH)
+GPIO.pulseRatio(23, 0.5) # init to 50% duty cycle ratio
+GPIO.pulseAngle(24, 0)   # init to neutral
 
 # -------------------------------------------------- #
 # Main server part                                   #
@@ -41,7 +42,7 @@ webiopi.runLoop()
 server.stop()
 
 # Reset GPIO functions
-GPIO.setFunction(1, GPIO.IN)
-GPIO.setFunction(7, GPIO.IN)
-GPIO.setFunction(8, GPIO.IN)
-GPIO.setFunction(9, GPIO.IN)
+GPIO.setFunction(21, GPIO.IN)
+GPIO.setFunction(22, GPIO.IN)
+GPIO.setFunction(23, GPIO.IN)
+GPIO.setFunction(24, GPIO.IN)
