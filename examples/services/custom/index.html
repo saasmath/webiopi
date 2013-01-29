@@ -14,16 +14,16 @@
 		button = webiopi().createGPIOButton(21, "SWITCH");
 		content.append(button); // append button to content div
 		               
-		// create a "LED" labeled button for GPIO 22
-		button = webiopi().createGPIOButton(22, "LED");
+		// create a "LED" labeled button for GPIO 25
+		button = webiopi().createGPIOButton(25, "LED");
 		content.append(button); // append button to content div
 		       
 		// create a button that output a single pulse
-		button = webiopi().createPulseButton("pulse", "Pulse", 22);
+		button = webiopi().createPulseButton("pulse", "Pulse", 25);
 		content.append(button); // append button to content div
 		
-		// create a button which output a bit sequence on GPIO 22 with a 100ms period 
-		button = webiopi().createSequenceButton("sos", "S.O.S 1", 22, 100, "01010100110011001100101010");
+		// create a button which output a bit sequence on GPIO 25 with a 100ms period 
+		button = webiopi().createSequenceButton("sos", "S.O.S 1", 25, 100, "01010100110011001100101010");
 		content.append(button); // append button to content div
 		       
 		// the previous button will always output the same sequence
@@ -58,17 +58,17 @@
 	});
 		
 	function mousedown() {
-		webiopi().setValue(22, 1);
+		webiopi().setValue(25, 1);
 	}
 	
 	function mouseup() {
-		webiopi().setValue(22, 0);
+		webiopi().setValue(25, 0);
 	}
 	
 	function outputSequence() {
 		var sequence = "01010100110011001100101010" // S.O.S. morse code or whatever you want
-		// output sequence on gpio 22 with a 100ms period
-		webiopi().outputSequence(22, 100, sequence, sequenceCallback);
+		// output sequence on gpio 25 with a 100ms period
+		webiopi().outputSequence(25, 100, sequence, sequenceCallback);
 	}
 	
 	function sequenceCallback(gpio, data) {

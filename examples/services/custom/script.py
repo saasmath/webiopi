@@ -5,9 +5,9 @@ webiopi.setDebug()
 # Retrieve GPIO lib
 GPIO = webiopi.GPIO
 SWITCH = 21
-LED    = 23
-SERVO  = 24
-RELAY  = 25
+SERVO  = 23
+LED0   = 24
+LED1   = 25
 
 # -------------------------------------------------- #
 # Macro definition part - Mapped to REST API         #
@@ -30,20 +30,20 @@ def myMacroWithoutArgs():
 def setup():
     # Setup GPIOs
     GPIO.setFunction(SWITCH, GPIO.IN)
-    GPIO.setFunction(LED, GPIO.PWM)
     GPIO.setFunction(SERVO, GPIO.PWM)
-    GPIO.setFunction(RELAY, GPIO.OUT)
+    GPIO.setFunction(LED0, GPIO.PWM)
+    GPIO.setFunction(LED1, GPIO.OUT)
     
-    GPIO.pulseRatio(LED, 0.5) # init to 50% duty cycle ratio
     GPIO.pulseAngle(SERVO, 0)   # init to neutral
-    GPIO.output(RELAY, GPIO.HIGH)
+    GPIO.pulseRatio(LED0, 0.5)  # init to 50% duty cycle ratio
+    GPIO.output(LED1, GPIO.HIGH)
 
 # -------------------------------------------------- #
 # Loop execution part - WebIOPi will call loop()     #
 # -------------------------------------------------- #
-# Example loop which toggle RELAY each 5 seconds
+# Example loop which toggle LED each 5 seconds
 def loop():
-    GPIO.output(RELAY, not GPIO.input(RELAY))
+    GPIO.output(LED1, not GPIO.input(LED1))
     webiopi.sleep(5)        
 
 # -------------------------------------------------- #
@@ -52,6 +52,6 @@ def loop():
 def destroy():
     # Reset GPIO functions
     GPIO.setFunction(SWITCH, GPIO.IN)
-    GPIO.setFunction(LED, GPIO.IN)
     GPIO.setFunction(SERVO, GPIO.IN)
-    GPIO.setFunction(RELAY, GPIO.IN)
+    GPIO.setFunction(LED0, GPIO.IN)
+    GPIO.setFunction(LED1, GPIO.IN)
