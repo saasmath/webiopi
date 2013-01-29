@@ -1,4 +1,5 @@
 import os
+import imp
 from webiopi import rest
 from webiopi import coap
 from webiopi import http
@@ -11,9 +12,11 @@ else:
 
 class Server():
     def __init__(self, port=8000, context="webiopi", index="index.html", login=None, password=None, passwdfile=None, coap_port=5683, configfile=None):
+        self.modules = {}
         self.handler = rest.RESTHandler()
         self.host = getLocalIP()
         self.http_port = port
+
         if port == None:
             self.http_enabled = False
         else:
@@ -36,6 +39,17 @@ class Server():
             config = parser.ConfigParser()
             config.optionxform = str
             config.read(configfile)
+            
+            if config.has_section("SCRIPTS"):
+                scripts = config.items("SCRIPTS")
+                for (name, script) in scripts:
+                    info("Loading %s script : %s" % (name, script))
+                    module = imp.load_source(name, script)
+                    for aname in dir(module):
+                        attr = getattr(module, aname)
+                        if callable(attr) and hasattr(attr, "macro"):
+                            self.handler.addMacro(attr)
+                    self.modules[name] = module
             
             if config.has_section("HTTP"):
                 self.http_enabled = config.getboolean("HTTP", "enabled")
@@ -84,6 +98,11 @@ class Server():
             self.context = "/" + self.context
         if not self.context.endswith("/"):
             self.context += "/"
+            
+        for name in self.modules:
+            module = self.modules[name]
+            if hasattr(module, "setup"):
+                module.setup()
 
         if self.http_enabled:
             self.http_server = http.HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
@@ -97,8 +116,8 @@ class Server():
         else:
             self.coap_server = None
     
-    def addMacro(self, callback):
-        self.handler.addMacro(callback)
+    def addMacro(self, macro):
+        self.handler.addMacro(macro)
         
     def stop(self):
         if self.http_server:
@@ -106,4 +125,10 @@ class Server():
         if self.coap_server:
             self.coap_server.stop()
         self.handler.stop()
+        for name in self.modules:
+            module = self.modules[name]
+            if hasattr(module, "destroy"):
+                module.destroy()
+
+
 
