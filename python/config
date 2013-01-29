@@ -2,7 +2,7 @@
 # Load custom scripts syntax :
 # name = sourcefile
 # each sourcefile may have setup, loop and destroy functions and macros
-#blink = /home/pi/blink/script.py
+#blink = /home/pi/webiopi/examples/services/custom/script.py
 
 [HTTP]
 # HTTP Server configuration
@@ -14,7 +14,7 @@ port = 8000
 passwd-file = /etc/webiopi/passwd
 
 # Use doc-root to change default HTML and resource files location
-#doc-root = /home/pi/blink/htdocs
+#doc-root = /home/pi/webiopi/examples/services/custom
 
 # Use welcome-file to change the default "Welcome" file
 #welcome-file = index.html
