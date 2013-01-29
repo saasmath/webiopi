@@ -18,28 +18,45 @@ except:
     pass
 
 class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
-    def __init__(self, host, port, context, index, handler, auth=None):
+    def __init__(self, host, port, handler, context, docroot, index, auth=None):
         BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
-        threading.Thread.__init__(self)
-
-        self.docroot = "/usr/share/webiopi/htdocs"
+        threading.Thread.__init__(self, name="HTTPThread")
         self.host = host
         self.port = port
-        self.context = context
-        self.index = index
+
+        if context:
+            self.context = context
+            if not self.context.startswith("/"):
+                self.context = "/" + self.context
+            if not self.context.endswith("/"):
+                self.context += "/"
+        else:
+            self.context = "/"
+            
+
+        if docroot:
+            self.docroot = docroot
+        else:
+            self.docroot = "/usr/share/webiopi/htdocs"
+
+        if index:
+            self.index = index
+        else:
+            self.index = "index.html"
+            
         self.handler = handler
         self.auth = auth
 
+        self.running = True
         self.start()
             
     def run(self):
         info("HTTP Server binded on http://%s:%s%s" % (self.host, self.port, self.context))
-        self.running = True
         try:
             self.serve_forever()
         except Exception as e:
-            if self.running:
-                error("%s" % e)
+            if self.running == True:
+                exception(e)
         info("HTTP Server stopped")
 
     def stop(self):

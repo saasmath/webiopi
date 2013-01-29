@@ -35,12 +35,12 @@ def main(argv):
 
     info("Starting %s" % VERSION_STRING)
     server = Server(port=port, configfile=configfile)
-    runLoop()
+    waitForSignal()
     server.stop()
 
 if __name__ == "__main__":
     try:
         main(sys.argv)
     except Exception as e:
-        error(e)
-        exit()
+        exception(e)
+        stop()

@@ -1,5 +1,4 @@
 import os
-import imp
 from webiopi import rest
 from webiopi import coap
 from webiopi import http
@@ -11,29 +10,28 @@ else:
     import ConfigParser as parser
 
 class Server():
-    def __init__(self, port=8000, context="webiopi", index="index.html", login=None, password=None, passwdfile=None, coap_port=5683, configfile=None):
-        self.modules = {}
+    def __init__(self, port=8000, coap_port=5683, login=None, password=None, passwdfile=None, configfile=None):
         self.handler = rest.RESTHandler()
         self.host = getLocalIP()
-        self.http_port = port
 
-        if port == None:
-            self.http_enabled = False
+        http_port = port
+        if http_port != None and http_port > 0:
+            http_enabled = True
         else:
-            self.http_enabled = True
+            http_enabled = False
 
-        self.context = context
-        self.index = index
-        self.auth = None
-        
-        self.coap_port = coap_port
-        if coap_port == None:
-            self.coap_enabled = False
-            multicast = False
-        else:
+        if coap_port != None and coap_port > 0:
             self.coap_enabled = True
             multicast = True
+        else:
+            self.coap_enabled = False
+            multicast = False
         
+        context = None
+        docroot = None
+        index = None
+        auth = None
+
         if configfile != None and os.path.exists(configfile):
             info("Loading configuration from %s" % configfile)
             config = parser.ConfigParser()
@@ -42,24 +40,29 @@ class Server():
             
             if config.has_section("SCRIPTS"):
                 scripts = config.items("SCRIPTS")
-                for (name, script) in scripts:
-                    info("Loading %s script : %s" % (name, script))
-                    module = imp.load_source(name, script)
-                    for aname in dir(module):
-                        attr = getattr(module, aname)
-                        if callable(attr) and hasattr(attr, "macro"):
-                            self.handler.addMacro(attr)
-                    self.modules[name] = module
+                for (name, source) in scripts:
+                    loadScript(name, source, self.handler)
             
             if config.has_section("HTTP"):
-                self.http_enabled = config.getboolean("HTTP", "enabled")
-                self.http_port = config.getint("HTTP", "port")
-                passwdfile = config.get("HTTP", "passwd-file")
+                if config.has_option("HTTP", "enabled"):
+                    http_enabled = config.getboolean("HTTP", "enabled")
+                if config.has_option("HTTP", "port"):
+                    http_port = config.getint("HTTP", "port")
+                if config.has_option("HTTP", "passwd-file"):
+                    passwdfile = config.get("HTTP", "passwd-file")
+                if config.has_option("HTTP", "doc-root"):
+                    docroot = config.get("HTTP", "doc-root")
+                if config.has_option("HTTP", "welcome-file"):
+                    index = config.get("HTTP", "welcome-file")
+                
 
             if config.has_section("COAP"):
-                self.coap_enabled = config.getboolean("COAP", "enabled")
-                self.coap_port = config.getint("COAP", "port")
-                multicast = config.getboolean("COAP", "multicast")
+                if config.has_option("COAP", "enabled"):
+                    coap_enabled = config.getboolean("COAP", "enabled")
+                if config.has_option("COAP", "port"):
+                    coap_port = config.getint("COAP", "port")
+                if config.has_option("COAP", "multicast"):
+                    multicast = config.getboolean("COAP", "multicast")
 
             if config.has_section("SERIAL"):
                 serials = config.items("SERIAL")
@@ -78,9 +81,9 @@ class Server():
         if passwdfile != None:
             if os.path.exists(passwdfile):
                 f = open(passwdfile)
-                self.auth = f.read().strip(" \r\n")
+                auth = f.read().strip(" \r\n")
                 f.close()
-                if len(self.auth) > 0:
+                if len(auth) > 0:
                     info("Access protected using %s" % passwdfile)
                 else:
                     info("Passwd file %s is empty" % passwdfile)
@@ -88,29 +91,19 @@ class Server():
                 error("Passwd file %s not found" % passwdfile)
             
         elif login != None or password != None:
-            self.auth = encodeAuth(login, password)
+            auth = encodeAuth(login, password)
             info("Access protected using login/password")
             
-        if self.auth == None or len(self.auth) == 0:
+        if auth == None or len(auth) == 0:
             warn("Access unprotected")
-            
-        if not self.context.startswith("/"):
-            self.context = "/" + self.context
-        if not self.context.endswith("/"):
-            self.context += "/"
-            
-        for name in self.modules:
-            module = self.modules[name]
-            if hasattr(module, "setup"):
-                module.setup()
-
-        if self.http_enabled:
-            self.http_server = http.HTTPServer(self.host, self.http_port, self.context, self.index, self.handler, self.auth)
+        
+        if http_enabled:
+            self.http_server = http.HTTPServer(self.host, http_port, self.handler, context, docroot, index, auth)
         else:
             self.http_server = None
         
-        if self.coap_enabled:
-            self.coap_server = coap.COAPServer(self.host, self.coap_port, self.handler)
+        if coap_enabled:
+            self.coap_server = coap.COAPServer(self.host, coap_port, self.handler)
             if multicast:
                 self.coap_server.enableMulticast()
         else:
@@ -125,10 +118,6 @@ class Server():
         if self.coap_server:
             self.coap_server.stop()
         self.handler.stop()
-        for name in self.modules:
-            module = self.modules[name]
-            if hasattr(module, "destroy"):
-                module.destroy()
 
 
 

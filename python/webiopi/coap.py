@@ -363,7 +363,7 @@ class COAPClient():
 
 class COAPServer(threading.Thread):
     def __init__(self, host, port, handler):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, name="COAPThread")
         self.handler = COAPHandler(handler)
         self.host = host
         self.port = port
@@ -371,27 +371,31 @@ class COAPServer(threading.Thread):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(('', port))
         self.socket.settimeout(1)
-        self.running = False
+        self.running = True
         self.start()
         
     def run(self):
         info("CoAP Server binded on coap://%s:%s/" % (self.host, self.port))
-        self.running = True
         while self.running == True:
             try:
                 (request, client) = self.socket.recvfrom(1500)
-            except Exception as e:
+            except socket.timeout as e:
                 continue
+            except Exception as e:
+                if self.running == True:
+                    exception(e)
             
             requestBytes = bytearray(request)
             coapRequest = COAPRequest()
             coapRequest.parseByteArray(requestBytes)
-            
             coapResponse = COAPResponse()
-            self.processMessage(coapRequest, coapResponse)
-            responseBytes = coapResponse.getBytes()
 
-            self.socket.sendto(responseBytes, client)
+            try:
+                self.processMessage(coapRequest, coapResponse)
+                responseBytes = coapResponse.getBytes()
+                self.socket.sendto(responseBytes, client)
+            except Exception as e:
+                exception(e)
             
         info("CoAP Server stopped")
     

@@ -1,10 +1,12 @@
 import sys
+import imp
 import time
 import signal
 import socket
 import base64
 import hashlib
 import logging
+import threading
 import subprocess
 
 from _webiopi.GPIO import BOARD_REVISION
@@ -27,29 +29,91 @@ FUNCTIONS = {
 
 SERIALS = {}
 DEVICES = {}
+SCRIPTS = {}
         
+LOG_FORMATTER = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")        
+ROOT_LOGGER = logging.getLogger()
+ROOT_LOGGER.setLevel(logging.WARN)
+
+CONSOLE_HANDLER = logging.StreamHandler()
+CONSOLE_HANDLER.setFormatter(LOG_FORMATTER)
+ROOT_LOGGER.addHandler(CONSOLE_HANDLER)
+
+LOGGER = logging.getLogger("WebIOPi")
+
 M_PLAIN = "text/plain"
 M_JSON  = "application/json"
 
 __running__ = False
 
-def endLoop(signum=0, frame=None):
-    global __running__
-    if __running__:
-        LOGGER.info("Stopping...")
-        __running__ = False
+TASKS = []
 
-def runLoop(func=None):
+class Task(threading.Thread):
+    def __init__(self, func, loop=False):
+        threading.Thread.__init__(self)
+        self.func = func
+        self.loop = loop
+        self.running = True
+        self.start()
+    
+    def stop(self):
+        self.running = False
+
+    def run(self):
+        if self.loop:
+            while self.running == True:
+                self.func()
+        else:
+            self.func()
+
+def stop(signum=0, frame=None):
     global __running__
+    info("Stopping...")
+    __running__ = False
+    for task in TASKS:
+        task.stop()
+
+    for name in SCRIPTS:
+        script = SCRIPTS[name]
+        if hasattr(script, "destroy"):
+            script.destroy()
+        
+def runLoop(func=None, async=False):
+    global __running__
+    global __lock__
     __running__ = True
-    signal.signal(signal.SIGINT, endLoop)
-    signal.signal(signal.SIGTERM, endLoop)
+
+    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, stop)
+
     if func != None:
-        while __running__:
-            func()
+        if async:
+            TASKS.append(Task(func, True))
+        else:
+            while __running__:
+                func()
     else:
-        while __running__:
-            time.sleep(1)
+        signal.pause()
+
+def waitForSignal():
+    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, stop)
+    signal.pause()
+    
+def loadScript(name, source, handler = None):
+    info("Loading %s from %s" % (name, source))
+    script = imp.load_source(name, source)
+    SCRIPTS[name] = script
+
+    if hasattr(script, "setup"):
+        script.setup()
+    if handler:
+        for aname in dir(script):
+            attr = getattr(script, aname)
+            if callable(attr) and hasattr(attr, "macro"):
+                handler.addMacro(attr)
+    if hasattr(script, "loop"):
+        runLoop(script.loop, True)
 
 def encodeAuth(login, password):
     abcd = "%s:%s" % (login, password)
@@ -85,16 +149,6 @@ def macro(func):
     func.macro = True
     return func
 
-LOG_FORMATTER = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")        
-ROOT_LOGGER = logging.getLogger()
-ROOT_LOGGER.setLevel(logging.WARN)
-
-CONSOLE_HANDLER = logging.StreamHandler()
-CONSOLE_HANDLER.setFormatter(LOG_FORMATTER)
-ROOT_LOGGER.addHandler(CONSOLE_HANDLER)
-
-LOGGER = logging.getLogger("WebIOPi")
-
 def setInfo():
     ROOT_LOGGER.setLevel(logging.INFO)
 
@@ -117,6 +171,9 @@ def warn(message):
 
 def error(message):
     LOGGER.error(message)
+
+def exception(message):
+    LOGGER.exception(message)
 
 def printBytes(bytes):
     for i in range(0, len(bytes)):
