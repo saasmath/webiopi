@@ -17,6 +17,8 @@ try :
 except:
     pass
 
+WEBIOPI_DOCROOT = "/usr/share/webiopi/htdocs"
+
 class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
     def __init__(self, host, port, handler, context, docroot, index, auth=None):
         BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
@@ -32,12 +34,11 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
                 self.context += "/"
         else:
             self.context = "/"
-            
 
         if docroot:
             self.docroot = docroot
         else:
-            self.docroot = "/usr/share/webiopi/htdocs"
+            self.docroot = "."
 
         if index:
             self.index = index
@@ -118,21 +119,26 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def serveFile(self, relativePath):
         if relativePath == "":
             relativePath = self.server.index
-                        
-        realPath = relativePath;
-        
-        if not os.path.exists(realPath):
-            realPath = self.server.docroot + os.sep + relativePath
+
+        path = self.server.docroot + os.sep + relativePath
+
+        if not os.path.exists(path):
+            path = relativePath;
             
-        if not os.path.exists(realPath):
+        if not os.path.exists(path):
+            path = WEBIOPI_DOCROOT + os.sep + relativePath;
+            
+        if not os.path.exists(path):
             return self.sendResponse(404, "Not Found")
 
-        realPath = os.path.realpath(realPath)
+        realPath = os.path.realpath(path)
         
         if realPath.endswith(".py"):
             return self.sendResponse(403, "Not Authorized")
         
-        if not (realPath.startswith(self.server.docroot) or realPath.startswith(os.getcwd())):
+        if not (realPath.startswith(self.server.docroot) 
+                or realPath.startswith(os.getcwd())
+                or realPath.startswith(WEBIOPI_DOCROOT)):
             return self.sendResponse(403, "Not Authorized")
         
         if os.path.isdir(realPath):
