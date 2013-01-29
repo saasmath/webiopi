@@ -2,9 +2,9 @@ from webiopi.utils import *
 from webiopi.serial import *
 import webiopi.devices.digital as digital
 import webiopi.devices.analog as analog
-import webiopi.devices.temp as temp
+import webiopi.devices.sensor as sensor
 
-PACKAGES = [digital, analog, temp]
+PACKAGES = [digital, analog, sensor]
 MACROS = {}
 
 try :
