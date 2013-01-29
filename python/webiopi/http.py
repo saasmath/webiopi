@@ -1,11 +1,11 @@
-from webiopi.utils import *
-
 import os
 import threading
 import re
 import codecs
 import mimetypes as mime
 import logging
+
+from webiopi.utils import *
 
 if PYTHON_MAJOR >= 3:
     import http.server as BaseHTTPServer

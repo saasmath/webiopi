@@ -14,6 +14,10 @@ PYTHON_MAJOR = sys.version_info.major
 VERSION = '0.5.4'
 VERSION_STRING = "WebIOPi/%s/Python%d.%d" % (VERSION, sys.version_info.major, sys.version_info.minor)
 
+MAPPING = [[], [], []]
+MAPPING[1] = ["V33", "V50", 0, "V50", 1, "GND", 4, 14, "GND", 15, 17, 18, 21, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
+MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
+
 FUNCTIONS = {
     "I2C": {"enabled": False, "gpio": {0:"SDA", 1:"SCL", 2:"SDA", 3:"SCL"}, "modules": ["i2c-bcm2708", "i2c-dev"]},
     "SPI": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}, "modules": ["spi-bcm2708", "spidev"]},
@@ -21,10 +25,9 @@ FUNCTIONS = {
     "ONEWIRE": {"enabled": False, "gpio": {4:"DATA"}, "modules": ["w1-gpio"]}
 }
 
-MAPPING = [[], [], []]
-MAPPING[1] = ["V33", "V50", 0, "V50", 1, "GND", 4, 14, "GND", 15, 17, 18, 21, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
-MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "GND", 22, 23, "V33", 24, 10, "GND", 9, 25, 11, 8, "GND", 7]
-
+SERIALS = {}
+DEVICES = {}
+        
 M_PLAIN = "text/plain"
 M_JSON  = "application/json"
 
@@ -160,5 +163,11 @@ def checkAllBus():
     for bus in FUNCTIONS:
         if modulesLoaded(bus):
             FUNCTIONS[bus]["enabled"] = True
+            
+def deviceInstance(name):
+    if name in DEVICES:
+        return DEVICES[name]["device"]
+    else:
+        return None
 
 checkAllBus()

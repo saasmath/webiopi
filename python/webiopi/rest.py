@@ -4,7 +4,8 @@ import webiopi.devices.digital as digital
 import webiopi.devices.analog as analog
 import webiopi.devices.temp as temp
 
-DEVICES = [digital, analog, temp]
+PACKAGES = [digital, analog, temp]
+MACROS = {}
 
 try :
     import _webiopi.GPIO as GPIO
@@ -12,29 +13,24 @@ except:
     pass
 
 def findDevice(name):
-    for devices in DEVICES: 
+    for devices in PACKAGES: 
         for dev in dir(devices):
             if dev.split(".")[-1] == name:
                 return getattr(devices, dev)
     return None
 
 class RESTHandler():
-    def __init__(self):
-        self.callbacks = {}
-        self.serials = {}
-        self.devices = {}
-        
     def stop(self):
-        for name in self.serials:
-            serial = self.serials[name]
+        for name in SERIALS:
+            serial = SERIALS[name]
             serial.close()
 
-    def addMacro(self, callback):
-        self.callbacks[callback.__name__] = callback
+    def addMacro(self, macro):
+        MACROS[macro.__name__] = macro
         
     def addSerial(self, name, device, speed):
         serial = Serial(speed, "/dev/%s" % device)
-        self.serials[name] = serial
+        SERIALS[name] = serial
         info("%s mapped to REST API /serial/%s" % (serial, name))
         
     def addDevice(self, name, device, args):
@@ -52,7 +48,7 @@ class RESTHandler():
             if callable(func) and hasattr(func, "routed"):
                 funcs[func.method][func.path] = func
         
-        self.devices[name] = {'device': dev, 'functions': funcs}
+        DEVICES[name] = {'device': dev, 'functions': funcs}
         info("%s mapped to REST API /device/%s" % (dev, name))
         
     def extract(self, fmtArray, pathArray, args):
@@ -99,11 +95,11 @@ class RESTHandler():
     def getDeviceRoute(self, method, path):
         pathArray = path.split("/")
         deviceName = pathArray[0]
-        if not deviceName in self.devices:
+        if not deviceName in DEVICES:
             return (None, deviceName + " Not Found")
 
         pathArray = pathArray[1:]
-        funcs = self.devices[deviceName]["functions"][method]
+        funcs = DEVICES[deviceName]["functions"][method]
         functionName = "/".join(pathArray)
         if functionName in funcs:
             return (funcs[functionName], {})
@@ -197,9 +193,9 @@ class RESTHandler():
         elif relativePath.startswith("serial/"):
             device = relativePath.replace("serial/", "")
             if device == "*":
-                return (200, ("%s" % [a for a in self.serials.keys()]).replace("'", '"'), M_JSON)
-            if device in self.serials:
-                serial = self.serials[device]
+                return (200, ("%s" % [a for a in SERIALS.keys()]).replace("'", '"'), M_JSON)
+            if device in SERIALS:
+                serial = SERIALS[device]
                 if serial.available() > 0:
                     data = serial.read(serial.available())
                     return (200, data.decode(), M_PLAIN)
@@ -289,17 +285,17 @@ class RESTHandler():
                 return (404, operation + " Not Found", M_PLAIN)
                 
         elif relativePath.startswith("macros/"):
-            (mode, fname, value) = relativePath.split("/")
-            if fname in self.callbacks:
-                callback = self.callbacks[fname]
+            (mode, mname, value) = relativePath.split("/")
+            if mname in MACROS:
+                macro = MACROS[mname]
 
                 if ',' in value:
                     args = value.split(',')
-                    result = callback(*args)
+                    result = macro(*args)
                 elif len(value) > 0:
-                    result = callback(value)
+                    result = macro(value)
                 else:
-                    result = callback()
+                    result = macro()
                      
                 response = ""
                 if result:
@@ -311,8 +307,8 @@ class RESTHandler():
                 
         elif relativePath.startswith("serial/"):
             device = relativePath.replace("serial/", "")
-            if device in self.serials:
-                serial = self.serials[device]
+            if device in SERIALS:
+                serial = SERIALS[device]
                 serial.write(data)
                 return (200, None, None)
             else:
