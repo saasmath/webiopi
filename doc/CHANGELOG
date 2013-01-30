@@ -4,10 +4,38 @@
    Added CoAP (draft-13) implementation (Server and Client)
    Added Python WebIOPi Client class (HTTP or CoAP with HTTP fallback)
    Added Python WebIOPi MulticastClient class (CoAP)
+   Added Serial support
+     Python lightweight Serial driver with no dependency
+     REST API Serial mapping
+     Javascript Serial class
+     Serial monitor web app
+   Added I2C support
+     Python lightweight I2C driver with no dependency
+     Automatically load required linux modules : i2c-bcm2808, i2c-dev
+   Added SPI support
+     Python lightweight SPI driver with no dependency
+     Automatically load required linux modules : spi-bcm2808, spidev
+   Added device drivers :
+     webiopi.devices.sensor.TMP102 - I2C Temperature sensor
+     webiopi.devices.digital.PCF8574 - I2C IO Expander
+     webiopi.devices.analog.MCP3004 - SPI 10-bits 4-channels ADC
+     webiopi.devices.analog.MCP3008 - SPI 10-bits 8-channels ADC
+     webiopi.devices.analog.MCP3204 - SPI 12-bits 4-channels ADC
+     webiopi.devices.analog.MCP3208 - SPI 12-bits 8-channels ADC
    Added /etc/webiopi/config file
-   Setup script forces apt-get update
+     GPIO start/stop config
+     Script loading facility
+     HTTP server config
+     CoAP server config
+     Serial lines config
+     Device specific config
+   Automatic device REST mapping
+   Added Javascript GPIO getValue and getFunction methods
+   Added Server logging facility
+   Fixed error fetching python-dev package during setup
    Fixed webiopi-passwd missing execution flag when installing with PiStore
    Fixed binary file serving
+   Fixed iOS6 Safari Mobile bug
 
 
 ==0.5.3 (01/07/13)==
