@@ -1,4 +1,3 @@
-#------------------------------------------------------------------------#
 [GPIO]
 # Initialize following GPIOs with given function and optional value
 # This is used during WebIOPi start process
@@ -7,8 +6,8 @@
 #24 = OUT 0
 #25 = OUT 1
 
-
 #------------------------------------------------------------------------#
+
 [~GPIO]
 # Reset following GPIOs with given function and optional value
 # This is used at the end of WebIOPi stop process
@@ -17,16 +16,16 @@
 #24 = IN
 #25 = OUT 0
 
-
 #------------------------------------------------------------------------#
+
 [SCRIPTS]
 # Load custom scripts syntax :
 # name = sourcefile
 #   each sourcefile may have setup, loop and destroy functions and macros
-#blink = /home/pi/webiopi/examples/services/custom/script.py
-
+#myscript = /home/pi/webiopi/examples/scripts/macros/script.py
 
 #------------------------------------------------------------------------#
+
 [REST]
 # By default, REST API allows to GET/POST on all GPIOs
 # Use gpio-export to limit GPIO available through REST API  
@@ -41,8 +40,8 @@
 # Uncomment to disable automatic device mapping
 #device-mapping = false
 
-
 #------------------------------------------------------------------------#
+
 [HTTP]
 # HTTP Server configuration
 enabled = true
@@ -53,13 +52,13 @@ port = 8000
 passwd-file = /etc/webiopi/passwd
 
 # Use doc-root to change default HTML and resource files location
-#doc-root = /home/pi/webiopi/examples/services/custom
+#doc-root = /home/pi/webiopi/examples/scripts/macros
 
 # Use welcome-file to change the default "Welcome" file
 #welcome-file = index.html
 
-
 #------------------------------------------------------------------------#
+
 [COAP]
 # CoAP Server configuration
 enabled = true
@@ -67,8 +66,8 @@ port = 5683
 # Enable CoAP multicast
 multicast = true
 
-
 #------------------------------------------------------------------------#
+
 [SERIAL]
 # Serial lines configuration syntax:
 # name = device baudrate
@@ -86,8 +85,8 @@ multicast = true
 #usb0 = ttyUSB0 9600
 #usb1 = ttyACM0 9600
 
-
 #------------------------------------------------------------------------#
+
 [DEVICES]
 # Specific device configuration syntax:
 # name = device [args...]
@@ -98,8 +97,8 @@ multicast = true
 # Devices are also accessible in custom scripts using deviceInstance(name)
 # See device driver doc for methods and URI scheme available
 
-#sensor0 = TMP102
-#sensor1 = BMP085
-
-#digital0 = PCF8574
-#analog0 = MCP3208
+#temp0		= TMP102
+#temp1		= TMP102 0x49
+#pressure0	= BMP085
+#expander0	= PCF8574
+#analog0	= MCP3208

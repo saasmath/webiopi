@@ -15,7 +15,7 @@
 		content.append(button); // append button to content div
 		               
 		// create a "LED" labeled button for GPIO 25
-		button = webiopi().createGPIOButton(25, "LED");
+		button = webiopi().createGPIOButton(25, "LED1");
 		content.append(button); // append button to content div
 		       
 		// create a button that output a single pulse
@@ -48,12 +48,13 @@
 		button = webiopi().createButton("hold", "Hold", mousedown, mouseup);
 		content.append(button);
 		
-		// Only for Chrome and Safari, create a slider that pulse out a 0-100% duty cycle ratio on GPIO 23
-		button = webiopi().createRatioSlider(23);
+		// Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 23
+		button = webiopi().createAngleSlider(23);
+
+		// Only for Chrome and Safari, create a slider that pulse out a 0-100% duty cycle ratio on GPIO 24
+		button = webiopi().createRatioSlider(24);
 		content.append(button);
 		       
-		// Only for Chrome and Safari, create a slider that pulse out a -45 to +45° angle on GPIO 24
-		button = webiopi().createAngleSlider(24);
 		content.append(button);
 	});
 		
