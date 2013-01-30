@@ -10,6 +10,9 @@ class MCP3X0X(SPI):
         self.MSB_MASK = 2**(resolution-8) - 1
         self.MAX = (2**resolution - 1) * 1.0 
 
+    def __str__(self):
+        return "%s(channel=%d)" % (self.name, self.channel)
+
     @route("GET", "%(mcpChannel)d/value", "%d")
     def readChannel(self, mcpChannel, diff=False):
         if not mcpChannel in range(self.channelCount):
