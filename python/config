@@ -1,3 +1,17 @@
+[GPIO]
+# Initialize following GPIOs with given function and optional value
+# This is used during WebIOPi start process
+21 = IN
+24 = OUT 0
+25 = OUT 1
+
+[~GPIO]
+# Reset following GPIOs with given function and optional value
+# This is used at the end of WebIOPi stop process
+21 = IN
+24 = IN
+25 = OUT 0
+
 [SCRIPTS]
 # Load custom scripts syntax :
 # name = sourcefile

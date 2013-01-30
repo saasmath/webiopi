@@ -8,8 +8,9 @@ import hashlib
 import logging
 import threading
 import subprocess
+import _webiopi.GPIO as GPIO
 
-from _webiopi.GPIO import BOARD_REVISION
+BOARD_REVISION = GPIO.BOARD_REVISION
 
 PYTHON_MAJOR = sys.version_info.major
 
@@ -77,6 +78,8 @@ def stop(signum=0, frame=None):
         script = SCRIPTS[name]
         if hasattr(script, "destroy"):
             script.destroy()
+            
+    GPIODestroy()
         
 def runLoop(func=None, async=False):
     global __running__
@@ -99,6 +102,40 @@ def waitForSignal():
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
     signal.pause()
+
+__GPIO_SETUP__ = []
+__GPIO_DESTROY__ = []
+__STR_TO_FUNC__ = {"in": GPIO.IN, "out": GPIO.OUT}
+def addGPIO(list, gpio, params):
+    gpio = int(gpio)
+    params = params.split(" ")
+    func = __STR_TO_FUNC__[params[0].lower()]
+    value = -1
+    if len(params) > 1:
+        value = int(params[1])
+    list.append({"gpio": gpio, "func": func, "value": value})
+
+def addGPIOSetup(gpio, params):
+    addGPIO(__GPIO_SETUP__, gpio, params)
+    
+def addGPIODestroy(gpio, params):
+    addGPIO(__GPIO_DESTROY__, gpio, params)
+
+def GPIOSetup():
+    for g in __GPIO_SETUP__:
+        gpio = g["gpio"]
+        debug("Setup GPIO %d" % gpio)
+        GPIO.setFunction(gpio, g["func"])
+        if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
+            GPIO.output(gpio, g["value"])
+
+def GPIODestroy():
+    for g in __GPIO_DESTROY__:
+        gpio = g["gpio"]
+        debug("Destroy GPIO %d" % gpio)
+        GPIO.setFunction(gpio, g["func"])
+        if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
+            GPIO.output(gpio, g["value"])
     
 def loadScript(name, source, handler = None):
     info("Loading %s from %s" % (name, source))

@@ -38,6 +38,18 @@ class Server():
             config.optionxform = str
             config.read(configfile)
             
+            if config.has_section("~GPIO"):
+                gpios = config.items("~GPIO")
+                for (gpio, params) in gpios:
+                    addGPIODestroy(gpio, params)
+            
+            if config.has_section("GPIO"):
+                gpios = config.items("GPIO")
+                for (gpio, params) in gpios:
+                    addGPIOSetup(gpio, params)
+            
+            GPIOSetup()
+            
             if config.has_section("SCRIPTS"):
                 scripts = config.items("SCRIPTS")
                 for (name, source) in scripts:
