@@ -22,5 +22,3 @@ class PCF8574(I2C):
         self.writeBytes(b)
         return self.input(channel)  
 
-__all__ = [PCF8574]
-
