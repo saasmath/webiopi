@@ -22,7 +22,7 @@ def setup():
     GPIO.setup(LED0, GPIO.PWM)
     GPIO.setup(LED1, GPIO.OUT)
     
-    GPIO.pulseAngle(SERVO, 0)   # set to 0¡ (neutral)
+    GPIO.pulseAngle(SERVO, 0)   # set to 0 (neutral)
     GPIO.pulseRatio(LED0, 0.5)  # set to 50% ratio
     GPIO.output(LED1, GPIO.HIGH)
 
