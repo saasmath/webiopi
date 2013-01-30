@@ -177,7 +177,7 @@ class RESTHandler():
             gpio = int(s_gpio)
             
             if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
-                return (403, "GPIO %d Not Authorized", None)
+                return (403, "GPIO %d Not Authorized" % gpio, None)
             
             value = None
             if operation == "value":
@@ -239,7 +239,7 @@ class RESTHandler():
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
             if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
-                return (403, "GPIO %d Not Authorized", None)
+                return (403, "GPIO %d Not Authorized" % gpio, None)
             
             if operation == "value":
                 if not self.gpio_post_value:
