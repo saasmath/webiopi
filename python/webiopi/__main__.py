@@ -2,7 +2,7 @@ from webiopi.server import *
 
 def displayHelp():
     print("WebIOPi command-line usage")
-    print("python -m webiopi [-d] [-h] [-c config] [-l log] [port]")
+    print("python -m webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]")
     exit()
 
 def main(argv):
@@ -18,6 +18,11 @@ def main(argv):
             i+=1
         elif argv[i] in ["-l", "-L", "--log-file"]:
             logfile = argv[i+1]
+            i+=1
+        elif argv[i] in ["-s", "-S", "--script-file"]:
+            scriptfile = argv[i+1]
+            scriptname = scriptfile.split("/")[-1].split(".")[0]
+            loadScript(scriptname, scriptfile)
             i+=1
         elif argv[i] in ["-h", "-H", "--help"]:
             displayHelp()
