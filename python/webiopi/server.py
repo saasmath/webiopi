@@ -21,10 +21,10 @@ class Server():
             http_enabled = False
 
         if coap_port != None and coap_port > 0:
-            self.coap_enabled = True
+            coap_enabled = True
             multicast = True
         else:
-            self.coap_enabled = False
+            coap_enabled = False
             multicast = False
         
         context = None
