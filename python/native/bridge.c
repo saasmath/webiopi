@@ -561,9 +561,12 @@ static PyObject *py_isPWMEnabled(PyObject *self, PyObject *args)
 }
 
 PyMethodDef python_methods[] = {
-	{"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)"},
-	{"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0) as string"},
-	{"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel,direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
+	{"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0)"},
+	{"getSetup", py_get_function, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0)"},
+	{"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0) as string"},
+	{"getSetupString", py_get_function_string, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0) as string"},
+	{"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Setup the GPIO channel, direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
+	{"setup", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Setup the GPIO channel, direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
 	{"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
 	{"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
 	{"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},

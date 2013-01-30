@@ -14,10 +14,10 @@ LED1   = 25
 # -------------------------------------------------- #
 def setup():
     # Setup GPIOs
-    GPIO.setFunction(SWITCH, GPIO.IN)
-    GPIO.setFunction(SERVO, GPIO.PWM)
-    GPIO.setFunction(LED0, GPIO.PWM)
-    GPIO.setFunction(LED1, GPIO.OUT)
+    GPIO.setup(SWITCH, GPIO.IN)
+    GPIO.setup(SERVO, GPIO.PWM)
+    GPIO.setup(LED0, GPIO.PWM)
+    GPIO.setup(LED1, GPIO.OUT)
     
     GPIO.pulseAngle(SERVO, 0)   # init to neutral
     GPIO.pulseRatio(LED0, 0.5)  # init to 50% duty cycle ratio
@@ -28,7 +28,7 @@ def setup():
 # -------------------------------------------------- #
 def destroy():
     # Reset GPIO functions
-    GPIO.setFunction(SWITCH, GPIO.IN)
-    GPIO.setFunction(SERVO, GPIO.IN)
-    GPIO.setFunction(LED0, GPIO.IN)
-    GPIO.setFunction(LED1, GPIO.IN)
+    GPIO.setup(SWITCH, GPIO.IN)
+    GPIO.setup(SERVO, GPIO.IN)
+    GPIO.setup(LED0, GPIO.IN)
+    GPIO.setup(LED1, GPIO.IN)
