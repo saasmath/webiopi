@@ -38,15 +38,15 @@ class Server():
             config.optionxform = str
             config.read(configfile)
             
-            if config.has_section("~GPIO"):
-                gpios = config.items("~GPIO")
-                for (gpio, params) in gpios:
-                    addGPIODestroy(gpio, params)
-            
             if config.has_section("GPIO"):
                 gpios = config.items("GPIO")
                 for (gpio, params) in gpios:
                     addGPIOSetup(gpio, params)
+            
+            if config.has_section("~GPIO"):
+                gpios = config.items("~GPIO")
+                for (gpio, params) in gpios:
+                    addGPIOReset(gpio, params)
             
             GPIOSetup()
             
@@ -54,6 +54,17 @@ class Server():
                 scripts = config.items("SCRIPTS")
                 for (name, source) in scripts:
                     loadScript(name, source, self.handler)
+            
+            if config.has_section("REST"):
+                if config.has_option("REST", "gpio-export"):
+                    exports = config.get("REST", "gpio-export")
+                    self.handler.gpio_export = [int(i) for i in exports.split(",")]
+                if config.has_option("REST", "gpio-post-value"):
+                    self.handler.gpio_post_value = config.getboolean("REST", "gpio-post-value")
+                if config.has_option("REST", "gpio-post-function"):
+                    self.handler.gpio_post_function = config.getboolean("REST", "gpio-post-function")
+                if config.has_option("REST", "device-mapping"):
+                    self.handler.device_mapping = config.getboolean("REST", "device-mapping")
             
             if config.has_section("HTTP"):
                 if config.has_option("HTTP", "enabled"):

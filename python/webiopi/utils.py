@@ -79,7 +79,7 @@ def stop(signum=0, frame=None):
         if hasattr(script, "destroy"):
             script.destroy()
             
-    GPIODestroy()
+    GPIOReset()
         
 def runLoop(func=None, async=False):
     global __running__
@@ -104,7 +104,7 @@ def waitForSignal():
     signal.pause()
 
 __GPIO_SETUP__ = []
-__GPIO_DESTROY__ = []
+__GPIO_RESET__ = []
 __STR_TO_FUNC__ = {"in": GPIO.IN, "out": GPIO.OUT}
 def addGPIO(list, gpio, params):
     gpio = int(gpio)
@@ -118,8 +118,8 @@ def addGPIO(list, gpio, params):
 def addGPIOSetup(gpio, params):
     addGPIO(__GPIO_SETUP__, gpio, params)
     
-def addGPIODestroy(gpio, params):
-    addGPIO(__GPIO_DESTROY__, gpio, params)
+def addGPIOReset(gpio, params):
+    addGPIO(__GPIO_RESET__, gpio, params)
 
 def GPIOSetup():
     for g in __GPIO_SETUP__:
@@ -129,10 +129,10 @@ def GPIOSetup():
         if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
             GPIO.output(gpio, g["value"])
 
-def GPIODestroy():
-    for g in __GPIO_DESTROY__:
+def GPIOReset():
+    for g in __GPIO_RESET__:
         gpio = g["gpio"]
-        debug("Destroy GPIO %d" % gpio)
+        debug("Reset GPIO %d" % gpio)
         GPIO.setFunction(gpio, g["func"])
         if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
             GPIO.output(gpio, g["value"])

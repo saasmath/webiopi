@@ -20,6 +20,12 @@ def findDevice(name):
     return None
 
 class RESTHandler():
+    def __init__(self):
+        self.gpio_export = []
+        self.gpio_post_value = True
+        self.gpio_post_function = True
+        self.device_mapping = True
+        
     def stop(self):
         for name in SERIALS:
             serial = SERIALS[name]
@@ -124,7 +130,11 @@ class RESTHandler():
         
         json += ', "GPIO":{\n'
         first = True
-        for gpio in range(GPIO.GPIO_COUNT):
+        if len(self.gpio_export) > 0:
+            gpios = self.gpio_export
+        else:
+            gpios = range(GPIO.GPIO_COUNT)
+        for gpio in gpios:
             if not first:
                 json += ", \n"
 
@@ -165,7 +175,10 @@ class RESTHandler():
         elif relativePath.startswith("GPIO/"):
             (mode, s_gpio, operation) = relativePath.split("/")
             gpio = int(s_gpio)
-
+            
+            if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
+                return (403, "GPIO %d Not Authorized", None)
+            
             value = None
             if operation == "value":
                 if GPIO.input(gpio):
@@ -206,6 +219,8 @@ class RESTHandler():
                 return (404, device + " Not Found", M_PLAIN)
 
         elif relativePath.startswith("device/"):
+            if not self.device_mapping:
+                return (404, None, None)
             path = relativePath.replace("device/", "")
             (func, args) = self.getDeviceRoute("GET", path)
             if func == None:
@@ -223,8 +238,12 @@ class RESTHandler():
         if relativePath.startswith("GPIO/"):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)
+            if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
+                return (403, "GPIO %d Not Authorized", None)
             
             if operation == "value":
+                if not self.gpio_post_value:
+                    return (403, None, None)
                 if value == "0":
                     GPIO.output(gpio, GPIO.LOW)
                 elif value == "1":
@@ -235,6 +254,8 @@ class RESTHandler():
                 return (200, value, M_PLAIN)
 
             elif operation == "function":
+                if not self.gpio_post_function:
+                    return (403, None, None)
                 value = value.lower()
                 if value == "in":
                     GPIO.setFunction(gpio, GPIO.IN)
@@ -315,6 +336,8 @@ class RESTHandler():
                 return (404, device + " Not Found", M_PLAIN)
 
         elif relativePath.startswith("device/"):
+            if not self.device_mapping:
+                return (404, None, None)
             path = relativePath.replace("device/", "")
             (func, args) = self.getDeviceRoute("POST", path)
             if func == None:

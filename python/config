@@ -1,23 +1,48 @@
+#------------------------------------------------------------------------#
 [GPIO]
 # Initialize following GPIOs with given function and optional value
 # This is used during WebIOPi start process
-21 = IN
-24 = OUT 0
-25 = OUT 1
+#21 = IN
+#23 = OUT 0
+#24 = OUT 0
+#25 = OUT 1
 
+
+#------------------------------------------------------------------------#
 [~GPIO]
 # Reset following GPIOs with given function and optional value
 # This is used at the end of WebIOPi stop process
-21 = IN
-24 = IN
-25 = OUT 0
+#21 = IN
+#23 = IN
+#24 = IN
+#25 = OUT 0
 
+
+#------------------------------------------------------------------------#
 [SCRIPTS]
 # Load custom scripts syntax :
 # name = sourcefile
-# each sourcefile may have setup, loop and destroy functions and macros
+#   each sourcefile may have setup, loop and destroy functions and macros
 #blink = /home/pi/webiopi/examples/services/custom/script.py
 
+
+#------------------------------------------------------------------------#
+[REST]
+# By default, REST API allows to GET/POST on all GPIOs
+# Use gpio-export to limit GPIO available through REST API  
+#gpio-export = 21, 23, 24, 25
+
+# Uncomment to forbid changing GPIO values 
+#gpio-post-value = false
+
+# Uncomment to forbid changing GPIO functions 
+#gpio-post-function = false 
+
+# Uncomment to disable automatic device mapping
+#device-mapping = false
+
+
+#------------------------------------------------------------------------#
 [HTTP]
 # HTTP Server configuration
 enabled = true
@@ -33,6 +58,8 @@ passwd-file = /etc/webiopi/passwd
 # Use welcome-file to change the default "Welcome" file
 #welcome-file = index.html
 
+
+#------------------------------------------------------------------------#
 [COAP]
 # CoAP Server configuration
 enabled = true
@@ -40,6 +67,8 @@ port = 5683
 # Enable CoAP multicast
 multicast = true
 
+
+#------------------------------------------------------------------------#
 [SERIAL]
 # Serial lines configuration syntax:
 # name = device baudrate
@@ -57,16 +86,20 @@ multicast = true
 #usb0 = ttyUSB0 9600
 #usb1 = ttyACM0 9600
 
+
+#------------------------------------------------------------------------#
 [DEVICES]
 # Specific device configuration syntax:
 # name = device [args...]
 #   name: used in the URL mapping
 #   device: device name
-#   args: (optional) see device implementation doc
-# All devices configured here are mapped on REST API /device/name
+#   args: (optional) see device driver doc
+# If enabled, devices configured here are mapped on REST API /device/name
+# Devices are also accessible in custom scripts using deviceInstance(name)
+# See device driver doc for methods and URI scheme available
 
-#temp0 = TMP102
-#weather0 = BMP085
+#sensor0 = TMP102
+#sensor1 = BMP085
 
 #digital0 = PCF8574
 #analog0 = MCP3208
