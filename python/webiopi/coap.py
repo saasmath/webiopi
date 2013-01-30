@@ -379,23 +379,20 @@ class COAPServer(threading.Thread):
         while self.running == True:
             try:
                 (request, client) = self.socket.recvfrom(1500)
+                requestBytes = bytearray(request)
+                coapRequest = COAPRequest()
+                coapRequest.parseByteArray(requestBytes)
+                coapResponse = COAPResponse()
+    
+                self.processMessage(coapRequest, coapResponse)
+                responseBytes = coapResponse.getBytes()
+                self.socket.sendto(responseBytes, client)
             except socket.timeout as e:
                 continue
             except Exception as e:
                 if self.running == True:
                     exception(e)
             
-            requestBytes = bytearray(request)
-            coapRequest = COAPRequest()
-            coapRequest.parseByteArray(requestBytes)
-            coapResponse = COAPResponse()
-
-            try:
-                self.processMessage(coapRequest, coapResponse)
-                responseBytes = coapResponse.getBytes()
-                self.socket.sendto(responseBytes, client)
-            except Exception as e:
-                exception(e)
             
         info("CoAP Server stopped")
     
