@@ -2,7 +2,7 @@ from webiopi.server import *
 
 def displayHelp():
     print("WebIOPi command-line usage")
-    print("python -m webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]")
+    print("webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]")
     exit()
 
 def main(argv):

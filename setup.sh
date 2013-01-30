@@ -85,10 +85,15 @@ echo
 # Add service/daemon script
 #if [ ! -f "/etc/init.d/webiopi" ]; then
 echo "Setting up startup script..."
-cp -rf python/webiopi.py.init /etc/init.d/webiopi
+cp -rf python/webiopi.init.sh /etc/init.d/webiopi
 chmod 0755 /etc/init.d/webiopi
 sed -i "s/python/$python/g" /etc/init.d/webiopi
 echo
+
+# Add webiopi command
+cp -rf python/webiopi.sh /usr/bin/webiopi
+sed -i "s/python/$python/g" /usr/bin/webiopi
+chmod 0755 /usr/bin/webiopi
 
 # Add webiopi-passwd command
 cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
@@ -97,12 +102,10 @@ chmod 0755 /usr/bin/webiopi-passwd
 
 # Display WebIOPi usages
 echo "WebIOPi successfully installed"
-for python in $INSTALLED; do
-        echo "* To start WebIOPi with $python\t: sudo $python -m webiopi [-d] [-h] [-c config] [-l log] [port]"
-done
+echo "* To start WebIOPi foreground\t: sudo webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]"
 echo
-echo "* To start WebIOPi at boot\t: sudo update-rc.d webiopi defaults"
 echo "* To start WebIOPi service\t: sudo /etc/init.d/webiopi start"
+echo "* To start WebIOPi at boot\t: sudo update-rc.d webiopi defaults"
 echo
 echo "* Look in `pwd`/examples for Python library usage examples"
 echo
