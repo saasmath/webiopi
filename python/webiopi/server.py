@@ -100,6 +100,11 @@ class Server():
                 for (name, params) in devices:
                     values = params.split(" ")
                     self.handler.addDevice(name, values[0], values[1:])
+                    
+            if config.has_section("ROUTES"):
+                routes = config.items("ROUTES")
+                for (source, destination) in routes:
+                    self.handler.addRoute(source, destination)
         
         if passwdfile != None:
             if os.path.exists(passwdfile):

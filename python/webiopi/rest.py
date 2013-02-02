@@ -40,6 +40,7 @@ class RESTHandler():
         self.gpio_post_value = True
         self.gpio_post_function = True
         self.device_mapping = True
+        self.routes = {}
         
     def stop(self):
         for name in SERIALS:
@@ -72,6 +73,20 @@ class RESTHandler():
         
         DEVICES[name] = {'device': dev, 'functions': funcs}
         info("%s mapped to REST API /device/%s" % (dev, name))
+        
+    def addRoute(self, source, destination):
+        info("Re-Routing %s => %s" % (source, destination))
+        if source[0] == "/":
+            source = source[1:]
+        if destination[0] == "/":
+            destination = destination[1:]
+        self.routes[source] = destination
+        
+    def findRoute(self, path):
+        for source in self.routes:
+            if path.startswith(source):
+                return path.replace(source, self.routes[source])
+        return path
         
     def extract(self, fmtArray, pathArray, args):
         if len(fmtArray) != len(pathArray):
@@ -168,6 +183,8 @@ class RESTHandler():
         return json
 
     def do_GET(self, relativePath):
+        relativePath = self.findRoute(relativePath)
+        
         # JSON full state
         if relativePath == "*":
             return (200, self.getJSON(), M_JSON)
@@ -251,6 +268,8 @@ class RESTHandler():
             return (0, None, None)
 
     def do_POST(self, relativePath, data):
+        relativePath = self.findRoute(relativePath)
+
         if relativePath.startswith("GPIO/"):
             (mode, s_gpio, operation, value) = relativePath.split("/")
             gpio = int(s_gpio)

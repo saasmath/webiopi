@@ -26,22 +26,6 @@
 
 #------------------------------------------------------------------------#
 
-[REST]
-# By default, REST API allows to GET/POST on all GPIOs
-# Use gpio-export to limit GPIO available through REST API  
-#gpio-export = 21, 23, 24, 25
-
-# Uncomment to forbid changing GPIO values 
-#gpio-post-value = false
-
-# Uncomment to forbid changing GPIO functions 
-#gpio-post-function = false 
-
-# Uncomment to disable automatic device mapping
-#device-mapping = false
-
-#------------------------------------------------------------------------#
-
 [HTTP]
 # HTTP Server configuration
 enabled = true
@@ -71,9 +55,9 @@ multicast = true
 [SERIAL]
 # Serial lines configuration syntax:
 # name = device baudrate
-#   name: used in the URL mapping
-#   device: tty device name
-#   baudrate: serial speed from 9600 to 115200
+#   name     : used in the URL mapping
+#   device   : tty device name
+#   baudrate : serial speed from 9600 to 115200
 # All tty devices configured here are mapped on REST API /serial/name
 
 # Raspberry native UART on GPIO, uncomment to enable
@@ -90,9 +74,9 @@ multicast = true
 [DEVICES]
 # Specific device configuration syntax:
 # name = device [args...]
-#   name: used in the URL mapping
-#   device: device name
-#   args: (optional) see device driver doc
+#   name   : used in the URL mapping
+#   device : device name
+#   args   : (optional) see device driver doc
 # If enabled, devices configured here are mapped on REST API /device/name
 # Devices are also accessible in custom scripts using deviceInstance(name)
 # See device driver doc for methods and URI scheme available
@@ -106,3 +90,40 @@ multicast = true
 #expander0 = PCF8574
 
 #analog0 = MCP3208
+
+#------------------------------------------------------------------------#
+
+[REST]
+# By default, REST API allows to GET/POST on all GPIOs
+# Use gpio-export to limit GPIO available through REST API  
+#gpio-export = 21, 23, 24, 25
+
+# Uncomment to forbid changing GPIO values 
+#gpio-post-value = false
+
+# Uncomment to forbid changing GPIO functions 
+#gpio-post-function = false 
+
+# Uncomment to disable automatic device mapping
+#device-mapping = false
+
+[ROUTES]
+# Custom REST API route syntax :
+# source = destination
+#   source      : URL to route
+#   destination : Resulting URL
+# Adding routes allows to simplify access with Human comprehensive URLs
+
+# In the next example with have the bedroom light connected to GPIO 25
+# and a temperature sensor named temp0, defined in [DEVICES] section
+#  - GET  /bedroom/light       => GET  /GPIO/25/value, returns the light state
+#  - POST /bedroom/light/0     => POST /GPIO/25/value/0, turn off the light
+#  - POST /bedroom/light/1	   => POST /GPIO/25/value/1, turn on the light
+#  - GET  /bedroom/temperature => GET  /device/temp0/temperature, returns the temperature
+#/bedroom/light = /GPIO/25/value
+#/bedroom/temperature = /device/temp0/temperature
+
+#/livingroom/light = /device/expander0/0/value
+#/livingroom/brightness = /device/analog0/0/scale
+#/livingroom/temperature = /device/temp1/temperature
+
