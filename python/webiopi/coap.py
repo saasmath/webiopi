@@ -1,8 +1,9 @@
 from webiopi.utils import *
 
-import threading
 import socket
 import struct
+import logging
+import threading
 
 if PYTHON_MAJOR >= 3:
     from urllib.parse import urlparse
@@ -362,6 +363,8 @@ class COAPClient():
         return None
 
 class COAPServer(threading.Thread):
+    logger = logging.getLogger("CoAP")
+
     def __init__(self, host, port, handler):
         threading.Thread.__init__(self, name="COAPThread")
         self.handler = COAPHandler(handler)
@@ -387,6 +390,8 @@ class COAPServer(threading.Thread):
                 self.processMessage(coapRequest, coapResponse)
                 responseBytes = coapResponse.getBytes()
                 self.socket.sendto(responseBytes, client)
+                self.logger.debug("%s %s CoAP %s-" % (coapRequest.CODES[coapRequest.code], coapRequest.uri_path, coapResponse.CODES[coapResponse.code]))
+                
             except socket.timeout as e:
                 continue
             except Exception as e:
