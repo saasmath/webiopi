@@ -15,7 +15,17 @@
 #   limitations under the License.
 
 from time import sleep
+
 import _webiopi.GPIO as GPIO
-from webiopi.utils import *
+
+from webiopi.utils import BOARD_REVISION, VERSION
+from webiopi.utils import setInfo, setDebug, info, debug, warn, error, exception
+from webiopi.utils import runLoop
+
+from webiopi.rest import macro
 from webiopi.server import Server
 from webiopi.clients import Client, MulticastClient
+
+import webiopi.bus
+
+webiopi.bus.checkAllBus()

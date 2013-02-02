@@ -1,5 +1,5 @@
-from webiopi.utils import route
 from webiopi.i2c import I2C
+from webiopi.rest import route
 
 class PCF8574(I2C):
     def __init__(self, addr=0x20):

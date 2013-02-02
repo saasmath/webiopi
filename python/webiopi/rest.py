@@ -1,18 +1,33 @@
 from webiopi.utils import *
-from webiopi.serial import *
-import webiopi.devices.digital as digital
-import webiopi.devices.analog as analog
-import webiopi.devices.sensor as sensor
+from webiopi.serial import Serial
 
-PACKAGES = [digital, analog, sensor]
 MACROS = {}
+
+M_PLAIN = "text/plain"
+M_JSON  = "application/json"
 
 try :
     import _webiopi.GPIO as GPIO
 except:
     pass
 
-def findDevice(name):
+def route(method="POST", path=None, format="%s"):
+    def wrapper(func):
+        func.routed = True
+        func.method = method
+        func.format = format
+        if path:
+            func.path = path
+        else:
+            func.path = func.__name__
+        return func
+    return wrapper
+
+def macro(func):
+    func.macro = True
+    return func
+
+def findDeviceClass(name):
     for devices in PACKAGES: 
         for dev in dir(devices):
             if dev.split(".")[-1] == name:
@@ -40,7 +55,7 @@ class RESTHandler():
         info("%s mapped to REST API /serial/%s" % (serial, name))
         
     def addDevice(self, name, device, args):
-        devClass = findDevice(device)
+        devClass = findDeviceClass(device)
         if devClass == None:
             raise Exception("Device driver not found for %s" % device)
         if len(args) > 0:
@@ -52,6 +67,7 @@ class RESTHandler():
         for att in dir(dev):
             func = getattr(dev, att)
             if callable(func) and hasattr(func, "routed"):
+                debug("Mapping %s.%s to REST %s /device/%s/%s" % (dev, att, func.method, name, func.path))
                 funcs[func.method][func.path] = func
         
         DEVICES[name] = {'device': dev, 'functions': funcs}
@@ -350,3 +366,9 @@ class RESTHandler():
 
         else: # path unknowns
             return (0, None, None)
+
+import webiopi.devices.digital as digital
+import webiopi.devices.analog as analog
+import webiopi.devices.sensor as sensor
+
+PACKAGES = [digital, analog, sensor]

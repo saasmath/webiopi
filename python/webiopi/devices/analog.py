@@ -1,6 +1,6 @@
-from webiopi.utils import route
 from webiopi.i2c import I2C
 from webiopi.spi import SPI
+from webiopi.rest import route
 
 class MCP3X0X(SPI):
     def __init__(self, spiChannel, resolution, channelCount):

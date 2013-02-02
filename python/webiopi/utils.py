@@ -24,13 +24,16 @@ MAPPING[2] = ["V33", "V50", 2, "V50", 3, "GND", 4, 14, "GND", 15, 17, 18, 27, "G
 FUNCTIONS = {
     "I2C": {"enabled": False, "gpio": {0:"SDA", 1:"SCL", 2:"SDA", 3:"SCL"}, "modules": ["i2c-bcm2708", "i2c-dev"]},
     "SPI": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}, "modules": ["spi-bcm2708", "spidev"]},
-    "UART": {"enabled": True, "gpio": {14:"TX", 15:"RX"}, "modules": []},
+    "UART": {"enabled": False, "gpio": {14:"TX", 15:"RX"}, "modules": []},
     "ONEWIRE": {"enabled": False, "gpio": {4:"DATA"}, "modules": ["w1-gpio"]}
 }
 
+GPIO_SETUP = []
+GPIO_RESET = []
 SERIALS = {}
 DEVICES = {}
 SCRIPTS = {}
+TASKS = []
         
 LOG_FORMATTER = logging.Formatter(fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")        
 ROOT_LOGGER = logging.getLogger()
@@ -42,12 +45,7 @@ ROOT_LOGGER.addHandler(CONSOLE_HANDLER)
 
 LOGGER = logging.getLogger("WebIOPi")
 
-M_PLAIN = "text/plain"
-M_JSON  = "application/json"
-
-__running__ = False
-
-TASKS = []
+RUNNING = False
 
 class Task(threading.Thread):
     def __init__(self, func, loop=False):
@@ -68,24 +66,27 @@ class Task(threading.Thread):
             self.func()
 
 def stop(signum=0, frame=None):
-    global __running__
-    info("Stopping...")
-    __running__ = False
-    for task in TASKS:
-        task.stop()
-
-    for name in SCRIPTS:
-        script = SCRIPTS[name]
-        if hasattr(script, "destroy"):
-            script.destroy()
-            
-    GPIOReset()
+    global RUNNING
+    if RUNNING:
+        info("Stopping...")
+        RUNNING = False
+        for task in TASKS:
+            task.stop()
+    
+        for name in SCRIPTS:
+            script = SCRIPTS[name]
+            if hasattr(script, "destroy"):
+                script.destroy()
         
-def runLoop(func=None, async=False):
-    global __running__
-    global __lock__
-    __running__ = True
+        for name in DEVICES:
+            device = DEVICES[name]["device"]
+            device.close()
+                
+        GPIOReset()
 
+def runLoop(func=None, async=False):
+    global RUNNING
+    RUNNING = True
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
 
@@ -93,36 +94,37 @@ def runLoop(func=None, async=False):
         if async:
             TASKS.append(Task(func, True))
         else:
-            while __running__:
+            while RUNNING:
                 func()
     else:
-        signal.pause()
+        while RUNNING:
+            time.sleep(1)
 
-def waitForSignal():
-    signal.signal(signal.SIGINT, stop)
-    signal.signal(signal.SIGTERM, stop)
-    signal.pause()
 
-__GPIO_SETUP__ = []
-__GPIO_RESET__ = []
-__STR_TO_FUNC__ = {"in": GPIO.IN, "out": GPIO.OUT}
 def addGPIO(list, gpio, params):
     gpio = int(gpio)
     params = params.split(" ")
-    func = __STR_TO_FUNC__[params[0].lower()]
+    func = params[0].lower()
+    if func == "in":
+        func = GPIO.IN
+    elif func == "out":
+        func = GPIO.OUT
+    else:
+        raise Exception("Unknown function")
+    
     value = -1
     if len(params) > 1:
         value = int(params[1])
     list.append({"gpio": gpio, "func": func, "value": value})
 
 def addGPIOSetup(gpio, params):
-    addGPIO(__GPIO_SETUP__, gpio, params)
+    addGPIO(GPIO_SETUP, gpio, params)
     
 def addGPIOReset(gpio, params):
-    addGPIO(__GPIO_RESET__, gpio, params)
+    addGPIO(GPIO_RESET, gpio, params)
 
 def GPIOSetup():
-    for g in __GPIO_SETUP__:
+    for g in GPIO_SETUP:
         gpio = g["gpio"]
         debug("Setup GPIO %d" % gpio)
         GPIO.setFunction(gpio, g["func"])
@@ -130,13 +132,19 @@ def GPIOSetup():
             GPIO.output(gpio, g["value"])
 
 def GPIOReset():
-    for g in __GPIO_RESET__:
+    for g in GPIO_RESET:
         gpio = g["gpio"]
         debug("Reset GPIO %d" % gpio)
         GPIO.setFunction(gpio, g["func"])
         if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
             GPIO.output(gpio, g["value"])
     
+def deviceInstance(name):
+    if name in DEVICES:
+        return DEVICES[name]["device"]
+    else:
+        return None
+
 def loadScript(name, source, handler = None):
     info("Loading %s from %s" % (name, source))
     script = imp.load_source(name, source)
@@ -170,22 +178,6 @@ def getLocalIP():
         except (socket.error, e):
             return "localhost"
         
-def route(method="POST", path=None, format="%s"):
-    def wrapper(func):
-        func.routed = True
-        func.method = method
-        func.format = format
-        if path:
-            func.path = path
-        else:
-            func.path = func.__name__
-        return func
-    return wrapper
-
-def macro(func):
-    func.macro = True
-    return func
-
 def setInfo():
     ROOT_LOGGER.setLevel(logging.INFO)
 
@@ -216,52 +208,3 @@ def printBytes(bytes):
     for i in range(0, len(bytes)):
         print("%03d: 0x%02X %03d %c" % (i, bytes[i], bytes[i], bytes[i]))
 
-def loadModules(bus):
-    if len(FUNCTIONS[bus]["modules"]) == 0:
-        return
-    
-    if FUNCTIONS[bus]["enabled"] == False and not modulesLoaded(bus):
-        info("Loading %s modules" % bus)
-        for module in FUNCTIONS[bus]["modules"]:
-            subprocess.call(["modprobe", module])
-        FUNCTIONS[bus]["enabled"] = True
-
-def unloadModules(bus):
-    if len(FUNCTIONS[bus]["modules"]) == 0:
-        return
-
-    info("Unloading %s modules" % bus)
-    for module in FUNCTIONS[bus]["modules"]:
-        subprocess.call(["modprobe", "-r", module])
-    FUNCTIONS[bus]["enabled"] = False
-        
-def __moduleLoaded__(modules, lines):
-    if len(modules) == 0:
-        return True
-    for line in lines:
-        if modules[0].replace("-", "_") == line.split(" ")[0]:
-            return __moduleLoaded__(modules[1:], lines)
-    return False
-
-def modulesLoaded(bus):
-    if not bus in FUNCTIONS or len(FUNCTIONS[bus]["modules"]) == 0:
-        return True
-
-    f = open("/proc/modules")
-    c = f.read()
-    f.close()
-    lines = c.split("\n")
-    return __moduleLoaded__(FUNCTIONS[bus]["modules"], lines)
-
-def checkAllBus():
-    for bus in FUNCTIONS:
-        if modulesLoaded(bus):
-            FUNCTIONS[bus]["enabled"] = True
-            
-def deviceInstance(name):
-    if name in DEVICES:
-        return DEVICES[name]["device"]
-    else:
-        return None
-
-checkAllBus()

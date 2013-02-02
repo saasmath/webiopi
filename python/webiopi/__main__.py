@@ -1,4 +1,6 @@
-from webiopi.server import *
+import sys
+from webiopi.utils import *
+from webiopi.server import Server
 
 def displayHelp():
     print("WebIOPi command-line usage")
@@ -40,7 +42,7 @@ def main(argv):
 
     info("Starting %s" % VERSION_STRING)
     server = Server(port=port, configfile=configfile)
-    waitForSignal()
+    runLoop()
     server.stop()
 
 if __name__ == "__main__":

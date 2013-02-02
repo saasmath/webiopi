@@ -2,6 +2,50 @@ import os
 
 from webiopi.utils import *
 
+def loadModule(module):
+    debug("Loading module : %s" % module)
+    subprocess.call(["modprobe", module])
+    
+def unloadModule(module):
+    subprocess.call(["modprobe", "-r", module])
+    
+def loadModules(bus):
+    info("Loading %s modules" % bus)
+    if FUNCTIONS[bus]["enabled"] == False and not modulesLoaded(bus):
+        for module in FUNCTIONS[bus]["modules"]:
+            loadModule(module)
+    FUNCTIONS[bus]["enabled"] = True
+
+def unloadModules(bus):
+    info("Unloading %s modules" % bus)
+    for module in FUNCTIONS[bus]["modules"]:
+        unloadModule(module)
+    FUNCTIONS[bus]["enabled"] = False
+        
+def __modulesLoaded__(modules, lines):
+    if len(modules) == 0:
+        return True
+    for line in lines:
+        if modules[0].replace("-", "_") == line.split(" ")[0]:
+            return __modulesLoaded__(modules[1:], lines)
+    return False
+
+def modulesLoaded(bus):
+    if not bus in FUNCTIONS or len(FUNCTIONS[bus]["modules"]) == 0:
+        return True
+
+    f = open("/proc/modules")
+    c = f.read()
+    f.close()
+    lines = c.split("\n")
+    return __modulesLoaded__(FUNCTIONS[bus]["modules"], lines)
+
+def checkAllBus():
+    for bus in FUNCTIONS:
+        print("Checking %s modules" % bus)
+        if modulesLoaded(bus):
+            FUNCTIONS[bus]["enabled"] = True
+
 class Bus():
     def __init__(self, busName, device, flag=os.O_RDWR):
         loadModules(busName)

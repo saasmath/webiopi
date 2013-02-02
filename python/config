@@ -97,8 +97,12 @@ multicast = true
 # Devices are also accessible in custom scripts using deviceInstance(name)
 # See device driver doc for methods and URI scheme available
 
-#temp0		= TMP102
-#temp1		= TMP102 0x49
-#pressure0	= BMP085
-#expander0	= PCF8574
-#analog0	= MCP3208
+#temp0 = TMP102
+#temp1 = TMP102 0x49
+#temp2 = BMP085
+#temp3 = DS18B20
+#temp4 = DS18B20 28-0000049bc218
+
+#expander0 = PCF8574
+
+#analog0 = MCP3208
