@@ -117,7 +117,12 @@ class RESTHandler():
             elif type == 'b':
                 args[name] = int(path, 2)
             elif type == 'd':
-                args[name] = int(path)
+                if path.startswith("0x"):
+                    args[name] = int(path, 16)
+                elif path.startswith("0b"):
+                    args[name] = int(path, 2)
+                else:
+                    args[name] = int(path)
             elif type == 'x':
                 args[name] = int(path, 16)
             elif type == 'f':

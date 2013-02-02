@@ -1,6 +1,6 @@
 from webiopi.i2c import I2C
+from webiopi.onewire import OneWireTemperature
 from webiopi.rest import route
-from webiopi.onewire import *
 
 class TMPXXX(I2C):
     def __init__(self, slave=0b1001000, name="TMPXXX"):

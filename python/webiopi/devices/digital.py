@@ -19,6 +19,13 @@ class PCF8574(I2C):
             b |= mask
         else:
             b &= ~mask
-        self.writeBytes(b)
+        self.writeByte(b)
         return self.input(channel)  
 
+    @route("GET", "byte", "%d")
+    def readByte(self):
+        return I2C.readByte(self)
+    
+    @route("POST", "byte/%(value)d")
+    def writeByte(self, value):
+        I2C.writeByte(self, value)
