@@ -15,6 +15,37 @@ try :
 except:
     pass
 
+def HTTPCode2CoAPCode(code):
+    return int(code/100) * 32 + (code%100)
+
+   
+class COAPContentFormat():
+    FORMATS = {0: "text/plain",
+               40: "application/link-format",
+               41: "application/xml",
+               42: "application/octet-stream",
+               47: "application/exi",
+               50: "application/json"
+               }
+
+    def getCode(format):
+        if format == None:
+            return None
+        for code in COAPContentFormat.FORMATS:
+            if COAPContentFormat.FORMATS[code] == format:
+                return code
+        return None
+    
+    def toString(code):
+        if code == None:
+            return None
+
+        if code in COAPContentFormat.FORMATS:
+            return COAPContentFormat.FORMATS[code]
+        
+        raise Exception("Unknown content format %d" % code)
+        
+
 class COAPOption():
     OPTIONS = {1: "If-Match",
                3: "Uri-Host",
@@ -65,6 +96,7 @@ class COAPMessage():
         self.host    = ""
         self.port    = 5683
         self.uri_path = ""
+        self.content_format = None
         self.payload = None
         
         if uri != None:
@@ -83,7 +115,7 @@ class COAPMessage():
         result = []
         result.append("Version: %s" % self.version)
         result.append("Type: %s" % self.TYPES[self.type])
-        result.append("code: %s" % self.CODES[self.code])
+        result.append("Code: %s" % self.CODES[self.code])
         result.append("Id: %s" % self.id)
         result.append("Token: %s" % self.token)
         result.append("Options: %s" % len(self.options))
@@ -91,6 +123,7 @@ class COAPMessage():
             result.append("+ %d: %s" % (option["number"], option["value"]))
         
         result.append("Uri-Path: %s" % self.uri_path)
+        result.append("Content-Format: %s" % COAPContentFormat.toString(self.content_format))
         result.append("Payload: %s" % self.payload)
         result.append("")
         return '\n'.join(result)
@@ -171,6 +204,14 @@ class COAPMessage():
                     else:
                         data = bytearray(p)
                     lastnumber = self.appendOption(buff, lastnumber, COAPOption.URI_PATH, data)
+
+        if self.content_format != None:
+            data = bytearray()
+            format = self.content_format
+            if format > 0xFF:
+                data.append((format & 0xFF00) >> 8)
+            data.append(format & 0x00FF)
+            lastnumber = self.appendOption(buff, lastnumber, COAPOption.CONTENT_FORMAT, data)
             
         buff.append(0xFF)
         
@@ -386,18 +427,18 @@ class COAPServer(threading.Thread):
                 coapRequest = COAPRequest()
                 coapRequest.parseByteArray(requestBytes)
                 coapResponse = COAPResponse()
-    
+                #self.logger.debug("Received Request:\n%s" % coapRequest)
                 self.processMessage(coapRequest, coapResponse)
+                #self.logger.debug("Sending Response:\n%s" % coapResponse)
                 responseBytes = coapResponse.getBytes()
                 self.socket.sendto(responseBytes, client)
-                self.logger.debug("%s %s CoAP %s-" % (coapRequest.CODES[coapRequest.code], coapRequest.uri_path, coapResponse.CODES[coapResponse.code]))
+                self.logger.debug('"%s %s CoAP/%.1f" %s -' % (coapRequest.CODES[coapRequest.code], coapRequest.uri_path, coapRequest.version, coapResponse.CODES[coapResponse.code]))
                 
             except socket.timeout as e:
                 continue
             except Exception as e:
                 if self.running == True:
                     exception(e)
-            
             
         info("CoAP Server stopped")
     
@@ -428,6 +469,10 @@ class COAPServer(threading.Thread):
             self.handler.do_GET(request, response)
         elif request.code == COAPRequest.POST:
             self.handler.do_POST(request, response)
+        elif request.code / 32 == 0:
+            response.code = COAPResponse.NOT_IMPLEMENTED
+        else:
+            exception(Exception("Received CoAP Response : %s" % response))
         
 class COAPHandler():
     def __init__(self, handler):
@@ -440,11 +485,10 @@ class COAPHandler():
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
                 response.code = COAPResponse.CONTENT
-            elif (code / 100) == 4:
-                response.code = 128 + (code % 100)
-            elif (code / 100) == 5:
-                response.code = 160 + (code % 100)
+            else:
+                response.code =  HTTPCode2CoAPCode(code)
             response.payload = body
+            response.content_format = COAPContentFormat.getCode(type)
         except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
             response.code = COAPResponse.FORBIDDEN
             response.payload = "%s" % e
@@ -459,12 +503,10 @@ class COAPHandler():
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
                 response.code = COAPResponse.CHANGED
-            elif (code / 100) == 4:
-                response.code = 128 + (code % 100)
-            elif (code / 100) == 5:
-                response.code = 160 + (code % 100)
-                
+            else:
+                response.code =  HTTPCode2CoAPCode(code)
             response.payload = body
+            response.content_format = COAPContentFormat.getCode(type)
         except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
             response.code = COAPResponse.FORBIDDEN
             response.payload = "%s" % e
