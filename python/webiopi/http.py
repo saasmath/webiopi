@@ -217,6 +217,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
             self.sendResponse(403, "%s" % e)
+        except ValueError as e:
+            self.sendResponse(403, "%s" % e)
         except Exception as e:
             self.sendResponse(500)
             raise e

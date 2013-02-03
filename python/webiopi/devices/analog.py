@@ -17,25 +17,20 @@ from webiopi.spi import SPI
 from webiopi.rest import route
 from webiopi.utils import *
 
-class MCP3X0X(SPI):
-    def __init__(self, chip, resolution, channelCount):
-        SPI.__init__(self, chip, 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
+class ADC():
+    def __init__(self, resolution, channelCount):
         self.resolution = resolution
         self.channelCount = channelCount
-        self.MSB_MASK = 2**(resolution-8) - 1
         self.MAX = (2**resolution - 1) * 1.0 
-
-    def __str__(self):
-        return "%s(chip=%d)" % (self.name, self.chip)
-
+ 
+    def __readInteger__(self, adcChannel, diff):
+        raise NotImplementedError
+    
     @route("GET", "%(adcChannel)d/integer", "%d")
     def readInteger(self, adcChannel, diff=False):
         if not adcChannel in range(self.channelCount):
-            raise Exception("Channel %d out of range [%d-%d]" % (adcChannel, 0, self.channelCount-1))
-
-        data = self.__command__(adcChannel, diff)
-        r = self.xfer(data)
-        return ((r[1] & self.MSB_MASK) << 8) | r[2]
+            raise ValueError("Channel %d out of range [%d-%d]" % (adcChannel, 0, self.channelCount-1))
+        return self.__readInteger__(adcChannel, diff)
     
     @route("GET", "%(adcChannel)d/float", "%.02f")
     def readFloat(self, adcChannel, diff=False):
@@ -54,14 +49,45 @@ class MCP3X0X(SPI):
         for i in range(self.channelCount):
             values[i] = self.readFloat(i)
         return jsonDumps(values)
-            
     
+class DAC():
+    def __init__(self, resolution, channelCount):
+        self.resolution = resolution
+        self.channelCount = channelCount
+        self.MAX = 2**resolution - 1 
+    
+    def __writeInteger__(self, dacChannel, value):
+        raise NotImplementedError
+    
+    @route("POST", "%(dacChannel)d/integer/%(value)d")        
+    def writeInteger(self, dacChannel, value):
+        if not dacChannel in range(self.channelCount):
+            raise ValueError("Channel %d out of range [%d-%d]" % (dacChannel, 0, self.channelCount-1))
+        self.__writeInteger__(dacChannel, value)
+    
+    @route("POST", "%(dacChannel)d/float/%(value)f")        
+    def writeFloat(self, dacChannel, value):
+        self.writeInteger(dacChannel, int(value * self.MAX))
 
+class MCP3X0X(SPI, ADC):
+    def __init__(self, chip, resolution, channelCount):
+        SPI.__init__(self, chip, 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
+        ADC.__init__(self, resolution, channelCount)
+        self.MSB_MASK = 2**(resolution-8) - 1
+
+    def __str__(self):
+        return "%s(chip=%d)" % (self.name, self.chip)
+
+    def __readInteger__(self, adcChannel, diff):
+        data = self.__command__(adcChannel, diff)
+        r = self.xfer(data)
+        return ((r[1] & self.MSB_MASK) << 8) | r[2]
+    
 class MCP300X(MCP3X0X):
     def __init__(self, chip, channelCount):
         MCP3X0X.__init__(self, chip, 10, channelCount)
 
-    def __command__(self, mcpChannel, diff=False):
+    def __command__(self, mcpChannel, diff):
         d = [0x00, 0x00, 0x00]
         d[0] |= 1
         d[1] |= (not diff) << 7
@@ -82,7 +108,7 @@ class MCP320X(MCP3X0X):
     def __init__(self, chip, channelCount):
         MCP3X0X.__init__(self, chip, 12, channelCount)
 
-    def __command__(self, mcpChannel, diff=False):
+    def __command__(self, mcpChannel, diff):
         d = [0x00, 0x00, 0x00]
         d[0] |= 1 << 2
         d[0] |= (not diff) << 1
@@ -99,9 +125,10 @@ class MCP3208(MCP320X):
     def __init__(self, chip=0):
         MCP320X.__init__(self, chip, 8)
         
-class MCP492X(SPI):
+class MCP492X(SPI, DAC):
     def __init__(self, chip, channelCount):
         SPI.__init__(self, chip, 0, 8, 10000, "MCP492%d" % channelCount)
+        DAC.__init__(self, 12, channelCount)
         self.channelCount = channelCount
         self.buffered=False
         self.gain=False
@@ -110,11 +137,7 @@ class MCP492X(SPI):
     def __str__(self):
         return "%s(chip=%d)" % (self.name, self.chip)
 
-    @route("POST", "%(dacChannel)d/integer/%(value)d")        
-    def writeInteger(self, dacChannel, value):
-        if not dacChannel in range(self.channelCount):
-            raise Exception("Channel %d out of range [%d-%d]" % (dacChannel, 0, self.channelCount-1))
-
+    def __writeInteger__(self, dacChannel, value):
         d = bytearray(2)
         d[0]  = 0
         d[0] |= (dacChannel & 0x01) << 7
@@ -124,11 +147,7 @@ class MCP492X(SPI):
         d[0] |= (value >> 8) & 0x0F
         d[1]  = value & 0xFF
         self.writeBytes(d)
-    
-    @route("POST", "%(dacChannel)d/float/%(value)f")        
-    def writeFloat(self, dacChannel, value):
-        self.writeInteger(dacChannel, int(value * 4095))
-        
+
 class MCP4921(MCP492X):
     def __init__(self, chip=0):
         MCP492X.__init__(self, chip, 1)

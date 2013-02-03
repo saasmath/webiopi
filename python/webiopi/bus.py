@@ -82,7 +82,7 @@ class Bus():
             os.close(self.fd)
     
     def available(self):
-        raise Exception("Not supported for %s" % self.busName)
+        raise NotImplementedError
     
     def read(self, size=1):
         if self.fd > 0:

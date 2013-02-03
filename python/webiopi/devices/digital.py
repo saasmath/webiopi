@@ -24,7 +24,7 @@ class PCF8574(I2C):
     @route("GET", "%(channel)d/value", "%d")
     def input(self, channel):
         if not channel in range(self.channelCount):
-            raise Exception("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
 
         mask = 1 << channel
         d = self.readByte()
@@ -33,7 +33,7 @@ class PCF8574(I2C):
     @route("POST", "%(channel)d/value/%(value)d", "%d")
     def output(self, channel, value):
         if not channel in range(self.channelCount):
-            raise Exception("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
 
         mask = 1 << channel
         b = self.readByte()
