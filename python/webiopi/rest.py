@@ -75,17 +75,19 @@ class RESTHandler():
         info("%s mapped to REST API /device/%s" % (dev, name))
         
     def addRoute(self, source, destination):
-        info("Re-Routing %s => %s" % (source, destination))
         if source[0] == "/":
             source = source[1:]
         if destination[0] == "/":
             destination = destination[1:]
         self.routes[source] = destination
+        info("Added Route /%s => /%s" % (source, destination))
         
     def findRoute(self, path):
         for source in self.routes:
             if path.startswith(source):
-                return path.replace(source, self.routes[source])
+                route = path.replace(source, self.routes[source])
+                info("Routing /%s => /%s" % (path, route))
+                return route
         return path
         
     def extract(self, fmtArray, pathArray, args):
