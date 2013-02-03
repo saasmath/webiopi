@@ -156,36 +156,27 @@ class RESTHandler():
         return (None, functionName + " Not Found")
 
     def getJSON(self):
-        json = "{"
-        first = True
+        json = {}
         for (alt, value) in FUNCTIONS.items():
-            if not first:
-                json += ", "
-            json += '"%s": %d' % (alt, value["enabled"])
-            first = False
+            json[alt] = int(value["enabled"])
         
-        json += ', "GPIO":{\n'
-        first = True
+        gpios = {}
         if len(self.gpio_export) > 0:
-            gpios = self.gpio_export
+            export = self.gpio_export
         else:
-            gpios = range(GPIO.GPIO_COUNT)
-        for gpio in gpios:
-            if not first:
-                json += ", \n"
+            export = range(GPIO.GPIO_COUNT)
 
-            function = GPIO.getFunctionString(gpio)
-            value = GPIO.input(gpio)
-                    
-            json += '"%d": {"function": "%s", "value": %d' % (gpio, function, value)
+        for gpio in export:
+            gpios[gpio] = {}
+            gpios[gpio]['function'] = GPIO.getFunctionString(gpio)
+            gpios[gpio]['value'] = int(GPIO.input(gpio))
+
             if GPIO.getFunction(gpio) == GPIO.PWM:
                 (type, value) = GPIO.getPulse(gpio).split(':')
-                json  += ', "%s": %s' %  (type, value)
-            json += '}'
-            first = False
-            
-        json += "\n}}"
-        return json
+                gpios[gpio][type] = value
+        
+        json['GPIO'] = gpios
+        return jsonDumps(json)
 
     def do_GET(self, relativePath):
         relativePath = self.findRoute(relativePath)

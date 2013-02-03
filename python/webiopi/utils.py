@@ -1,6 +1,7 @@
 import sys
 import imp
 import time
+import json
 import signal
 import socket
 import base64
@@ -207,4 +208,10 @@ def exception(message):
 def printBytes(bytes):
     for i in range(0, len(bytes)):
         print("%03d: 0x%02X %03d %c" % (i, bytes[i], bytes[i], bytes[i]))
-
+        
+def jsonDumps(obj):
+    if ROOT_LOGGER.level == logging.DEBUG:
+        return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
+    else:
+        return json.dumps(obj)
+        
