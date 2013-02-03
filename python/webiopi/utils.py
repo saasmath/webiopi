@@ -214,4 +214,7 @@ def jsonDumps(obj):
         return json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
     else:
         return json.dumps(obj)
+    
+def str2bool(value):
+    return (value == "1") or (value == "true") or (value == "True") or (value == "yes") or (value == "Yes")
         
