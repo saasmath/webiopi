@@ -83,8 +83,8 @@ multicast = true
 
 #temp0 = TMP102
 #temp1 = TMP102 0x49
-#temp2 = DS18B20
-#temp3 = DS18B20 28-0000049bc218
+#temp2 = OneWireTemp
+#temp3 = OneWireTemp 28-0000049bc218
 
 #expander0 = PCF8574
 #expander1 = PCF8574 0x21

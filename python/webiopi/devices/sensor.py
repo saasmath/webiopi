@@ -13,15 +13,23 @@
 #   limitations under the License.
 
 from webiopi.i2c import I2C
-from webiopi.onewire import OneWireTemperature
+from webiopi.onewire import OneWire
 from webiopi.rest import route
 
-class TMPXXX(I2C):
+class Temperature():
+    def __getTemperature__(self):
+        raise NotImplementedError
+
+    @route("GET", "temperature", "%.02f")
+    def getTemperature(self):
+        return self.__getTemperature__()
+    
+
+class TMPXXX(I2C, Temperature):
     def __init__(self, slave=0b1001000, name="TMPXXX"):
         I2C.__init__(self, slave, name)
         
-    @route("GET", "temperature", "%.02f")
-    def getTemperature(self):
+    def __getTemperature__(self):
         d = self.readBytes(2)
         return ((d[0] << 4) | (d[1] >> 4)) *0.0625
 
@@ -37,6 +45,17 @@ class TMP275(TMPXXX):
     def __init__(self, slave=0b1001000):
         TMPXXX.__init__(self, slave, "TMP275")
 
-class DS18B20(OneWireTemperature):
+class OneWireTemp(OneWire, Temperature):
+    def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
+        OneWire.__init__(self, slave, family, "TEMP", name)
+        
+    def __getTemperature__(self):
+        data = self.read()
+        lines = data.split("\n")
+        if lines[0].endswith("YES"):
+            temp = lines[1][-5:]
+            return int(temp) / 1000.0
+
+class DS18B20(OneWireTemp):
     def __init__(self, slave=None):
-        OneWireTemperature.__init__(self, slave, 0x28, "DS18B20")
+        OneWireTemp.__init__(self, slave, 0x28, "DS18B20")

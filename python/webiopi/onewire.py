@@ -74,14 +74,3 @@ class OneWire(Bus):
             data = file.read()
         return data
 
-class OneWireTemperature(OneWire):
-    def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
-        OneWire.__init__(self, slave, family, "TEMP", name)
-        
-    @route("GET", "temperature", "%.2f")
-    def getTemperature(self):
-        data = self.read()
-        lines = data.split("\n")
-        if lines[0].endswith("YES"):
-            temp = lines[1][-5:]
-            return int(temp) / 1000.0
