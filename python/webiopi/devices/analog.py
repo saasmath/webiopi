@@ -1,6 +1,7 @@
 from webiopi.i2c import I2C
 from webiopi.spi import SPI
 from webiopi.rest import route
+from webiopi.utils import *
 
 class MCP3X0X(SPI):
     def __init__(self, chip, resolution, channelCount):
@@ -25,6 +26,21 @@ class MCP3X0X(SPI):
     @route("GET", "%(adcChannel)d/float", "%.02f")
     def readFloat(self, adcChannel, diff=False):
         return self.readInteger(adcChannel, diff) / self.MAX
+    
+    @route("GET", "*/integer", "%s")
+    def readAllInteger(self):
+        values = {}
+        for i in range(self.channelCount):
+            values[i] = self.readInteger(i)
+        return jsonDumps(values)
+            
+    @route("GET", "*/float", "%s")
+    def readAllFloat(self):
+        values = {}
+        for i in range(self.channelCount):
+            values[i] = self.readFloat(i)
+        return jsonDumps(values)
+            
     
 
 class MCP300X(MCP3X0X):
