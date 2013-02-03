@@ -42,7 +42,7 @@ def modulesLoaded(bus):
 
 def checkAllBus():
     for bus in FUNCTIONS:
-        print("Checking %s modules" % bus)
+        #print("Checking %s modules" % bus)
         if modulesLoaded(bus):
             FUNCTIONS[bus]["enabled"] = True
 
