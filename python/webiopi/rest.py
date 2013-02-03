@@ -157,7 +157,14 @@ class RESTHandler():
         
         return (None, functionName + " Not Found")
 
-    def getJSON(self):
+    def getJSON(self, compact=False):
+        if compact:
+            f = 'f'
+            v = 'v'
+        else:
+            f = 'function'
+            v = 'value'
+        
         json = {}
         for (alt, value) in FUNCTIONS.items():
             json[alt] = int(value["enabled"])
@@ -170,8 +177,11 @@ class RESTHandler():
 
         for gpio in export:
             gpios[gpio] = {}
-            gpios[gpio]['function'] = GPIO.getFunctionString(gpio)
-            gpios[gpio]['value'] = int(GPIO.input(gpio))
+            if compact:
+                gpios[gpio][f] = GPIO.getFunction(gpio)
+            else:
+                gpios[gpio][f] = GPIO.getFunctionString(gpio)
+            gpios[gpio][v] = int(GPIO.input(gpio))
 
             if GPIO.getFunction(gpio) == GPIO.PWM:
                 (type, value) = GPIO.getPulse(gpio).split(':')
@@ -180,12 +190,12 @@ class RESTHandler():
         json['GPIO'] = gpios
         return jsonDumps(json)
 
-    def do_GET(self, relativePath):
+    def do_GET(self, relativePath, compact=False):
         relativePath = self.findRoute(relativePath)
         
         # JSON full state
         if relativePath == "*":
-            return (200, self.getJSON(), M_JSON)
+            return (200, self.getJSON(compact), M_JSON)
             
         # RPi header map
         elif relativePath == "map":
@@ -265,7 +275,7 @@ class RESTHandler():
         else:
             return (0, None, None)
 
-    def do_POST(self, relativePath, data):
+    def do_POST(self, relativePath, data, compact=False):
         relativePath = self.findRoute(relativePath)
 
         if relativePath.startswith("GPIO/"):

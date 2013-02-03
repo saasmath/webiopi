@@ -480,7 +480,7 @@ class COAPHandler():
     
     def do_GET(self, request, response):
         try:
-            (code, body, type) = self.handler.do_GET(request.uri_path[1:])
+            (code, body, type) = self.handler.do_GET(request.uri_path[1:], True)
             if code == 0:
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
@@ -498,7 +498,7 @@ class COAPHandler():
         
     def do_POST(self, request, response):
         try:
-            (code, body, type) = self.handler.do_POST(request.uri_path[1:], request.payload)
+            (code, body, type) = self.handler.do_POST(request.uri_path[1:], request.payload, True)
             if code == 0:
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
