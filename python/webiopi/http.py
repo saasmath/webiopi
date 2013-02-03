@@ -160,20 +160,34 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if not self.checkAuthentication():
             return self.requestAuthentication()
         
-        relativePath = self.path.replace(self.server.context, "/")
-        if relativePath.startswith("/"):
+        request = self.path.replace(self.server.context, "/").split('?')
+        relativePath = request[0]
+        if relativePath[0] == "/":
             relativePath = relativePath[1:];
+
+        params = {}
+        if len(request) > 1:
+            for s in request[1].split('&'):
+                if s.find('=') > 0:
+                    (name, value) = s.split('=')
+                    params[name] = value
+                else:
+                    params[s] = None
+        
+        compact = False
+        if 'compact' in params:
+            compact = str2bool(params['compact'])
 
         try:
             result = (None, None, None)
             if self.command == "GET":
-                result = self.server.handler.do_GET(relativePath)
+                result = self.server.handler.do_GET(relativePath, compact)
             elif self.command == "POST":
                 length = 0
                 length_header = 'content-length'
                 if length_header in self.headers:
                     length = int(self.headers[length_header])
-                result = self.server.handler.do_POST(relativePath, self.rfile.read(length))
+                result = self.server.handler.do_POST(relativePath, self.rfile.read(length), compact)
             else:
                 result = (405, None, None)
                 
