@@ -83,13 +83,14 @@ multicast = true
 
 #temp0 = TMP102
 #temp1 = TMP102 0x49
-#temp2 = BMP085
-#temp3 = DS18B20
-#temp4 = DS18B20 28-0000049bc218
+#temp2 = DS18B20
+#temp3 = DS18B20 28-0000049bc218
 
 #expander0 = PCF8574
+#expander1 = PCF8574 0x21
 
-#analog0 = MCP3208
+#adc = MCP3208
+#dac = MCP4922 1
 
 #------------------------------------------------------------------------#
 
@@ -107,6 +108,8 @@ multicast = true
 # Uncomment to disable automatic device mapping
 #device-mapping = false
 
+#------------------------------------------------------------------------#
+
 [ROUTES]
 # Custom REST API route syntax :
 # source = destination
@@ -115,15 +118,14 @@ multicast = true
 # Adding routes allows to simplify access with Human comprehensive URLs
 
 # In the next example with have the bedroom light connected to GPIO 25
-# and a temperature sensor named temp0, defined in [DEVICES] section
+# and a temperature sensor named temp2, defined in [DEVICES] section
 #  - GET  /bedroom/light       => GET  /GPIO/25/value, returns the light state
 #  - POST /bedroom/light/0     => POST /GPIO/25/value/0, turn off the light
 #  - POST /bedroom/light/1	   => POST /GPIO/25/value/1, turn on the light
-#  - GET  /bedroom/temperature => GET  /device/temp0/temperature, returns the temperature
+#  - GET  /bedroom/temperature => GET  /device/temp2/temperature, returns the temperature
 #/bedroom/light = /GPIO/25/value
-#/bedroom/temperature = /device/temp0/temperature
+#/bedroom/temperature = /device/temp2/temperature
 
 #/livingroom/light = /device/expander0/0/value
-#/livingroom/brightness = /device/analog0/0/scale
-#/livingroom/temperature = /device/temp1/temperature
-
+#/livingroom/brightness = /device/adc/0/float
+#/livingroom/temperature = /device/temp0/temperature

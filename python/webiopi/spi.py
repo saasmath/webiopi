@@ -72,9 +72,17 @@ SPI_IOC_RD_MAX_SPEED_HZ     = _IOR(SPI_IOC_MAGIC, 4, 4)
 SPI_IOC_WR_MAX_SPEED_HZ     = _IOW(SPI_IOC_MAGIC, 4, 4)
 
 class SPI(Bus):
-    def __init__(self, channel=0, mode=0, bits=8, speed=0, name="SPI"):
-        Bus.__init__(self, "SPI", "/dev/spidev0.%d" % channel)
-        self.channel = channel
+    def __init__(self, chip=0, mode=0, bits=8, speed=0, name="SPI"):
+        if isinstance(chip, str):
+            if chip.startswith("0b"):
+                chip = int(chip, 2)
+            elif chip.startswith("0x"):
+                chip = int(chip, 16)
+            else:
+                chip = int(chip)
+
+        Bus.__init__(self, "SPI", "/dev/spidev0.%d" % chip)
+        self.chip = chip
 
         val8 = array.array('B', [0])
         val8[0] = mode
@@ -106,7 +114,7 @@ class SPI(Bus):
         self.name = name
     
     def __str__(self):
-        return "%s(channel=%d, mode=%d, speed=%dHz)" % (self.name, self.channel, self.mode, self.speed)
+        return "%s(chip=%d, mode=%d, speed=%dHz)" % (self.name, self.chip, self.mode, self.speed)
         
     def xfer(self, txbuff=None):
         length = len(txbuff)
