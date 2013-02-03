@@ -16,32 +16,35 @@ from webiopi.i2c import I2C
 from webiopi.rest import route
 from webiopi.utils import *
 
-class PCF8574(I2C):
-    def __init__(self, addr=0x20):
-        I2C.__init__(self, addr, "PCF8574")
-        self.channelCount = 8
+class Expander():
+    def __init__(self, channelCount):
+        self.channelCount = channelCount
         
-    @route("GET", "%(channel)d/value", "%d")
+    def __input__(self, chanel):
+        raise NotImplementedError
+        
+    def __output__(self, chanel, value):
+        raise NotImplementedError
+        
+    def __readInteger__(self):
+        raise NotImplementedError
+    
+    def __writeInteger__(self, value):
+        raise NotImplementedError
+
+    def __checkChannel__(self, channel):
+        if not channel in range(self.channelCount):
+            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+
+    @route("GET", "%(channel)d", "%d")
     def input(self, channel):
-        if not channel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+        self.__checkChannel__(channel)
+        return self.__input__(channel)
 
-        mask = 1 << channel
-        d = self.readByte()
-        return (d & mask) == mask 
-
-    @route("POST", "%(channel)d/value/%(value)d", "%d")
+    @route("POST", "%(channel)d/%(value)d", "%d")
     def output(self, channel, value):
-        if not channel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
-
-        mask = 1 << channel
-        b = self.readByte()
-        if value:
-            b |= mask
-        else:
-            b &= ~mask
-        self.writeByte(b)
+        self.__checkChannel__(channel)
+        self.__output__(channel, value)
         return self.input(channel)  
 
     @route("GET", "*", "%s")
@@ -51,10 +54,35 @@ class PCF8574(I2C):
             values[i] = int(self.input(i))
         return jsonDumps(values)
 
-    @route("GET", "byte", "%d")
-    def readByte(self):
+    @route("GET", "integer", "%d")
+    def readInteger(self):
+        return self.__readInteger__(self)
+    
+    @route("POST", "integer/%(value)d")
+    def writeInteger(self, value):
+        self.__writeInteger__(value)
+        
+class PCF8574(I2C, Expander):
+    def __init__(self, addr=0x20):
+        I2C.__init__(self, addr, "PCF8574")
+        Expander.__init__(self, 8)
+        
+    def __input__(self, channel):
+        mask = 1 << channel
+        d = self.readByte()
+        return (d & mask) == mask 
+
+    def __output__(self, channel, value):
+        mask = 1 << channel
+        b = self.readByte()
+        if value:
+            b |= mask
+        else:
+            b &= ~mask
+        self.writeByte(b)
+
+    def __readInteger__(self):
         return I2C.readByte(self)
     
-    @route("POST", "byte/%(value)d")
-    def writeByte(self, value):
+    def __writeInteger__(self, value):
         I2C.writeByte(self, value)

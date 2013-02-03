@@ -126,6 +126,6 @@ multicast = true
 #/bedroom/light = /GPIO/25/value
 #/bedroom/temperature = /device/temp2/temperature
 
-#/livingroom/light = /device/expander0/0/value
+#/livingroom/light = /device/expander0/0
 #/livingroom/brightness = /device/adc/0/float
 #/livingroom/temperature = /device/temp0/temperature
