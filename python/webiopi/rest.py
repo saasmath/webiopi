@@ -47,7 +47,7 @@ class RESTHandler():
     def __init__(self):
         self.device_mapping = True
         self.routes = {}
-        self.gpioDriver = None
+        self.gpioExport = []
         
     def stop(self):
         for name in SERIALS:
@@ -73,9 +73,6 @@ class RESTHandler():
         self.addDeviceInstance(name, dev, args)
 
     def addDeviceInstance(self, name, dev, args):
-        if name == "GPIO":
-            self.gpioDriver = dev
-
         funcs = {"GET": {}, "POST": {}}
         for att in dir(dev):
             func = getattr(dev, att)
@@ -179,12 +176,45 @@ class RESTHandler():
             response = func.format % result
         return (200, response, M_PLAIN)
         
+    def getJSON(self, compact=False):
+        if compact:
+            f = 'f'
+            v = 'v'
+        else:
+            f = 'function'
+            v = 'value'
+        
+        json = {}
+        for (alt, value) in FUNCTIONS.items():
+            json[alt] = int(value["enabled"])
+        
+        gpios = {}
+        if len(self.gpioExport) > 0:
+            export = self.gpioExport
+        else:
+            export = range(GPIO.GPIO_COUNT)
+
+        for gpio in export:
+            gpios[gpio] = {}
+            if compact:
+                gpios[gpio][f] = GPIO.getFunction(gpio)
+            else:
+                gpios[gpio][f] = GPIO.getFunctionString(gpio)
+            gpios[gpio][v] = int(GPIO.input(gpio))
+
+            if GPIO.getFunction(gpio) == GPIO.PWM:
+                (type, value) = GPIO.getPulse(gpio).split(':')
+                gpios[gpio][type] = value
+        
+        json['GPIO'] = gpios
+        return jsonDumps(json)
+
     def do_GET(self, relativePath, compact=False):
         relativePath = self.findRoute(relativePath)
         
         # JSON full state
         if relativePath == "*":
-            return (200, self.gpioDriver.getJSON(compact), M_JSON)
+            return (200, self.getJSON(compact), M_JSON)
             
         # RPi header map
         elif relativePath == "map":

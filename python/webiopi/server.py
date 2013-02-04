@@ -76,6 +76,7 @@ class Server():
                 if config.has_option("REST", "gpio-export"):
                     exports = config.get("REST", "gpio-export")
                     self.gpioDriver.export = [int(i) for i in exports.split(",")]
+                    self.restHandler.gpioExport = self.gpioDriver.export
                 if config.has_option("REST", "gpio-post-value"):
                     self.gpioDriver.post_value = config.getboolean("REST", "gpio-post-value")
                 if config.has_option("REST", "gpio-post-function"):

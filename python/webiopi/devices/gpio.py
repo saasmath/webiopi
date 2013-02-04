@@ -10,39 +10,6 @@ class GPIODriver():
     def __str__(self):
         return "GPIODriver"
     
-    def getJSON(self, compact=False):
-        if compact:
-            f = 'f'
-            v = 'v'
-        else:
-            f = 'function'
-            v = 'value'
-        
-        json = {}
-        for (alt, value) in FUNCTIONS.items():
-            json[alt] = int(value["enabled"])
-        
-        gpios = {}
-        if len(self.export) > 0:
-            export = self.export
-        else:
-            export = range(GPIO.GPIO_COUNT)
-
-        for gpio in export:
-            gpios[gpio] = {}
-            if compact:
-                gpios[gpio][f] = GPIO.getFunction(gpio)
-            else:
-                gpios[gpio][f] = GPIO.getFunctionString(gpio)
-            gpios[gpio][v] = int(GPIO.input(gpio))
-
-            if GPIO.getFunction(gpio) == GPIO.PWM:
-                (type, value) = GPIO.getPulse(gpio).split(':')
-                gpios[gpio][type] = value
-        
-        json['GPIO'] = gpios
-        return jsonDumps(json)
-
     def checkChannelAllowed(self, channel):
         if len(self.export) > 0 and not channel in self.export:
             raise ValueError("GPIO %d Not Authorized" % channel)
