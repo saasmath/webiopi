@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 import os
+import time
 
 from webiopi.utils import *
 
@@ -24,10 +25,14 @@ def unloadModule(module):
     subprocess.call(["modprobe", "-r", module])
     
 def loadModules(bus):
-    info("Loading %s modules" % bus)
     if FUNCTIONS[bus]["enabled"] == False and not modulesLoaded(bus):
+        info("Loading %s modules" % bus)
         for module in FUNCTIONS[bus]["modules"]:
             loadModule(module)
+        if "wait" in FUNCTIONS[bus]:
+            info("Sleeping %ds to let %s modules load" % (FUNCTIONS[bus]["wait"], bus))
+            time.sleep(FUNCTIONS[bus]["wait"])
+
     FUNCTIONS[bus]["enabled"] = True
 
 def unloadModules(bus):
@@ -45,7 +50,7 @@ def __modulesLoaded__(modules, lines):
     return False
 
 def modulesLoaded(bus):
-    if not bus in FUNCTIONS or len(FUNCTIONS[bus]["modules"]) == 0:
+    if not bus in FUNCTIONS or not "modules" in FUNCTIONS[bus]:
         return True
 
     f = open("/proc/modules")
@@ -56,7 +61,6 @@ def modulesLoaded(bus):
 
 def checkAllBus():
     for bus in FUNCTIONS:
-        #print("Checking %s modules" % bus)
         if modulesLoaded(bus):
             FUNCTIONS[bus]["enabled"] = True
 

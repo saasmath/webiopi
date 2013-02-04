@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 import os
-import time
 from webiopi.bus import Bus, loadModule
 from webiopi.rest import route
 
@@ -44,7 +43,6 @@ class OneWire(Bus):
                     raise Exception("Slave address %s does not match family %02x" % (slave, family))
                 self.slave = slave
         else:
-            time.sleep(1)
             devices = self.deviceList()
             if len(devices) == 0:
                 raise Exception("No device match family %02x" % family)
