@@ -17,6 +17,7 @@ from webiopi.utils import *
 from webiopi import rest
 from webiopi import coap
 from webiopi import http
+from webiopi.devices.gpio import GPIODriver
 
 if PYTHON_MAJOR >= 3:
     import configparser as parser
@@ -25,8 +26,10 @@ else:
 
 class Server():
     def __init__(self, port=8000, coap_port=5683, login=None, password=None, passwdfile=None, configfile=None):
-        self.handler = rest.RESTHandler()
         self.host = getLocalIP()
+        self.gpioDriver = GPIODriver()
+        self.restHandler = rest.RESTHandler()
+        self.restHandler.addDeviceInstance("GPIO", self.gpioDriver, [])
 
         http_port = port
         if http_port != None and http_port > 0:
@@ -67,18 +70,18 @@ class Server():
             if config.has_section("SCRIPTS"):
                 scripts = config.items("SCRIPTS")
                 for (name, source) in scripts:
-                    loadScript(name, source, self.handler)
+                    loadScript(name, source, self.restHandler)
             
             if config.has_section("REST"):
                 if config.has_option("REST", "gpio-export"):
                     exports = config.get("REST", "gpio-export")
-                    self.handler.gpio_export = [int(i) for i in exports.split(",")]
+                    self.gpioDriver.export = [int(i) for i in exports.split(",")]
                 if config.has_option("REST", "gpio-post-value"):
-                    self.handler.gpio_post_value = config.getboolean("REST", "gpio-post-value")
+                    self.gpioDriver.post_value = config.getboolean("REST", "gpio-post-value")
                 if config.has_option("REST", "gpio-post-function"):
-                    self.handler.gpio_post_function = config.getboolean("REST", "gpio-post-function")
+                    self.gpioDriver.post_function = config.getboolean("REST", "gpio-post-function")
                 if config.has_option("REST", "device-mapping"):
-                    self.handler.device_mapping = config.getboolean("REST", "device-mapping")
+                    self.restHandler.device_mapping = config.getboolean("REST", "device-mapping")
             
             if config.has_section("HTTP"):
                 if config.has_option("HTTP", "enabled"):
@@ -107,18 +110,18 @@ class Server():
                     (device, speed) = params.split(" ")
                     speed = int(speed)
                     if speed > 0:
-                        self.handler.addSerial(name, device, speed)
+                        self.restHandler.addSerial(name, device, speed)
         
             if config.has_section("DEVICES"):
                 devices = config.items("DEVICES")
                 for (name, params) in devices:
                     values = params.split(" ")
-                    self.handler.addDevice(name, values[0], values[1:])
+                    self.restHandler.addDevice(name, values[0], values[1:])
                     
             if config.has_section("ROUTES"):
                 routes = config.items("ROUTES")
                 for (source, destination) in routes:
-                    self.handler.addRoute(source, destination)
+                    self.restHandler.addRoute(source, destination)
         
         if passwdfile != None:
             if os.path.exists(passwdfile):
@@ -140,26 +143,26 @@ class Server():
             warn("Access unprotected")
         
         if http_enabled:
-            self.http_server = http.HTTPServer(self.host, http_port, self.handler, context, docroot, index, auth)
+            self.http_server = http.HTTPServer(self.host, http_port, self.restHandler, context, docroot, index, auth)
         else:
             self.http_server = None
         
         if coap_enabled:
-            self.coap_server = coap.COAPServer(self.host, coap_port, self.handler)
+            self.coap_server = coap.COAPServer(self.host, coap_port, self.restHandler)
             if multicast:
                 self.coap_server.enableMulticast()
         else:
             self.coap_server = None
     
     def addMacro(self, macro):
-        self.handler.addMacro(macro)
+        self.restHandler.addMacro(macro)
         
     def stop(self):
         if self.http_server:
             self.http_server.stop()
         if self.coap_server:
             self.coap_server.stop()
-        self.handler.stop()
+        self.restHandler.stop()
 
 
 

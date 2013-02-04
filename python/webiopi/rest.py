@@ -20,11 +20,6 @@ MACROS = {}
 M_PLAIN = "text/plain"
 M_JSON  = "application/json"
 
-try :
-    import _webiopi.GPIO as GPIO
-except:
-    pass
-
 def route(method="POST", path=None, format="%s"):
     def wrapper(func):
         func.routed = True
@@ -50,11 +45,9 @@ def findDeviceClass(name):
 
 class RESTHandler():
     def __init__(self):
-        self.gpio_export = []
-        self.gpio_post_value = True
-        self.gpio_post_function = True
         self.device_mapping = True
         self.routes = {}
+        self.gpioDriver = None
         
     def stop(self):
         for name in SERIALS:
@@ -77,6 +70,11 @@ class RESTHandler():
             dev = devClass(*args)
         else:
             dev = devClass()
+        self.addDeviceInstance(name, dev, args)
+
+    def addDeviceInstance(self, name, dev, args):
+        if name == "GPIO":
+            self.gpioDriver = dev
 
         funcs = {"GET": {}, "POST": {}}
         for att in dir(dev):
@@ -170,50 +168,27 @@ class RESTHandler():
                 return (func, args) 
         
         return (None, functionName + " Not Found")
-
-    def getJSON(self, compact=False):
-        if compact:
-            f = 'f'
-            v = 'v'
-        else:
-            f = 'function'
-            v = 'value'
+    
+    def callDeviceFunction(self, method, path):
+        (func, args) = self.getDeviceRoute(method, path)
+        if func == None:
+            return (404, args, M_PLAIN)
+        result = func(**args)
+        response = None
+        if result != None:
+            response = func.format % result
+        return (200, response, M_PLAIN)
         
-        json = {}
-        for (alt, value) in FUNCTIONS.items():
-            json[alt] = int(value["enabled"])
-        
-        gpios = {}
-        if len(self.gpio_export) > 0:
-            export = self.gpio_export
-        else:
-            export = range(GPIO.GPIO_COUNT)
-
-        for gpio in export:
-            gpios[gpio] = {}
-            if compact:
-                gpios[gpio][f] = GPIO.getFunction(gpio)
-            else:
-                gpios[gpio][f] = GPIO.getFunctionString(gpio)
-            gpios[gpio][v] = int(GPIO.input(gpio))
-
-            if GPIO.getFunction(gpio) == GPIO.PWM:
-                (type, value) = GPIO.getPulse(gpio).split(':')
-                gpios[gpio][type] = value
-        
-        json['GPIO'] = gpios
-        return jsonDumps(json)
-
     def do_GET(self, relativePath, compact=False):
         relativePath = self.findRoute(relativePath)
         
         # JSON full state
         if relativePath == "*":
-            return (200, self.getJSON(compact), M_JSON)
+            return (200, self.gpioDriver.getJSON(compact), M_JSON)
             
         # RPi header map
         elif relativePath == "map":
-            json = "%s" % MAPPING[GPIO.BOARD_REVISION]
+            json = "%s" % MAPPING[BOARD_REVISION]
             json = json.replace("'", '"')
             return (200, json, M_JSON)
 
@@ -223,40 +198,12 @@ class RESTHandler():
 
         # board revision
         elif relativePath == "revision":
-            revision = "%s" % GPIO.BOARD_REVISION
+            revision = "%s" % BOARD_REVISION
             return (200, revision, M_PLAIN)
 
         # Single GPIO getter
         elif relativePath.startswith("GPIO/"):
-            (mode, s_gpio, operation) = relativePath.split("/")
-            gpio = int(s_gpio)
-            
-            if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
-                return (403, "GPIO %d Not Authorized" % gpio, None)
-            
-            value = None
-            if operation == "value":
-                if GPIO.input(gpio):
-                    value = "1"
-                else:
-                    value = "0"
-    
-            elif operation == "function":
-                value = GPIO.getFunctionString(gpio)
-    
-            elif operation == "pwm":
-                if GPIO.isPWMEnabled(gpio):
-                    value = "enabled"
-                else:
-                    value = "disabled"
-                
-            elif operation == "pulse":
-                value = GPIO.getPulse(gpio)
-                
-            else:
-                return (404, operation + " Not Found", M_PLAIN)
-                
-            return (200, value, M_PLAIN)
+            return self.callDeviceFunction("GET", relativePath)
         
         elif relativePath.startswith("serial/"):
             device = relativePath.replace("serial/", "")
@@ -277,14 +224,7 @@ class RESTHandler():
             if not self.device_mapping:
                 return (404, None, None)
             path = relativePath.replace("device/", "")
-            (func, args) = self.getDeviceRoute("GET", path)
-            if func == None:
-                return (404, args, M_PLAIN)
-            result = func(**args)
-            response = None
-            if result != None:
-                response = func.format % result
-            return (200, response, M_PLAIN)
+            return self.callDeviceFunction("GET", path)
 
         else:
             return (0, None, None)
@@ -293,74 +233,7 @@ class RESTHandler():
         relativePath = self.findRoute(relativePath)
 
         if relativePath.startswith("GPIO/"):
-            (mode, s_gpio, operation, value) = relativePath.split("/")
-            gpio = int(s_gpio)
-            if len(self.gpio_export) > 0 and not gpio in self.gpio_export:
-                return (403, "GPIO %d Not Authorized" % gpio, None)
-            
-            if operation == "value":
-                if not self.gpio_post_value:
-                    return (403, None, None)
-                if value == "0":
-                    GPIO.output(gpio, GPIO.LOW)
-                elif value == "1":
-                    GPIO.output(gpio, GPIO.HIGH)
-                else:
-                    return (400, "Bad Value", M_PLAIN)
-    
-                return (200, value, M_PLAIN)
-
-            elif operation == "function":
-                if not self.gpio_post_function:
-                    return (403, None, None)
-                value = value.lower()
-                if value == "in":
-                    GPIO.setFunction(gpio, GPIO.IN)
-                elif value == "out":
-                    GPIO.setFunction(gpio, GPIO.OUT)
-                elif value == "pwm":
-                    GPIO.setFunction(gpio, GPIO.PWM)
-                else:
-                    return (400, "Bad Function", M_PLAIN)
-
-                value = GPIO.getFunctionString(gpio)
-                return (200, value, M_PLAIN)
-
-            elif operation == "sequence":
-                (period, sequence) = value.split(",")
-                period = int(period)
-                GPIO.outputSequence(gpio, period, sequence)
-                return (200, sequence[-1], M_PLAIN)
-                
-            elif operation == "pwm":
-                if value == "enable":
-                    GPIO.enablePWM(gpio)
-                elif value == "disable":
-                    GPIO.disablePWM(gpio)
-                
-                if GPIO.isPWMEnabled(gpio):
-                    result = "enabled"
-                else:
-                    result = "disabled"
-                
-                return (200, result, M_PLAIN)
-                
-            elif operation == "pulse":
-                GPIO.pulse(gpio)
-                return (200, "OK", M_PLAIN)
-                
-            elif operation == "pulseRatio":
-                ratio = float(value)
-                GPIO.pulseRatio(gpio, ratio)
-                return (200, value, M_PLAIN)
-                
-            elif operation == "pulseAngle":
-                angle = float(value)
-                GPIO.pulseAngle(gpio, angle)
-                return (200, value, M_PLAIN)
-                
-            else: # operation unknown
-                return (404, operation + " Not Found", M_PLAIN)
+            return self.callDeviceFunction("POST", relativePath)
                 
         elif relativePath.startswith("macros/"):
             (mode, mname, value) = relativePath.split("/")
@@ -396,14 +269,7 @@ class RESTHandler():
             if not self.device_mapping:
                 return (404, None, None)
             path = relativePath.replace("device/", "")
-            (func, args) = self.getDeviceRoute("POST", path)
-            if func == None:
-                return (404, args, M_PLAIN)
-            result = func(**args)
-            response = None
-            if result != None:
-                response = func.format % result
-            return (200, response, M_PLAIN)
+            return self.callDeviceFunction("POST", path)
 
         else: # path unknowns
             return (0, None, None)
