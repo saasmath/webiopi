@@ -20,6 +20,18 @@ class Expander():
     def __init__(self, channelCount):
         self.channelCount = channelCount
         
+    def __checkChannel__(self, channel):
+        if not channel in range(self.channelCount):
+            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+
+    @route("GET", "channel-count", "%d")
+    def getChannelCount(self):
+        return self.channelCount
+
+class GPIOExpander(Expander):
+    def __init__(self, channelCount):
+        Expander.__init__(self, channelCount)
+    
     def __input__(self, chanel):
         raise NotImplementedError
         
@@ -31,10 +43,6 @@ class Expander():
     
     def __writeInteger__(self, value):
         raise NotImplementedError
-
-    def __checkChannel__(self, channel):
-        if not channel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
 
     @route("GET", "%(channel)d", "%d")
     def input(self, channel):
@@ -62,10 +70,10 @@ class Expander():
     def writeInteger(self, value):
         self.__writeInteger__(value)
         
-class PCF8574(I2C, Expander):
+class PCF8574(I2C, GPIOExpander):
     def __init__(self, addr=0x20):
         I2C.__init__(self, addr, "PCF8574")
-        Expander.__init__(self, 8)
+        GPIOExpander.__init__(self, 8)
         
     def __input__(self, channel):
         mask = 1 << channel

@@ -15,26 +15,38 @@
 from webiopi.i2c import I2C
 from webiopi.spi import SPI
 from webiopi.rest import route
+from webiopi.devices.digital import Expander
 from webiopi.utils import *
 
-class ADC():
+class AnalogExpander(Expander):
     def __init__(self, resolution, channelCount):
+        Expander.__init__(self, channelCount)
         self.resolution = resolution
-        self.channelCount = channelCount
-        self.MAX = (2**resolution - 1) * 1.0 
- 
-    def __readInteger__(self, adcChannel, diff):
+        self.MAX = 2**resolution - 1
+    
+    @route("GET", "resolution", "%d")
+    def getResolution(self):
+        return self.resolution
+    
+    @route("GET", "max-integer", "%d")
+    def getMaxInteger(self):
+        return int(self.MAX)
+    
+class ADC(AnalogExpander):
+    def __init__(self, resolution, channelCount):
+        AnalogExpander.__init__(self, resolution, channelCount)
+
+    def __readInteger__(self, channel, diff):
         raise NotImplementedError
     
-    @route("GET", "%(adcChannel)d/integer", "%d")
-    def readInteger(self, adcChannel, diff=False):
-        if not adcChannel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (adcChannel, 0, self.channelCount-1))
-        return self.__readInteger__(adcChannel, diff)
+    @route("GET", "%(channel)d/integer", "%d")
+    def readInteger(self, channel, diff=False):
+        self.__checkChannel__(channel)
+        return self.__readInteger__(channel, diff)
     
-    @route("GET", "%(adcChannel)d/float", "%.02f")
-    def readFloat(self, adcChannel, diff=False):
-        return self.readInteger(adcChannel, diff) / self.MAX
+    @route("GET", "%(channel)d/float", "%.02f")
+    def readFloat(self, channel, diff=False):
+        return self.readInteger(channel, diff) / self.MAX
     
     @route("GET", "*/integer", "%s")
     def readAllInteger(self):
@@ -50,24 +62,21 @@ class ADC():
             values[i] = self.readFloat(i)
         return jsonDumps(values)
     
-class DAC():
+class DAC(AnalogExpander):
     def __init__(self, resolution, channelCount):
-        self.resolution = resolution
-        self.channelCount = channelCount
-        self.MAX = 2**resolution - 1 
+        AnalogExpander.__init__(self, resolution, channelCount)
     
-    def __writeInteger__(self, dacChannel, value):
+    def __writeInteger__(self, channel, value):
         raise NotImplementedError
     
-    @route("POST", "%(dacChannel)d/integer/%(value)d")        
-    def writeInteger(self, dacChannel, value):
-        if not dacChannel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (dacChannel, 0, self.channelCount-1))
-        self.__writeInteger__(dacChannel, value)
+    @route("POST", "%(channel)d/integer/%(value)d")        
+    def writeInteger(self, channel, value):
+        self.__checkChannel__(channel)
+        self.__writeInteger__(channel, value)
     
-    @route("POST", "%(dacChannel)d/float/%(value)f")        
-    def writeFloat(self, dacChannel, value):
-        self.writeInteger(dacChannel, int(value * self.MAX))
+    @route("POST", "%(channel)d/float/%(value)f")        
+    def writeFloat(self, channel, value):
+        self.writeInteger(channel, int(value * self.MAX))
 
 class MCP3X0X(SPI, ADC):
     def __init__(self, chip, resolution, channelCount):
@@ -78,8 +87,8 @@ class MCP3X0X(SPI, ADC):
     def __str__(self):
         return "%s(chip=%d)" % (self.name, self.chip)
 
-    def __readInteger__(self, adcChannel, diff):
-        data = self.__command__(adcChannel, diff)
+    def __readInteger__(self, channel, diff):
+        data = self.__command__(channel, diff)
         r = self.xfer(data)
         return ((r[1] & self.MSB_MASK) << 8) | r[2]
     
@@ -87,13 +96,13 @@ class MCP300X(MCP3X0X):
     def __init__(self, chip, channelCount):
         MCP3X0X.__init__(self, chip, 10, channelCount)
 
-    def __command__(self, mcpChannel, diff):
+    def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
         d[0] |= 1
         d[1] |= (not diff) << 7
-        d[1] |= ((mcpChannel >> 2) & 0x01) << 6
-        d[1] |= ((mcpChannel >> 1) & 0x01) << 5
-        d[1] |= ((mcpChannel >> 0) & 0x01) << 4
+        d[1] |= ((channel >> 2) & 0x01) << 6
+        d[1] |= ((channel >> 1) & 0x01) << 5
+        d[1] |= ((channel >> 0) & 0x01) << 4
         return d
         
 class MCP3004(MCP300X):
@@ -108,13 +117,13 @@ class MCP320X(MCP3X0X):
     def __init__(self, chip, channelCount):
         MCP3X0X.__init__(self, chip, 12, channelCount)
 
-    def __command__(self, mcpChannel, diff):
+    def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
         d[0] |= 1 << 2
         d[0] |= (not diff) << 1
-        d[0] |= (mcpChannel >> 2) & 0x01
-        d[1] |= ((mcpChannel >> 1) & 0x01) << 7
-        d[1] |= ((mcpChannel >> 0) & 0x01) << 6
+        d[0] |= (channel >> 2) & 0x01
+        d[1] |= ((channel >> 1) & 0x01) << 7
+        d[1] |= ((channel >> 0) & 0x01) << 6
         return d
     
 class MCP3204(MCP320X):
@@ -137,10 +146,10 @@ class MCP492X(SPI, DAC):
     def __str__(self):
         return "%s(chip=%d)" % (self.name, self.chip)
 
-    def __writeInteger__(self, dacChannel, value):
+    def __writeInteger__(self, channel, value):
         d = bytearray(2)
         d[0]  = 0
-        d[0] |= (dacChannel & 0x01) << 7
+        d[0] |= (channel & 0x01) << 7
         d[0] |= (self.buffered & 0x01) << 6
         d[0] |= (not self.gain & 0x01) << 5
         d[0] |= (not self.shutdown & 0x01) << 4
