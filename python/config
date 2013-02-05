@@ -52,27 +52,8 @@ multicast = true
 
 #------------------------------------------------------------------------#
 
-[SERIAL]
-# Serial lines configuration syntax:
-# name = device baudrate
-#   name     : used in the URL mapping
-#   device   : tty device name
-#   baudrate : serial speed from 9600 to 115200
-# All tty devices configured here are mapped on REST API /serial/name
-
-# Raspberry native UART on GPIO, uncomment to enable
-# Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
-# And also disable getty on ttyAMA0 in /etc/inittab
-#serial0 = ttyAMA0 9600
-
-# USB serial adapters
-#usb0 = ttyUSB0 9600
-#usb1 = ttyACM0 9600
-
-#------------------------------------------------------------------------#
-
 [DEVICES]
-# Specific device configuration syntax:
+# Device configuration syntax:
 # name = device [args...]
 #   name   : used in the URL mapping
 #   device : device name
@@ -80,6 +61,15 @@ multicast = true
 # If enabled, devices configured here are mapped on REST API /device/name
 # Devices are also accessible in custom scripts using deviceInstance(name)
 # See device driver doc for methods and URI scheme available
+
+# Raspberry native UART on GPIO, uncomment to enable
+# Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
+# And also disable getty on ttyAMA0 in /etc/inittab
+#serial0 = Serial /dev/ttyAMA0 9600
+
+# USB serial adapters
+#usb0 = Serial /dev/ttyUSB0 9600
+#usb1 = Serial /dev/ttyACM0 9600
 
 #temp0 = TMP102
 #temp1 = TMP102 0x49
@@ -122,10 +112,10 @@ multicast = true
 #  - GET  /bedroom/light       => GET  /GPIO/25/value, returns the light state
 #  - POST /bedroom/light/0     => POST /GPIO/25/value/0, turn off the light
 #  - POST /bedroom/light/1	   => POST /GPIO/25/value/1, turn on the light
-#  - GET  /bedroom/temperature => GET  /device/temp2/temperature, returns the temperature
+#  - GET  /bedroom/temperature => GET  /devices/temp2/celcius, returns the temperature
 #/bedroom/light = /GPIO/25/value
-#/bedroom/temperature = /device/temp2/temperature
+#/bedroom/temperature = /devices/temp2/celcius
 
-#/livingroom/light = /device/expander0/0
-#/livingroom/brightness = /device/adc/0/float
-#/livingroom/temperature = /device/temp0/temperature
+#/livingroom/light = /devices/expander0/0
+#/livingroom/brightness = /devices/adc/0/float
+#/livingroom/temperature = /devices/temp0/celcius

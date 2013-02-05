@@ -14,9 +14,9 @@
 
 from webiopi.i2c import I2C
 from webiopi.spi import SPI
-from webiopi.rest import route
-from webiopi.devices.digital import Expander
+from webiopi.rest import *
 from webiopi.utils import *
+from webiopi.devices.digital import Expander
 
 class AnalogExpander(Expander):
     def __init__(self, resolution, channelCount):
@@ -24,11 +24,13 @@ class AnalogExpander(Expander):
         self.resolution = resolution
         self.MAX = 2**resolution - 1
     
-    @route("GET", "resolution", "%d")
+    @request("GET", "resolution")
+    @response("%d")
     def getResolution(self):
         return self.resolution
     
-    @route("GET", "max-integer", "%d")
+    @request("GET", "max-integer")
+    @response("%d")
     def getMaxInteger(self):
         return int(self.MAX)
     
@@ -39,27 +41,31 @@ class ADC(AnalogExpander):
     def __readInteger__(self, channel, diff):
         raise NotImplementedError
     
-    @route("GET", "%(channel)d/integer", "%d")
+    @request("GET", "%(channel)d/integer")
+    @response("%d")
     def readInteger(self, channel, diff=False):
         self.__checkChannel__(channel)
         return self.__readInteger__(channel, diff)
     
-    @route("GET", "%(channel)d/float", "%.02f")
+    @request("GET", "%(channel)d/float")
+    @response("%.2f")
     def readFloat(self, channel, diff=False):
         return self.readInteger(channel, diff) / self.MAX
     
-    @route("GET", "*/integer", "%s")
+    @request("GET", "*/integer")
+    @response(contentType=M_JSON)
     def readAllInteger(self):
         values = {}
         for i in range(self.channelCount):
             values[i] = self.readInteger(i)
         return jsonDumps(values)
             
-    @route("GET", "*/float", "%s")
+    @request("GET", "*/float")
+    @response(contentType=M_JSON)
     def readAllFloat(self):
         values = {}
         for i in range(self.channelCount):
-            values[i] = self.readFloat(i)
+            values[i] = float("%.2f" % self.readFloat(i))
         return jsonDumps(values)
     
 class DAC(AnalogExpander):
@@ -69,12 +75,12 @@ class DAC(AnalogExpander):
     def __writeInteger__(self, channel, value):
         raise NotImplementedError
     
-    @route("POST", "%(channel)d/integer/%(value)d")        
+    @request("POST", "%(channel)d/integer/%(value)d")        
     def writeInteger(self, channel, value):
         self.__checkChannel__(channel)
         self.__writeInteger__(channel, value)
     
-    @route("POST", "%(channel)d/float/%(value)f")        
+    @request("POST", "%(channel)d/float/%(value)f")        
     def writeFloat(self, channel, value):
         self.writeInteger(channel, int(value * self.MAX))
 

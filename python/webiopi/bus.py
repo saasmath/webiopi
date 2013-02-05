@@ -14,8 +14,10 @@
 
 import os
 import time
+import threading
 
 from webiopi.utils import *
+
 
 def loadModule(module):
     debug("Loading module : %s" % module)

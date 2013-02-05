@@ -19,12 +19,16 @@ import struct
 import termios
 
 from webiopi.bus import Bus
+from webiopi.rest import *
 
 TIOCINQ   = hasattr(termios, 'FIONREAD') and termios.FIONREAD or 0x541B
 TIOCM_zero_str = struct.pack('I', 0)
 
 class Serial(Bus):
-    def __init__(self, baudrate=9600, device="/dev/ttyAMA0"):
+    def __init__(self, device="/dev/ttyAMA0", baudrate=9600):
+        if isinstance(baudrate, str):
+            baudrate = int(baudrate)
+
         aname = "B%d" % baudrate
         if not hasattr(termios, aname):
             raise Exception("Unsupported baudrate")
@@ -65,4 +69,13 @@ class Serial(Bus):
     def available(self):
         s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)
         return struct.unpack('I',s)[0]
-        
+    
+    @request("GET", "")
+    def read(self):
+        if self.available() > 0:
+            return Bus.read(self, self.available()).decode()
+        return ""
+    
+    @request("POST", "", "data")
+    def write(self, data):
+        Bus.write(self, data)

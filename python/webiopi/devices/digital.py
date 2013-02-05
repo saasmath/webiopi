@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 from webiopi.i2c import I2C
-from webiopi.rest import route
+from webiopi.rest import *
 from webiopi.utils import *
 
 class Expander():
@@ -24,7 +24,8 @@ class Expander():
         if not channel in range(self.channelCount):
             raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
 
-    @route("GET", "channel-count", "%d")
+    @request("GET", "channel-count")
+    @response("%d")
     def getChannelCount(self):
         return self.channelCount
 
@@ -44,31 +45,37 @@ class GPIOExpander(Expander):
     def __writeInteger__(self, value):
         raise NotImplementedError
 
-    @route("GET", "%(channel)d", "%d")
+    @request("GET", "%(channel)d")
+    @response("%d")
     def input(self, channel):
         self.__checkChannel__(channel)
         return self.__input__(channel)
 
-    @route("POST", "%(channel)d/%(value)d", "%d")
+    @request("POST", "%(channel)d/%(value)d")
+    @response("%d")
     def output(self, channel, value):
         self.__checkChannel__(channel)
         self.__output__(channel, value)
         return self.input(channel)  
 
-    @route("GET", "*", "%s")
+    @request("GET", "*")
+    @response(contentType=M_JSON)
     def readAll(self):
         values = {}
         for i in range(self.channelCount):
             values[i] = int(self.input(i))
         return jsonDumps(values)
 
-    @route("GET", "integer", "%d")
+    @request("GET", "integer")
+    @response("%d")
     def readInteger(self):
         return self.__readInteger__(self)
     
-    @route("POST", "integer/%(value)d")
+    @request("POST", "integer/%(value)d")
+    @response("%d")
     def writeInteger(self, value):
         self.__writeInteger__(value)
+        return self.readInteger()
         
 class PCF8574(I2C, GPIOExpander):
     def __init__(self, addr=0x20):

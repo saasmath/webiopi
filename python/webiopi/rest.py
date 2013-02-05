@@ -13,22 +13,25 @@
 #   limitations under the License.
 
 from webiopi.utils import *
-from webiopi.serial import Serial
 
 MACROS = {}
 
 M_PLAIN = "text/plain"
 M_JSON  = "application/json"
 
-def route(method="POST", path=None, format="%s"):
+def request(method="GET", path="", data=None):
     def wrapper(func):
         func.routed = True
         func.method = method
+        func.path = path
+        func.data = data
+        return func
+    return wrapper
+
+def response(format="%s", contentType=M_PLAIN):
+    def wrapper(func):
         func.format = format
-        if path:
-            func.path = path
-        else:
-            func.path = func.__name__
+        func.contentType = contentType
         return func
     return wrapper
 
@@ -50,17 +53,10 @@ class RESTHandler():
         self.gpioExport = []
         
     def stop(self):
-        for name in SERIALS:
-            serial = SERIALS[name]
-            serial.close()
+        pass
 
     def addMacro(self, macro):
         MACROS[macro.__name__] = macro
-        
-    def addSerial(self, name, device, speed):
-        serial = Serial(speed, "/dev/%s" % device)
-        SERIALS[name] = serial
-        info("%s mapped to REST API /serial/%s" % (serial, name))
         
     def addDevice(self, name, device, args):
         devClass = findDeviceClass(device)
@@ -77,11 +73,17 @@ class RESTHandler():
         for att in dir(dev):
             func = getattr(dev, att)
             if callable(func) and hasattr(func, "routed"):
-                debug("Mapping %s.%s to REST %s /device/%s/%s" % (dev, att, func.method, name, func.path))
+                if name == "GPIO":
+                    debug("Mapping %s.%s to REST %s /GPIO/%s" % (dev, att, func.method, func.path))
+                else:
+                    debug("Mapping %s.%s to REST %s /devices/%s/%s" % (dev, att, func.method, name, func.path))
                 funcs[func.method][func.path] = func
         
         DEVICES[name] = {'device': dev, 'functions': funcs}
-        info("%s mapped to REST API /device/%s" % (dev, name))
+        if name == "GPIO":
+            info("%s mapped to REST API /GPIO" % dev)
+        else:
+            info("%s mapped to REST API /devices/%s" % (dev, name))
         
     def addRoute(self, source, destination):
         if source[0] == "/":
@@ -166,15 +168,27 @@ class RESTHandler():
         
         return (None, functionName + " Not Found")
     
-    def callDeviceFunction(self, method, path):
+    def callDeviceFunction(self, method, path, data=None):
         (func, args) = self.getDeviceRoute(method, path)
         if func == None:
             return (404, args, M_PLAIN)
+
+        if func.data != None:
+            args[func.data] = data
+        
         result = func(**args)
         response = None
+        contentType = None
         if result != None:
-            response = func.format % result
-        return (200, response, M_PLAIN)
+            if hasattr(func, "format"):
+                response = func.format % result
+            else:
+                response = result
+                
+            if hasattr(func, "contentType"):
+                contentType = func.contentType
+        
+        return (200, response, contentType)
         
     def getJSON(self, compact=False):
         if compact:
@@ -250,10 +264,10 @@ class RESTHandler():
             else:
                 return (404, device + " Not Found", M_PLAIN)
 
-        elif relativePath.startswith("device/"):
+        elif relativePath.startswith("devices/"):
             if not self.device_mapping:
                 return (404, None, None)
-            path = relativePath.replace("device/", "")
+            path = relativePath.replace("devices/", "")
             return self.callDeviceFunction("GET", path)
 
         else:
@@ -286,26 +300,18 @@ class RESTHandler():
             else:
                 return (404, fname + " Not Found", M_PLAIN)
                 
-        elif relativePath.startswith("serial/"):
-            device = relativePath.replace("serial/", "")
-            if device in SERIALS:
-                serial = SERIALS[device]
-                serial.write(data)
-                return (200, None, None)
-            else:
-                return (404, device + " Not Found", M_PLAIN)
-
-        elif relativePath.startswith("device/"):
+        elif relativePath.startswith("devices/"):
             if not self.device_mapping:
                 return (404, None, None)
-            path = relativePath.replace("device/", "")
-            return self.callDeviceFunction("POST", path)
+            path = relativePath.replace("devices/", "")
+            return self.callDeviceFunction("POST", path, data)
 
         else: # path unknowns
             return (0, None, None)
 
-import webiopi.devices.digital as digital
-import webiopi.devices.analog as analog
-import webiopi.devices.sensor as sensor
+from webiopi import serial
+from webiopi.devices import digital
+from webiopi.devices import analog
+from webiopi.devices import sensor
 
-PACKAGES = [digital, analog, sensor]
+PACKAGES = [serial, digital, analog, sensor]

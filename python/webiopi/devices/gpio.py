@@ -1,4 +1,4 @@
-from webiopi.rest import route
+from webiopi.rest import *
 from webiopi.utils import *
 
 class GPIODriver():
@@ -22,12 +22,12 @@ class GPIODriver():
         if not self.post_value:
             raise ValueError("POSTing value not allowed")
     
-    @route("GET", "%(channel)d/function", "%s")
+    @request("GET", "%(channel)d/function")
     def getFunctionString(self, channel):
         self.checkChannelAllowed(channel)
         return GPIO.getFunctionString(channel)
     
-    @route("POST", "%(channel)d/function/%(value)s", "%s")
+    @request("POST", "%(channel)d/function/%(value)s")
     def setFunction(self, channel, value):
         self.checkPostingFunctionAllowed()
         self.checkChannelAllowed(channel)
@@ -42,24 +42,27 @@ class GPIODriver():
             raise ValueError("Bad Function")
         return GPIO.getFunctionString(channel)
     
-    @route("GET", "%(channel)d/value", "%d")
+    @request("GET", "%(channel)d/value")
+    @response("%d")
     def getValue(self, channel):
         self.checkChannelAllowed(channel)
         return GPIO.input(channel)
     
-    @route("GET", "%(channel)d/pulse", "%s")
+    @request("GET", "%(channel)d/pulse", "%s")
     def getPulse(self, channel):
         self.checkChannelAllowed(channel)
         return GPIO.getPulse(channel)
     
-    @route("POST", "%(channel)d/value/%(value)d", "%d")
+    @request("POST", "%(channel)d/value/%(value)d")
+    @response("%d")
     def setValue(self, channel, value):
         self.checkPostingValueAllowed()
         self.checkChannelAllowed(channel)
         GPIO.output(channel, value)
         return GPIO.input(channel)
 
-    @route("POST", "%(channel)d/sequence/%(args)s", "%d")
+    @request("POST", "%(channel)d/sequence/%(args)s")
+    @response("%d")
     def outputSequence(self, channel, args):
         self.checkPostingValueAllowed()
         self.checkChannelAllowed(channel)
@@ -68,21 +71,21 @@ class GPIODriver():
         GPIO.outputSequence(channel, period, sequence)
         return int(sequence[-1])
         
-    @route("POST", "%(channel)d/pulse/", "%s")
+    @request("POST", "%(channel)d/pulse/")
     def pulse(self, channel):
         self.checkPostingValueAllowed()
         self.checkChannelAllowed(channel)
         GPIO.pulse(channel)
         return "OK"
         
-    @route("POST", "%(channel)d/pulseRatio/%(value)f", "%s")
+    @request("POST", "%(channel)d/pulseRatio/%(value)f")
     def pulseRatio(self, channel, value):
         self.checkPostingValueAllowed()
         self.checkChannelAllowed(channel)
         GPIO.pulseRatio(channel, value)
         return GPIO.getPulse(channel)
         
-    @route("POST", "%(channel)d/pulseAngle/%(value)f", "%s")
+    @request("POST", "%(channel)d/pulseAngle/%(value)f")
     def pulseAngle(self, channel, value):
         self.checkPostingValueAllowed()
         self.checkChannelAllowed(channel)

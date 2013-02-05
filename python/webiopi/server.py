@@ -105,14 +105,6 @@ class Server():
                 if config.has_option("COAP", "multicast"):
                     multicast = config.getboolean("COAP", "multicast")
 
-            if config.has_section("SERIAL"):
-                serials = config.items("SERIAL")
-                for (name, params) in serials:
-                    (device, speed) = params.split(" ")
-                    speed = int(speed)
-                    if speed > 0:
-                        self.restHandler.addSerial(name, device, speed)
-        
             if config.has_section("DEVICES"):
                 devices = config.items("DEVICES")
                 for (name, params) in devices:

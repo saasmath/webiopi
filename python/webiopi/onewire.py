@@ -14,7 +14,6 @@
 
 import os
 from webiopi.bus import Bus, loadModule
-from webiopi.rest import route
 
 EXTRAS = {
     "TEMP": {"loaded": False, "module": "w1-therm"}
@@ -39,7 +38,7 @@ class OneWire(Bus):
                 self.slave = "%02x-%s" % (family, slave)
             elif len(addr) == 2:
                 prefix = int(addr[0], 16)
-                if family != prefix:
+                if family > 0 and family != prefix:
                     raise Exception("Slave address %s does not match family %02x" % (slave, family))
                 self.slave = slave
         else:

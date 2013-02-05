@@ -45,7 +45,6 @@ FUNCTIONS = {
 
 GPIO_SETUP = []
 GPIO_RESET = []
-SERIALS = {}
 DEVICES = {}
 SCRIPTS = {}
 TASKS = []
