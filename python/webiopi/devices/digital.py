@@ -33,6 +33,9 @@ class GPIOExpander(Expander):
     def __init__(self, channelCount):
         Expander.__init__(self, channelCount)
     
+    def __family__(self):
+        return "GPIOExpander"
+    
     def __input__(self, chanel):
         raise NotImplementedError
         

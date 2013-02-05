@@ -84,6 +84,24 @@ class RESTHandler():
             info("%s mapped to REST API /GPIO" % dev)
         else:
             info("%s mapped to REST API /devices/%s" % (dev, name))
+            
+    def getDevicesJSON(self, compact=False):
+        name = "name"
+        type = "type"
+        
+        devices = []
+        for devName in DEVICES:
+            if devName == "GPIO":
+                continue
+            instance = DEVICES[devName]["device"]
+            device = {}
+            device[name] = devName
+            if hasattr(instance, "__family__"):
+                device[type] = instance.__family__()
+            else:
+                device[type] = instance.__str__()
+            devices.append(device)
+        return jsonDumps(devices)
         
     def addRoute(self, source, destination):
         if source[0] == "/":
@@ -249,21 +267,9 @@ class RESTHandler():
         elif relativePath.startswith("GPIO/"):
             return self.callDeviceFunction("GET", relativePath)
         
-        elif relativePath.startswith("serial/"):
-            device = relativePath.replace("serial/", "")
-            if device == "*":
-                return (200, ("%s" % [a for a in SERIALS.keys()]).replace("'", '"'), M_JSON)
-            if device in SERIALS:
-                serial = SERIALS[device]
-                if serial.available() > 0:
-                    data = serial.read(serial.available())
-                    return (200, data.decode(), M_PLAIN)
-                else:
-                    return (200, None, None)
-                
-            else:
-                return (404, device + " Not Found", M_PLAIN)
-
+        elif relativePath == "devices/*":
+            return (200, self.getDevicesJSON(compact), M_JSON)
+        
         elif relativePath.startswith("devices/"):
             if not self.device_mapping:
                 return (404, None, None)

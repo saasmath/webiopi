@@ -577,12 +577,14 @@ WebIOPi.prototype.Serial = function(device) {
 
 function Serial(device) {
 	this.device = device;
+	this.url = "/devices/" + device
 }
 
 Serial.prototype.write = function(data) {
-	$.post(w().context + "serial/" + this.device, data);
+	$.post(this.url, data);
 } 
 
 Serial.prototype.read = function(callback) {
-	$.get(w().context + "serial/" + this.device, callback);
+	$.get(this.url, callback);
 }
+

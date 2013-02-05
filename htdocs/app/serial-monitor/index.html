@@ -12,12 +12,14 @@
 		        sendData();
 		    }
 		});
-		$.get("/serial/*", function(data) {
+		$.get("/devices/*", function(data) {
 			var devices = $("#devices");
 			var added = false;
 			for (i in data) {
-				added = true;
-				devices.append($("<option>" + data[i] + "</option>"))
+				if (data[i].type=="Serial") {
+					added = true;
+					devices.append($("<option>" + data[i].name + "</option>"))
+				}
 			}
 			if (added) {
 				readData();

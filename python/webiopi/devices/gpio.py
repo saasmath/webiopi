@@ -8,7 +8,7 @@ class GPIODriver():
         self.post_function = True
         
     def __str__(self):
-        return "GPIODriver"
+        return "GPIO"
     
     def checkChannelAllowed(self, channel):
         if len(self.export) > 0 and not channel in self.export:

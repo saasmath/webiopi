@@ -66,6 +66,9 @@ class Serial(Bus):
     def __str__(self):
         return "Serial(%s, %dbps)" % (self.device, self.baudrate)
     
+    def __family__(self):
+        return "Serial"
+    
     def available(self):
         s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)
         return struct.unpack('I',s)[0]

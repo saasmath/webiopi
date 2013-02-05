@@ -38,6 +38,9 @@ class ADC(AnalogExpander):
     def __init__(self, resolution, channelCount):
         AnalogExpander.__init__(self, resolution, channelCount)
 
+    def __family__(self):
+        return "ADC"
+    
     def __readInteger__(self, channel, diff):
         raise NotImplementedError
     
@@ -71,6 +74,9 @@ class ADC(AnalogExpander):
 class DAC(AnalogExpander):
     def __init__(self, resolution, channelCount):
         AnalogExpander.__init__(self, resolution, channelCount)
+    
+    def __family__(self):
+        return "DAC"
     
     def __writeInteger__(self, channel, value):
         raise NotImplementedError

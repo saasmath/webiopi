@@ -17,6 +17,9 @@ from webiopi.onewire import OneWire
 from webiopi.rest import *
 
 class Temperature():
+    def __family__(self):
+        return "Temp"
+    
     def __getCelius__(self):
         raise NotImplementedError
 
