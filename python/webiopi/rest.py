@@ -101,7 +101,7 @@ class RESTHandler():
             else:
                 device[type] = instance.__str__()
             devices.append(device)
-        return jsonDumps(sorted(devices, key=lambda dev: dev[type]))
+        return jsonDumps(sorted(sorted(devices, key=lambda dev: dev[name]), key=lambda dev: dev[type]))
         
     def addRoute(self, source, destination):
         if source[0] == "/":
