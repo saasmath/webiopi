@@ -20,22 +20,22 @@ class Temperature():
     def __family__(self):
         return "Temp"
     
-    def __getCelcius__(self):
+    def __getCelsius__(self):
         raise NotImplementedError
 
     def __getFahrenheit__(self):
         raise NotImplementedError
     
-    def Celcius2Fahrenheit(self):
-        return 1.8*self.getCelcius() + 32
+    def Celsius2Fahrenheit(self):
+        return 1.8*self.getCelsius() + 32
 
-    def Fahrenheit2Celcius(self):
+    def Fahrenheit2Celsius(self):
         return (self.getFahrenheit() - 32)/1.8
 
-    @request("GET", "celcius")
+    @request("GET", "celsius")
     @response("%.02f")
-    def getCelcius(self):
-        return self.__getCelcius__()
+    def getCelsius(self):
+        return self.__getCelsius__()
     
     @request("GET", "fahrenheit")
     @response("%.02f")
@@ -47,12 +47,12 @@ class TMPXXX(I2C, Temperature):
     def __init__(self, slave=0b1001000, name="TMPXXX"):
         I2C.__init__(self, slave, name)
         
-    def __getCelcius__(self):
+    def __getCelsius__(self):
         d = self.readBytes(2)
         return ((d[0] << 4) | (d[1] >> 4)) *0.0625
     
     def __getFahrenheit__(self):
-        return self.Celcius2Fahrenheit()
+        return self.Celsius2Fahrenheit()
 
 class TMP075(TMPXXX):
     def __init__(self, slave=0b1001000):
@@ -70,7 +70,7 @@ class OneWireTemp(OneWire, Temperature):
     def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
         OneWire.__init__(self, slave, family, "TEMP", name)
         
-    def __getCelcius__(self):
+    def __getCelsius__(self):
         data = self.read()
         lines = data.split("\n")
         if lines[0].endswith("YES"):
@@ -78,7 +78,7 @@ class OneWireTemp(OneWire, Temperature):
             return int(temp) / 1000.0
     
     def __getFahrenheit__(self):
-        return self.Celcius2Fahrenheit()
+        return self.Celsius2Fahrenheit()
 
 class DS18B20(OneWireTemp):
     def __init__(self, slave=None):
