@@ -20,7 +20,7 @@ class Temperature():
     def __family__(self):
         return "Temp"
     
-    def __getCelius__(self):
+    def __getCelcius__(self):
         raise NotImplementedError
 
     def __getFahrenheit__(self):
