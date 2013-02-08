@@ -118,11 +118,11 @@ class MCP300X(MCP3X0X):
         return d
         
 class MCP3004(MCP300X):
-    def __init__(self, chip):
+    def __init__(self, chip=0):
         MCP300X.__init__(self, chip, 4)
         
 class MCP3008(MCP300X):
-    def __init__(self, chip):
+    def __init__(self, chip=0):
         MCP300X.__init__(self, chip, 8)
         
 class MCP320X(MCP3X0X):
