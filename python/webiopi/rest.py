@@ -94,14 +94,18 @@ class RESTHandler():
             if devName == "GPIO":
                 continue
             instance = DEVICES[devName]["device"]
-            device = {}
-            device[name] = devName
             if hasattr(instance, "__family__"):
-                device[type] = instance.__family__()
+                family = instance.__family__()
+                if isinstance(family, str):
+                    devices.append({name: devName, type:family})
+                else:
+                    for fam in family:
+                        devices.append({name: devName, type:fam})
+                        
             else:
-                device[type] = instance.__str__()
-            devices.append(device)
-        return jsonDumps(sorted(sorted(devices, key=lambda dev: dev[name]), key=lambda dev: dev[type]))
+                devices.append({name: devName, type:instance.__str__()})
+
+        return jsonDumps(sorted(devices, key=lambda dev: dev[name]))
         
     def addRoute(self, source, destination):
         if source[0] == "/":

@@ -76,6 +76,8 @@ multicast = true
 #temp2 = OneWireTemp
 #temp3 = OneWireTemp 28-0000049bc218
 
+#bmp = BMP085
+
 #expander0 = PCF8574
 #expander1 = PCF8574 0x21
 
