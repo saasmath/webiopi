@@ -308,7 +308,7 @@ class RESTHandler():
                 return (200, response, M_PLAIN)
                     
             else:
-                return (404, fname + " Not Found", M_PLAIN)
+                return (404, mname + " Not Found", M_PLAIN)
                 
         elif relativePath.startswith("devices/"):
             if not self.device_mapping:

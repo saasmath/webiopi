@@ -76,7 +76,7 @@ class Bus():
         self.open()
         
     def __str__(self):
-        return "Bus(%s, %s)" % (busName, device)
+        return "Bus(%s, %s)" % (self.busName, self.device)
         
     def open(self):
         self.fd = os.open(self.device, self.flag)

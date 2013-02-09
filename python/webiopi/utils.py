@@ -189,7 +189,7 @@ def getLocalIP():
             (host, p) = s.getsockname()
             s.close()
             return host 
-        except (socket.error, e):
+        except socket.error:
             return "localhost"
         
 def setInfo():
