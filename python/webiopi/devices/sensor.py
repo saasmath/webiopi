@@ -61,28 +61,35 @@ class Temperature():
         return self.__getFahrenheit__()
     
 
-class TMPXXX(I2C, Temperature):
-    def __init__(self, slave=0b1001000, name="TMPXXX"):
+class TMP102(I2C, Temperature):
+    def __init__(self, slave=0b1001000, name="TMP102"):
         I2C.__init__(self, slave, name)
         
     def __getCelsius__(self):
         d = self.readBytes(2)
-        return ((d[0] << 4) | (d[1] >> 4)) *0.0625
+        count = ((d[0] << 4) | (d[1] >> 4)) & 0xFFF
+        return signInteger(count, 12)*0.0625
     
     def __getFahrenheit__(self):
         return self.Celsius2Fahrenheit()
 
-class TMP075(TMPXXX):
-    def __init__(self, slave=0b1001000):
-        TMPXXX.__init__(self, slave, "TMP075")
+class TMP075(TMP102):
+    def __init__(self, slave=0b1001000, resolution=12, name="TMP075"):
+        TMP102.__init__(self, slave, name)
+        if not resolution in range(9,13):
+            raise ValueError("%dbits resolution out of range [%d..%d]bits" % (resolution, 9, 12))
+        self.resolution = resolution
+        
+        config  = self.readRegister(0x01)
+        config &= ~0x60
+        config |= (self.resolution - 9) << 5
+        self.writeRegister(0x01, config)
+        self.readRegisters(0x00, 2)
 
-class TMP102(TMPXXX):
-    def __init__(self, slave=0b1001000):
-        TMPXXX.__init__(self, slave, "TMP102")
+class TMP275(TMP075):
+    def __init__(self, slave=0b1001000, resolution=12, name="TMP275"):
+        TMP075.__init__(self, slave, resolution, name)
 
-class TMP275(TMPXXX):
-    def __init__(self, slave=0b1001000):
-        TMPXXX.__init__(self, slave, "TMP275")
 
 class OneWireTemp(OneWire, Temperature):
     def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
@@ -126,9 +133,7 @@ class BMP085(I2C, Temperature, Pressure):
     
     def readSignedInteger(self, address):
         d = self.readUnsignedInteger(address)
-        if d & 0x8000:
-            d -= 0x10000
-        return d
+        return signInteger(d, 16)
     
     def readUT(self):
         self.writeRegister(0xF4, 0x2E)

@@ -231,3 +231,7 @@ def jsonDumps(obj):
 def str2bool(value):
     return (value == "1") or (value == "true") or (value == "True") or (value == "yes") or (value == "Yes")
         
+def signInteger(value, bitcount):
+    if value & (1<<(bitcount-1)):
+        return value - (1<<bitcount)
+    return value
