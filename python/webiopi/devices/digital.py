@@ -12,54 +12,47 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import I2C
+from webiopi.i2c import *
 from webiopi.rest import *
 from webiopi.utils import *
 
-class Expander():
+class Port():
     def __init__(self, channelCount):
         self.channelCount = channelCount
+        self.MAX = 1
         
-    def __checkChannel__(self, channel):
+    def checkChannel(self, channel):
         if not channel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d-%d]" % (channel, 0, self.channelCount-1))
+            raise ValueError("Channel %d out of range [%d..%d]" % (channel, 0, self.channelCount-1))
+
+    def checkValue(self, value):
+        if not value in range(self.MAX+1):
+            raise ValueError("Value %d out of range [%d..%d]" % (value, 0, self.MAX))
+    
 
     @request("GET", "channel-count")
     @response("%d")
     def getChannelCount(self):
         return self.channelCount
 
-class GPIOExpander(Expander):
+class InputPort(Port):
     def __init__(self, channelCount):
-        Expander.__init__(self, channelCount)
+        Port.__init__(self, channelCount)
     
     def __family__(self):
-        return "GPIOExpander"
+        return "Input"
     
     def __input__(self, chanel):
-        raise NotImplementedError
-        
-    def __output__(self, chanel, value):
         raise NotImplementedError
         
     def __readInteger__(self):
         raise NotImplementedError
     
-    def __writeInteger__(self, value):
-        raise NotImplementedError
-
-    @request("GET", "%(channel)d")
+    @request("GET", "%(channel)d/value")
     @response("%d")
     def input(self, channel):
-        self.__checkChannel__(channel)
+        self.checkChannel(channel)
         return self.__input__(channel)
-
-    @request("POST", "%(channel)d/%(value)d")
-    @response("%d")
-    def output(self, channel, value):
-        self.__checkChannel__(channel)
-        self.__output__(channel, value)
-        return self.input(channel)  
 
     @request("GET", "*")
     @response(contentType=M_JSON)
@@ -74,22 +67,58 @@ class GPIOExpander(Expander):
     def readInteger(self):
         return self.__readInteger__(self)
     
+class OutputPort(Port):
+    def __init__(self, channelCount):
+        Port.__init__(self, channelCount)
+    
+    def __family__(self):
+        return "Output"
+    
+    def __output__(self, chanel, value):
+        raise NotImplementedError
+        
+    def __readInteger__(self):
+        raise NotImplementedError
+    
+    def __writeInteger__(self, value):
+        raise NotImplementedError
+
+    @request("POST", "%(channel)d/value/%(value)d")
+    @response("%d")
+    def output(self, channel, value):
+        self.checkChannel(channel)
+        self.checkValue(value)
+        self.__output__(channel, value)
+        return self.input(channel)  
+
     @request("POST", "integer/%(value)d")
     @response("%d")
     def writeInteger(self, value):
         self.__writeInteger__(value)
         return self.readInteger()
+    
+class GPIOPort(InputPort, OutputPort):
+    def __init__(self, channelCount):
+        InputPort.__init__(self, channelCount)
+        OutputPort.__init__(self, channelCount)
         
-class PCF8574(I2C, GPIOExpander):
-    def __init__(self, addr=0x20):
-        I2C.__init__(self, addr, "PCF8574")
-        GPIOExpander.__init__(self, 8)
+    def __family__(self):
+        return "GPIOPort"
+    
+        
+class PCF8574(I2C, GPIOPort):
+    def __init__(self, slave=0x20):
+        I2C.__init__(self, slave, "PCF8574")
+        GPIOPort.__init__(self, 8)
         
     def __input__(self, channel):
         mask = 1 << channel
         d = self.readByte()
         return (d & mask) == mask 
 
+    def __readInteger__(self):
+        return self.readByte(self)
+    
     def __output__(self, channel, value):
         mask = 1 << channel
         b = self.readByte()
@@ -99,8 +128,5 @@ class PCF8574(I2C, GPIOExpander):
             b &= ~mask
         self.writeByte(b)
 
-    def __readInteger__(self):
-        return I2C.readByte(self)
-    
     def __writeInteger__(self, value):
-        I2C.writeByte(self, value)
+        self.writeByte(self, value)

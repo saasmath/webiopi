@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import I2C
-from webiopi.onewire import OneWire
+from webiopi.i2c import *
+from webiopi.onewire import *
 from webiopi.rest import *
 import time
 
@@ -24,19 +24,19 @@ class Pressure():
     def __getPascal__(self):
         raise NotImplementedError
     
-    @request("GET", "pascal")
+    @request("GET", "pressure/pa")
     @response("%d")
     def getPascal(self):
         return self.__getPascal__()
     
-    @request("GET", "hectopascal")
+    @request("GET", "pressure/hpa")
     @response("%.2f")
     def getHectoPascal(self):
         return float(self.getPascal()) / 100.0
 
 class Temperature():
     def __family__(self):
-        return "Temp"
+        return "Temperature"
     
     def __getCelsius__(self):
         raise NotImplementedError
@@ -50,12 +50,12 @@ class Temperature():
     def Fahrenheit2Celsius(self):
         return (self.getFahrenheit() - 32)/1.8
 
-    @request("GET", "celsius")
+    @request("GET", "temp/c")
     @response("%.02f")
     def getCelsius(self):
         return self.__getCelsius__()
     
-    @request("GET", "fahrenheit")
+    @request("GET", "temp/f")
     @response("%.02f")
     def getFahrenheit(self):
         return self.__getFahrenheit__()
@@ -121,8 +121,7 @@ class BMP085(I2C, Temperature, Pressure):
         return [Temperature.__family__(self), Pressure.__family__(self)]
 
     def readUnsignedInteger(self, address):
-        self.writeByte(address)
-        d = self.readBytes(2)
+        d = self.readRegisters(address, 2)
         return d[0] << 8 | d[1]
     
     def readSignedInteger(self, address):
@@ -132,12 +131,12 @@ class BMP085(I2C, Temperature, Pressure):
         return d
     
     def readUT(self):
-        self.writeBytes([0xF4, 0x2E])
+        self.writeRegister(0xF4, 0x2E)
         time.sleep(0.01)
         return self.readUnsignedInteger(0xF6)
 
     def readUP(self):
-        self.writeBytes([0xF4, 0x34])
+        self.writeRegister(0xF4, 0x34)
         time.sleep(0.01)
         return self.readUnsignedInteger(0xF6)
 

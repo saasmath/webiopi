@@ -67,3 +67,20 @@ class I2C(Bus):
         
     def __str__(self):
         return "%s(slave=0x%02X)" % (self.name, self.slave)
+    
+    def readRegister(self, addr):
+        self.writeByte(addr)
+        return self.readByte()
+    
+    def readRegisters(self, addr, count):
+        self.writeByte(addr)
+        return self.readBytes(count)
+    
+    def writeRegister(self, addr, byte):
+        self.writeBytes([addr, byte])
+    
+    def writeRegisters(self, addr, bytes):
+        d = bytearray(len(bytes)+1)
+        d[0] = addr
+        d[1:] = bytes
+        self.writeBytes(d)

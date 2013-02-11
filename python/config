@@ -65,11 +65,11 @@ multicast = true
 # Raspberry native UART on GPIO, uncomment to enable
 # Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
 # And also disable getty on ttyAMA0 in /etc/inittab
-#serial0 = Serial /dev/ttyAMA0 9600
+#serial0 = Serial ttyAMA0 9600
 
 # USB serial adapters
-#usb0 = Serial /dev/ttyUSB0 9600
-#usb1 = Serial /dev/ttyACM0 9600
+#usb0 = Serial ttyUSB0 9600
+#usb1 = Serial ttyACM0 9600
 
 #temp0 = TMP102
 #temp1 = TMP102 0x49
@@ -78,8 +78,11 @@ multicast = true
 
 #bmp = BMP085
 
-#expander0 = PCF8574
-#expander1 = PCF8574 0x21
+#gpio0 = PCF8574
+#gpio1 = PCF8574 0x21
+
+#pwm0 = PCA9685
+#pwm1 = PCA9685 0x41
 
 #adc = MCP3208
 #dac = MCP4922 1
@@ -114,10 +117,13 @@ multicast = true
 #  - GET  /bedroom/light       => GET  /GPIO/25/value, returns the light state
 #  - POST /bedroom/light/0     => POST /GPIO/25/value/0, turn off the light
 #  - POST /bedroom/light/1	   => POST /GPIO/25/value/1, turn on the light
-#  - GET  /bedroom/temperature => GET  /devices/temp2/celsius, returns the temperature
+#  - GET  /bedroom/temperature => GET  /devices/temp2/temp/c, returns the temperature in celsius
 #/bedroom/light = /GPIO/25/value
-#/bedroom/temperature = /devices/temp2/celsius
+#/bedroom/temperature = /devices/temp2/temp/c
 
 #/livingroom/light = /devices/expander0/0
 #/livingroom/brightness = /devices/adc/0/float
-#/livingroom/temperature = /devices/temp0/celsius
+#/livingroom/temperature = /devices/temp0/temp/c
+
+#/weather/temperature = /devices/bmp/temp/c
+#/weather/pressure = /devices/bmp/pressure/hpa

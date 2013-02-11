@@ -12,15 +12,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import I2C
-from webiopi.spi import SPI
+from webiopi.i2c import *
+from webiopi.spi import *
 from webiopi.rest import *
 from webiopi.utils import *
-from webiopi.devices.digital import Expander
+from webiopi.devices.digital import *
 
-class AnalogExpander(Expander):
-    def __init__(self, resolution, channelCount):
-        Expander.__init__(self, channelCount)
+class AnalogPort(Port):
+    def __init__(self, channelCount, resolution):
+        Port.__init__(self, channelCount)
         self.resolution = resolution
         self.MAX = 2**resolution - 1
     
@@ -34,9 +34,9 @@ class AnalogExpander(Expander):
     def getMaxInteger(self):
         return int(self.MAX)
     
-class ADC(AnalogExpander):
-    def __init__(self, resolution, channelCount):
-        AnalogExpander.__init__(self, resolution, channelCount)
+class ADC(AnalogPort):
+    def __init__(self, channelCount, resolution):
+        AnalogPort.__init__(self, channelCount, resolution)
 
     def __family__(self):
         return "ADC"
@@ -47,7 +47,7 @@ class ADC(AnalogExpander):
     @request("GET", "%(channel)d/integer")
     @response("%d")
     def readInteger(self, channel, diff=False):
-        self.__checkChannel__(channel)
+        self.checkChannel(channel)
         return self.__readInteger__(channel, diff)
     
     @request("GET", "%(channel)d/float")
@@ -71,9 +71,9 @@ class ADC(AnalogExpander):
             values[i] = float("%.2f" % self.readFloat(i))
         return jsonDumps(values)
     
-class DAC(AnalogExpander):
-    def __init__(self, resolution, channelCount):
-        AnalogExpander.__init__(self, resolution, channelCount)
+class DAC(AnalogPort):
+    def __init__(self, channelCount, resolution):
+        AnalogPort.__init__(self, channelCount, resolution)
     
     def __family__(self):
         return "DAC"
@@ -83,17 +83,37 @@ class DAC(AnalogExpander):
     
     @request("POST", "%(channel)d/integer/%(value)d")        
     def writeInteger(self, channel, value):
-        self.__checkChannel__(channel)
+        self.checkChannel(channel)
+        self.checkValue(value)
         self.__writeInteger__(channel, value)
     
     @request("POST", "%(channel)d/float/%(value)f")        
     def writeFloat(self, channel, value):
         self.writeInteger(channel, int(value * self.MAX))
 
+class PWM(DAC):
+    def __init__(self, channelCount, resolution, frequency):
+         DAC.__init__(self, channelCount, resolution)
+         self.frequency = frequency
+         self.period = 1.0/frequency
+         
+         # Futaba servos standard
+         self.servo_neutral = 0.00152
+         self.servo_travel_time = 0.0004
+         self.servo_travel_angle = 45.0
+         
+    def __family__(self):
+        return "PWM"
+    
+    @request("POST", "%(channel)d/angle/%(value)f")
+    def writeAngle(self, channel, value):
+        self.writeFloat(channel, (value*self.servo_travel_time/self.servo_travel_angle+self.servo_neutral)/self.period)
+    
+
 class MCP3X0X(SPI, ADC):
-    def __init__(self, chip, resolution, channelCount):
+    def __init__(self, chip, channelCount, resolution):
         SPI.__init__(self, chip, 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
-        ADC.__init__(self, resolution, channelCount)
+        ADC.__init__(self, channelCount, resolution)
         self.MSB_MASK = 2**(resolution-8) - 1
 
     def __str__(self):
@@ -106,7 +126,7 @@ class MCP3X0X(SPI, ADC):
     
 class MCP300X(MCP3X0X):
     def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, 10, channelCount)
+        MCP3X0X.__init__(self, chip, channelCount, 10)
 
     def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
@@ -127,7 +147,7 @@ class MCP3008(MCP300X):
         
 class MCP320X(MCP3X0X):
     def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, 12, channelCount)
+        MCP3X0X.__init__(self, chip, channelCount, 12)
 
     def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
@@ -149,8 +169,7 @@ class MCP3208(MCP320X):
 class MCP492X(SPI, DAC):
     def __init__(self, chip, channelCount):
         SPI.__init__(self, chip, 0, 8, 10000, "MCP492%d" % channelCount)
-        DAC.__init__(self, 12, channelCount)
-        self.channelCount = channelCount
+        DAC.__init__(self, channelCount, 12)
         self.buffered=False
         self.gain=False
         self.shutdown=False
@@ -176,3 +195,35 @@ class MCP4921(MCP492X):
 class MCP4922(MCP492X):
     def __init__(self, chip=0):
         MCP492X.__init__(self, chip, 2)
+
+
+class PCA9685(PWM, I2C):
+    
+    MODE1    = 0x00
+    PWM_BASE = 0x06
+    PRESCALE = 0xFE
+    
+    M1_SLEEP    = 1<<4
+    M1_AI       = 1<<5
+    M1_RESTART  = 1<<7
+    
+    def __init__(self, slave=0x40, frequency=50):
+        I2C.__init__(self, slave, "PCA9685")
+        PWM.__init__(self, 16, 12, frequency)
+        self.prescale = int(25000000.0/((2**12)*self.frequency))
+        self.mode1 = self.M1_RESTART | self.M1_AI
+        
+        self.writeRegister(self.MODE1, self.M1_SLEEP)
+        self.writeRegister(self.PRESCALE, self.prescale)
+        time.sleep(0.01)
+
+        self.writeRegister(self.MODE1, self.mode1)
+    
+    def __writeInteger__(self, channel, value):
+        addr = int(channel * 4 + self.PWM_BASE) 
+        d = bytearray(4)
+        d[0] = 0
+        d[1] = 0
+        d[2] = (value & 0x0FF)
+        d[3] = (value & 0xF00) >> 8
+        self.writeRegisters(addr, d)

@@ -26,6 +26,9 @@ TIOCM_zero_str = struct.pack('I', 0)
 
 class Serial(Bus):
     def __init__(self, device="/dev/ttyAMA0", baudrate=9600):
+        if not device.startswith("/dev/"):
+            device = "/dev/%s" % device
+        
         if isinstance(baudrate, str):
             baudrate = int(baudrate)
 

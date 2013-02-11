@@ -13,11 +13,11 @@
 #   limitations under the License.
 
 import os
-from webiopi.utils import *
 from webiopi import rest
 from webiopi import coap
 from webiopi import http
-from webiopi.devices.gpio import GPIODriver
+from webiopi.utils import *
+from webiopi.devices.gpio import *
 
 if PYTHON_MAJOR >= 3:
     import configparser as parser
@@ -27,9 +27,9 @@ else:
 class Server():
     def __init__(self, port=8000, coap_port=5683, login=None, password=None, passwdfile=None, configfile=None):
         self.host = getLocalIP()
-        self.gpioDriver = GPIODriver()
+        self.gpio = NativeGPIO()
         self.restHandler = rest.RESTHandler()
-        self.restHandler.addDeviceInstance("GPIO", self.gpioDriver, [])
+        self.restHandler.addDeviceInstance("GPIO", self.gpio, [])
 
         http_port = port
         if http_port != None and http_port > 0:
