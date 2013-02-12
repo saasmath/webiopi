@@ -117,13 +117,13 @@ multicast = true
 #  - GET  /bedroom/light       => GET  /GPIO/25/value, returns the light state
 #  - POST /bedroom/light/0     => POST /GPIO/25/value/0, turn off the light
 #  - POST /bedroom/light/1	   => POST /GPIO/25/value/1, turn on the light
-#  - GET  /bedroom/temperature => GET  /devices/temp2/temp/c, returns the temperature in celsius
+#  - GET  /bedroom/temperature => GET  /devices/temp2/temperature/c, returns the temperature in celsius
 #/bedroom/light = /GPIO/25/value
-#/bedroom/temperature = /devices/temp2/temp/c
+#/bedroom/temperature = /devices/temp2/temperature/c
 
 #/livingroom/light = /devices/expander0/0
 #/livingroom/brightness = /devices/adc/0/float
-#/livingroom/temperature = /devices/temp0/temp/c
+#/livingroom/temperature = /devices/temp0/temperature/c
 
-#/weather/temperature = /devices/bmp/temp/c
+#/weather/temperature = /devices/bmp/temperature/c
 #/weather/pressure = /devices/bmp/pressure/hpa
