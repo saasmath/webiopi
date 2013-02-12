@@ -50,12 +50,12 @@ class Temperature():
     def Fahrenheit2Celsius(self):
         return (self.getFahrenheit() - 32)/1.8
 
-    @request("GET", "temp/c")
+    @request("GET", "temperature/c")
     @response("%.02f")
     def getCelsius(self):
         return self.__getCelsius__()
     
-    @request("GET", "temp/f")
+    @request("GET", "temperature/f")
     @response("%.02f")
     def getFahrenheit(self):
         return self.__getFahrenheit__()
@@ -105,9 +105,25 @@ class OneWireTemp(OneWire, Temperature):
     def __getFahrenheit__(self):
         return self.Celsius2Fahrenheit()
 
+class DS18S20(OneWireTemp):
+    def __init__(self, slave=None):
+        OneWireTemp.__init__(self, slave, 0x10, "DS18S20")
+        
+class DS1822(OneWireTemp):
+    def __init__(self, slave=None):
+        OneWireTemp.__init__(self, slave, 0x22, "DS1822")
+        
 class DS18B20(OneWireTemp):
     def __init__(self, slave=None):
         OneWireTemp.__init__(self, slave, 0x28, "DS18B20")
+        
+class DS1825(OneWireTemp):
+    def __init__(self, slave=None):
+        OneWireTemp.__init__(self, slave, 0x3B, "DS1825")
+        
+class DS28EA00(OneWireTemp):
+    def __init__(self, slave=None):
+        OneWireTemp.__init__(self, slave, 0x42, "DS28EA00")
         
 class BMP085(I2C, Temperature, Pressure):
     def __init__(self, slave=0b1110111, name="BMP085"):
