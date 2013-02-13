@@ -65,7 +65,7 @@ class InputPort(Port):
     @request("GET", "integer")
     @response("%d")
     def readInteger(self):
-        return self.__readInteger__(self)
+        return self.__readInteger__()
     
 class OutputPort(Port):
     def __init__(self, channelCount):
@@ -108,7 +108,15 @@ class GPIOPort(InputPort, OutputPort):
         
 class PCF8574(I2C, GPIOPort):
     def __init__(self, slave=0x20):
-        I2C.__init__(self, slave, "PCF8574")
+        slave = toint(slave)
+        if slave in range(0x20, 0x28):
+            name = "PCF8574"
+        elif slave in range(0x38, 0x40):
+            name = "PCF8574A"
+        else:
+            raise ValueError("Bad slave address for PCF8574(A) : 0x%02X not in range [0x20..0x27, 0x38..0x3F]" % slave)
+        
+        I2C.__init__(self, slave, name)
         GPIOPort.__init__(self, 8)
         
     def __input__(self, channel):
@@ -117,7 +125,7 @@ class PCF8574(I2C, GPIOPort):
         return (d & mask) == mask 
 
     def __readInteger__(self):
-        return self.readByte(self)
+        return self.readByte()
     
     def __output__(self, channel, value):
         mask = 1 << channel
@@ -129,4 +137,8 @@ class PCF8574(I2C, GPIOPort):
         self.writeByte(b)
 
     def __writeInteger__(self, value):
-        self.writeByte(self, value)
+        self.writeByte(value)
+        
+class PCF8574A(PCF8574):
+    def __init__(self, slave=0x38):
+        PCF8574.__init__(self, slave)

@@ -16,8 +16,8 @@ import os
 import sys
 import fcntl
 
-from webiopi.bus import Bus
-from webiopi.utils import BOARD_REVISION
+from webiopi.bus import *
+from webiopi.utils import *
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:
@@ -47,17 +47,10 @@ I2C_SMBUS       = 0x0720    # SMBus transfer */
 
 class I2C(Bus):
     def __init__(self, slave, name="I2C"):
-        if isinstance(slave, str):
-            if slave.startswith("0b"):
-                slave = int(slave, 2)
-            elif slave.startswith("0x"):
-                slave = int(slave, 16)
-            else:
-                slave = int(slave)
         self.channel = 0
         if BOARD_REVISION > 1:
             self.channel = 1
-        self.slave = slave
+        self.slave = toint(slave)
         self.name = name
 
         Bus.__init__(self, "I2C", "/dev/i2c-%d" % self.channel)
