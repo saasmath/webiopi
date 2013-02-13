@@ -73,8 +73,8 @@ class TMP102(I2C, Temperature):
     def __getFahrenheit__(self):
         return self.Celsius2Fahrenheit()
 
-class TMP075(TMP102):
-    def __init__(self, slave=0b1001000, resolution=12, name="TMP075"):
+class TMP75(TMP102):
+    def __init__(self, slave=0b1001000, resolution=12, name="TMP75"):
         TMP102.__init__(self, slave, name)
         if not resolution in range(9,13):
             raise ValueError("%dbits resolution out of range [%d..%d]bits" % (resolution, 9, 12))
@@ -86,7 +86,7 @@ class TMP075(TMP102):
         self.writeRegister(0x01, config)
         self.readRegisters(0x00, 2)
 
-class TMP275(TMP075):
+class TMP275(TMP75):
     def __init__(self, slave=0b1001000, resolution=12, name="TMP275"):
         TMP075.__init__(self, slave, resolution, name)
 
