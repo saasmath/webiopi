@@ -62,45 +62,47 @@ for python in $INSTALLED; do
 	echo $python > /dev/null
 done
 
-echo "Copying resources..."
+# Update HTML resources
+echo "Copying HTML resources..."
 mkdir /usr/share/webiopi 2>/dev/null 1>/dev/null
 cp -rfv htdocs /usr/share/webiopi
+echo
 
 # Add config file if it does not exist
 if [ ! -f "/etc/webiopi/config" ]; then
-	echo "Config file not found, copying..."
+	echo "Copying default config file..."
 	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
 	cp -v python/config /etc/webiopi/config
 fi
-echo
 
 # Add passwd file if it does not exist
 if [ ! -f "/etc/webiopi/passwd" ]; then
-	echo "Passwd file not found, copying..."
+	echo "Copying default passwd file..."
 	mkdir /etc/webiopi 2>/dev/null 1>/dev/null
 	cp -v python/passwd /etc/webiopi/passwd
 fi
-echo
 
 # Add service/daemon script
 #if [ ! -f "/etc/init.d/webiopi" ]; then
-echo "Setting up startup script..."
+echo "Installing startup script..."
 cp -rf python/webiopi.init.sh /etc/init.d/webiopi
-chmod 0755 /etc/init.d/webiopi
 sed -i "s/python/$python/g" /etc/init.d/webiopi
-echo
+chmod 0755 /etc/init.d/webiopi
 
 # Add webiopi command
+echo "Installing webiopi command..."
 cp -rf python/webiopi.sh /usr/bin/webiopi
 sed -i "s/python/$python/g" /usr/bin/webiopi
 chmod 0755 /usr/bin/webiopi
 
 # Add webiopi-passwd command
+echo "Installing webiopi-passwd command..."
 cp -rf python/webiopi-passwd.py /usr/bin/webiopi-passwd
 sed -i "s/python/$python/g" /usr/bin/webiopi-passwd
 chmod 0755 /usr/bin/webiopi-passwd
 
 # Display WebIOPi usages
+echo
 echo "WebIOPi successfully installed"
 echo "* To start WebIOPi foreground\t: sudo webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]"
 echo
