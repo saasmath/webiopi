@@ -25,7 +25,6 @@ def main(argv):
     port = 8000
     configfile = None
     logfile = None
-    setInfo()
     
     i = 1
     while i < len(argv):
