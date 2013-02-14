@@ -55,7 +55,8 @@
 		// Only for Chrome and Safari, create a slider that pulse out a 0-100% duty cycle ratio on GPIO 24
 		button = webiopi().createRatioSlider(24);
 		content.append(button);
-		       
+		
+		webiopi().refreshGPIO(true);
 	});
 		
 	function mousedown() {
