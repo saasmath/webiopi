@@ -12,10 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import *
-from webiopi.spi import *
 from webiopi.rest import *
 from webiopi.utils import *
+from webiopi.devices.i2c import *
+from webiopi.devices.spi import *
 from webiopi.devices.digital import *
 
 class AnalogPort(Port):

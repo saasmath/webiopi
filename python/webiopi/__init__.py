@@ -24,6 +24,5 @@ from webiopi.rest import macro
 from webiopi.server import Server
 from webiopi.clients import Client, MulticastClient
 
-import webiopi.bus
-
-webiopi.bus.checkAllBus()
+import webiopi.devices.bus
+webiopi.devices.bus.checkAllBus()

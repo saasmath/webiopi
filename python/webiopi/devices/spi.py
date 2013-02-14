@@ -19,8 +19,8 @@ import array
 import ctypes
 import struct
 
-from webiopi.bus import Bus
 from webiopi.utils import *
+from webiopi.devices.bus import *
 
 # from spi/spidev.h
 _IOC_NRBITS   =  8

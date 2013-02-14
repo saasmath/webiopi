@@ -16,8 +16,8 @@ import os
 import sys
 import fcntl
 
-from webiopi.bus import *
 from webiopi.utils import *
+from webiopi.devices.bus import *
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:

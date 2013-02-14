@@ -12,10 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import *
-from webiopi.onewire import *
-from webiopi.rest import *
 import time
+from webiopi.rest import *
+from webiopi.devices.i2c import *
+from webiopi.devices.onewire import *
 
 class Pressure():
     def __family__(self):

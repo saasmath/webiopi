@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 import os
-from webiopi.bus import Bus, loadModule
+from webiopi.devices.bus import *
 
 EXTRAS = {
     "TEMP": {"loaded": False, "module": "w1-therm"}

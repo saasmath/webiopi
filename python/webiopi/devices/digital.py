@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.i2c import *
 from webiopi.rest import *
 from webiopi.utils import *
+from webiopi.devices.i2c import *
 
 class Port():
     def __init__(self, channelCount):

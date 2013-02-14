@@ -314,7 +314,7 @@ class RESTHandler():
         else: # path unknowns
             return (0, None, None)
 
-from webiopi import serial
+from webiopi.devices import serial
 from webiopi.devices import digital
 from webiopi.devices import analog
 from webiopi.devices import sensor
