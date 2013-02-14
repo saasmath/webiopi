@@ -81,6 +81,10 @@ multicast = true
 #gpio0 = PCF8574
 #gpio1 = PCF8574 0x21
 
+#gpio0 = MCP23017
+#gpio1 = MCP23017 0x21
+#gpio2 = MCP23017 0x22
+
 #pwm0 = PCA9685
 #pwm1 = PCA9685 0x41
 
