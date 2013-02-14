@@ -75,12 +75,12 @@ class Server():
             if config.has_section("REST"):
                 if config.has_option("REST", "gpio-export"):
                     exports = config.get("REST", "gpio-export")
-                    self.gpioDriver.export = [int(i) for i in exports.split(",")]
-                    self.restHandler.gpioExport = self.gpioDriver.export
+                    self.gpio.export = [int(i) for i in exports.split(",")]
+                    self.restHandler.gpioExport = self.gpio.export
                 if config.has_option("REST", "gpio-post-value"):
-                    self.gpioDriver.post_value = config.getboolean("REST", "gpio-post-value")
+                    self.gpio.post_value = config.getboolean("REST", "gpio-post-value")
                 if config.has_option("REST", "gpio-post-function"):
-                    self.gpioDriver.post_function = config.getboolean("REST", "gpio-post-function")
+                    self.gpio.post_function = config.getboolean("REST", "gpio-post-function")
                 if config.has_option("REST", "device-mapping"):
                     self.restHandler.device_mapping = config.getboolean("REST", "device-mapping")
             
