@@ -99,7 +99,8 @@ class OneWireTemp(OneWire, Temperature):
         data = self.read()
         lines = data.split("\n")
         if lines[0].endswith("YES"):
-            temp = lines[1][-5:]
+            i = lines[1].find("=")
+            temp = lines[1][i+1:]
             return int(temp) / 1000.0
     
     def __getFahrenheit__(self):
