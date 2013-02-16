@@ -71,9 +71,9 @@ class ADC(AnalogPort):
             values[i] = float("%.2f" % self.readFloat(i))
         return jsonDumps(values)
     
-class DAC(AnalogPort):
+class DAC(ADC):
     def __init__(self, channelCount, resolution):
-        AnalogPort.__init__(self, channelCount, resolution)
+        ADC.__init__(self, channelCount, resolution)
     
     def __family__(self):
         return "DAC"
@@ -81,15 +81,20 @@ class DAC(AnalogPort):
     def __writeInteger__(self, channel, value):
         raise NotImplementedError
     
-    @request("POST", "%(channel)d/integer/%(value)d")        
+    @request("POST", "%(channel)d/integer/%(value)d")
+    @response("%d")    
     def writeInteger(self, channel, value):
         self.checkChannel(channel)
         self.checkValue(value)
         self.__writeInteger__(channel, value)
+        return self.readInteger(channel)
     
     @request("POST", "%(channel)d/float/%(value)f")        
+    @response("%.2f")    
     def writeFloat(self, channel, value):
         self.writeInteger(channel, int(value * self.MAX))
+        return self.readFloat(channel)
+    
 
 class PWM(DAC):
     def __init__(self, channelCount, resolution, frequency):
@@ -110,16 +115,33 @@ class PWM(DAC):
     @request("GET", "%(channel)d/reverse")
     @response("%d")    
     def getReverse(self, channel):
+        self.checkChannel(channel)
         return self.reverse[channel]
     
     @request("POST", "%(channel)d/reverse/%(value)b")
     @response("%d")    
     def setReverse(self, channel, value):
+        self.checkChannel(channel)
         self.reverse[channel] = value
-        return self.getReverse(channel)
+        return value
+    
+    @request("GET", "%(channel)d/angle")
+    @response("%.2f")
+    def readAngle(self, channel):
+        f = self.readFloat(channel)
+        f *= self.period
+        f -= self.servo_neutral
+        f *= self.servo_travel_angle
+        f /= self.servo_travel_time
+
+        if self.reverse[channel]:
+            f = -f
+        else:
+            f = f
+        return f
         
     @request("POST", "%(channel)d/angle/%(value)f")
-    @response("%.02f")
+    @response("%.2f")
     def writeAngle(self, channel, value):
         if self.reverse[channel]:
             f = -value
@@ -132,7 +154,7 @@ class PWM(DAC):
         f /= self.period
         
         self.writeFloat(channel, f)
-        return value
+        return self.readAngle(channel)
 
 
 class MCP3X0X(SPI, ADC):
@@ -198,10 +220,14 @@ class MCP492X(SPI, DAC):
         self.buffered=False
         self.gain=False
         self.shutdown=False
+        self.values = [0 for i in range(channelCount)]
 
     def __str__(self):
         return "%s(chip=%d)" % (self.name, self.chip)
 
+    def __readInteger__(self, channel, diff=False):
+        return self.values[0]
+        
     def __writeInteger__(self, channel, value):
         d = bytearray(2)
         d[0]  = 0
@@ -212,6 +238,7 @@ class MCP492X(SPI, DAC):
         d[0] |= (value >> 8) & 0x0F
         d[1]  = value & 0xFF
         self.writeBytes(d)
+        self.values[channel] = value
 
 class MCP4921(MCP492X):
     def __init__(self, chip=0):
@@ -223,7 +250,6 @@ class MCP4922(MCP492X):
 
 
 class PCA9685(PWM, I2C):
-    
     MODE1    = 0x00
     PWM_BASE = 0x06
     PRESCALE = 0xFE
@@ -243,9 +269,19 @@ class PCA9685(PWM, I2C):
         time.sleep(0.01)
 
         self.writeRegister(self.MODE1, self.mode1)
+
+    def getChannelAddress(self, channel):
+        return int(channel * 4 + self.PWM_BASE) 
+
+    def __readInteger__(self, channel, diff=False):
+        addr = self.getChannelAddress(channel)
+        d = self.readRegisters(addr, 4)
+        start = d[1] << 8 | d[0]
+        end   = d[3] << 8 | d[2]
+        return end-start
     
     def __writeInteger__(self, channel, value):
-        addr = int(channel * 4 + self.PWM_BASE) 
+        addr = self.getChannelAddress(channel)
         d = bytearray(4)
         d[0] = 0
         d[1] = 0
