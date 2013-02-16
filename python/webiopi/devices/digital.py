@@ -203,9 +203,9 @@ class MCP230XX(GPIOPort, I2C):
     BANK0_IOCON = 0x0A
     
     def __init__(self, slave, channelCount, name="MCP230XX"):
-        I2C.__init__(self, slave, name)
+        I2C.__init__(self, toint(slave), name)
         GPIOPort.__init__(self, channelCount)
-        self.banks = int(channelCount / 8)
+        self.banks = int(self.channelCount / 8)
         
     def getChannel(self, register, channel):
         self.checkChannel(channel)

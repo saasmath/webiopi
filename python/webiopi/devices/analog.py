@@ -102,17 +102,42 @@ class PWM(DAC):
          self.servo_travel_time = 0.0004
          self.servo_travel_angle = 45.0
          
+         self.reverse = [False for i in range(channelCount)]
+         
     def __family__(self):
         return "PWM"
+
+    @request("GET", "%(channel)d/reverse")
+    @response("%d")    
+    def getReverse(self, channel):
+        return self.reverse[channel]
     
+    @request("POST", "%(channel)d/reverse/%(value)b")
+    @response("%d")    
+    def setReverse(self, channel, value):
+        self.reverse[channel] = value
+        return self.getReverse(channel)
+        
     @request("POST", "%(channel)d/angle/%(value)f")
+    @response("%.02f")
     def writeAngle(self, channel, value):
-        self.writeFloat(channel, (value*self.servo_travel_time/self.servo_travel_angle+self.servo_neutral)/self.period)
-    
+        if self.reverse[channel]:
+            f = -value
+        else:
+            f = value
+        
+        f *= self.servo_travel_time
+        f /= self.servo_travel_angle
+        f += self.servo_neutral
+        f /= self.period
+        
+        self.writeFloat(channel, f)
+        return value
+
 
 class MCP3X0X(SPI, ADC):
     def __init__(self, chip, channelCount, resolution):
-        SPI.__init__(self, chip, 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
+        SPI.__init__(self, toint(chip), 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
         ADC.__init__(self, channelCount, resolution)
         self.MSB_MASK = 2**(resolution-8) - 1
 
@@ -168,7 +193,7 @@ class MCP3208(MCP320X):
         
 class MCP492X(SPI, DAC):
     def __init__(self, chip, channelCount):
-        SPI.__init__(self, chip, 0, 8, 10000, "MCP492%d" % channelCount)
+        SPI.__init__(self, toint(chip), 0, 8, 10000, "MCP492%d" % channelCount)
         DAC.__init__(self, channelCount, 12)
         self.buffered=False
         self.gain=False
@@ -208,8 +233,8 @@ class PCA9685(PWM, I2C):
     M1_RESTART  = 1<<7
     
     def __init__(self, slave=0x40, frequency=50):
-        I2C.__init__(self, slave, "PCA9685")
-        PWM.__init__(self, 16, 12, frequency)
+        I2C.__init__(self, toint(slave), "PCA9685")
+        PWM.__init__(self, 16, 12, toint(frequency))
         self.prescale = int(25000000.0/((2**12)*self.frequency))
         self.mode1 = self.M1_RESTART | self.M1_AI
         

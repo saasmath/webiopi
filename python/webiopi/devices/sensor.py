@@ -63,7 +63,7 @@ class Temperature():
 
 class TMP102(I2C, Temperature):
     def __init__(self, slave=0b1001000, name="TMP102"):
-        I2C.__init__(self, slave, name)
+        I2C.__init__(self, toint(slave), name)
         
     def __getCelsius__(self):
         d = self.readBytes(2)
@@ -76,6 +76,7 @@ class TMP102(I2C, Temperature):
 class TMP75(TMP102):
     def __init__(self, slave=0b1001000, resolution=12, name="TMP75"):
         TMP102.__init__(self, slave, name)
+        resolution = toint(resolution)
         if not resolution in range(9,13):
             raise ValueError("%dbits resolution out of range [%d..%d]bits" % (resolution, 9, 12))
         self.resolution = resolution
@@ -88,7 +89,7 @@ class TMP75(TMP102):
 
 class TMP275(TMP75):
     def __init__(self, slave=0b1001000, resolution=12, name="TMP275"):
-        TMP075.__init__(self, slave, resolution, name)
+        TMP75.__init__(self, slave, resolution, name)
 
 
 class OneWireTemp(OneWire, Temperature):
@@ -128,7 +129,7 @@ class DS28EA00(OneWireTemp):
         
 class BMP085(I2C, Temperature, Pressure):
     def __init__(self, slave=0b1110111, name="BMP085"):
-        I2C.__init__(self, slave, name)
+        I2C.__init__(self, toint(slave), name)
         self.ac1 = self.readSignedInteger(0xAA)
         self.ac2 = self.readSignedInteger(0xAC)
         self.ac3 = self.readSignedInteger(0xAE)

@@ -150,7 +150,7 @@ class RESTHandler():
             if type == 's':
                 args[name] = path
             elif type == 'b':
-                args[name] = int(path, 2)
+                args[name] = str2bool(path)
             elif type == 'd':
                 args[name] = toint(path)
             elif type == 'x':

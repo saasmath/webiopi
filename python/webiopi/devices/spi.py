@@ -87,14 +87,6 @@ SPI_IOC_WR_MAX_SPEED_HZ     = _IOW(SPI_IOC_MAGIC, 4, 4)
 
 class SPI(Bus):
     def __init__(self, chip=0, mode=0, bits=8, speed=0, name="SPI"):
-        if isinstance(chip, str):
-            if chip.startswith("0b"):
-                chip = int(chip, 2)
-            elif chip.startswith("0x"):
-                chip = int(chip, 16)
-            else:
-                chip = int(chip)
-
         Bus.__init__(self, "SPI", "/dev/spidev0.%d" % chip)
         self.chip = chip
 
