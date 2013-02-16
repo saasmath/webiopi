@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
 from webiopi.utils import LOGGER, PYTHON_MAJOR
+from webiopi.protocols.coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
 
 if PYTHON_MAJOR >= 3:
     import http.client as httplib

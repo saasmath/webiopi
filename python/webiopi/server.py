@@ -13,11 +13,11 @@
 #   limitations under the License.
 
 import os
-from webiopi import rest
-from webiopi import coap
-from webiopi import http
 from webiopi.utils import *
-from webiopi.devices.gpio import *
+from webiopi.protocols import rest
+from webiopi.protocols import http
+from webiopi.protocols import coap
+from webiopi.devices.digital.gpio import *
 
 if PYTHON_MAJOR >= 3:
     import configparser as parser

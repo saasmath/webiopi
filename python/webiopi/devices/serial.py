@@ -18,8 +18,8 @@ import fcntl
 import struct
 import termios
 
-from webiopi.rest import *
 from webiopi.devices.bus import *
+from webiopi.protocols.rest import *
 
 TIOCINQ   = hasattr(termios, 'FIONREAD') and termios.FIONREAD or 0x541B
 TIOCM_zero_str = struct.pack('I', 0)

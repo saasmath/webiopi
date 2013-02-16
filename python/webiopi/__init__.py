@@ -20,7 +20,7 @@ from webiopi.utils import BOARD_REVISION, VERSION
 from webiopi.utils import setInfo, setDebug, info, debug, warn, error, exception
 from webiopi.utils import runLoop
 
-from webiopi.rest import macro
+from webiopi.protocols.rest import macro
 from webiopi.server import Server
 from webiopi.clients import Client, MulticastClient
 

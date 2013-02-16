@@ -12,11 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.rest import *
 from webiopi.utils import *
-from webiopi.devices.i2c import *
-from webiopi.devices.spi import *
-from webiopi.devices.digital import *
+from webiopi.devices.digital import Port
+from webiopi.protocols.rest import *
 
 class AnalogPort(Port):
     def __init__(self, channelCount, resolution):
@@ -156,135 +154,6 @@ class PWM(DAC):
         self.writeFloat(channel, f)
         return self.readAngle(channel)
 
-
-class MCP3X0X(SPI, ADC):
-    def __init__(self, chip, channelCount, resolution):
-        SPI.__init__(self, toint(chip), 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
-        ADC.__init__(self, channelCount, resolution)
-        self.MSB_MASK = 2**(resolution-8) - 1
-
-    def __str__(self):
-        return "%s(chip=%d)" % (self.name, self.chip)
-
-    def __readInteger__(self, channel, diff):
-        data = self.__command__(channel, diff)
-        r = self.xfer(data)
-        return ((r[1] & self.MSB_MASK) << 8) | r[2]
-    
-class MCP300X(MCP3X0X):
-    def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, channelCount, 10)
-
-    def __command__(self, channel, diff):
-        d = [0x00, 0x00, 0x00]
-        d[0] |= 1
-        d[1] |= (not diff) << 7
-        d[1] |= ((channel >> 2) & 0x01) << 6
-        d[1] |= ((channel >> 1) & 0x01) << 5
-        d[1] |= ((channel >> 0) & 0x01) << 4
-        return d
-        
-class MCP3004(MCP300X):
-    def __init__(self, chip=0):
-        MCP300X.__init__(self, chip, 4)
-        
-class MCP3008(MCP300X):
-    def __init__(self, chip=0):
-        MCP300X.__init__(self, chip, 8)
-        
-class MCP320X(MCP3X0X):
-    def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, channelCount, 12)
-
-    def __command__(self, channel, diff):
-        d = [0x00, 0x00, 0x00]
-        d[0] |= 1 << 2
-        d[0] |= (not diff) << 1
-        d[0] |= (channel >> 2) & 0x01
-        d[1] |= ((channel >> 1) & 0x01) << 7
-        d[1] |= ((channel >> 0) & 0x01) << 6
-        return d
-    
-class MCP3204(MCP320X):
-    def __init__(self, chip=0):
-        MCP320X.__init__(self, chip, 4)
-        
-class MCP3208(MCP320X):
-    def __init__(self, chip=0):
-        MCP320X.__init__(self, chip, 8)
-        
-class MCP492X(SPI, DAC):
-    def __init__(self, chip, channelCount):
-        SPI.__init__(self, toint(chip), 0, 8, 10000, "MCP492%d" % channelCount)
-        DAC.__init__(self, channelCount, 12)
-        self.buffered=False
-        self.gain=False
-        self.shutdown=False
-        self.values = [0 for i in range(channelCount)]
-
-    def __str__(self):
-        return "%s(chip=%d)" % (self.name, self.chip)
-
-    def __readInteger__(self, channel, diff=False):
-        return self.values[0]
-        
-    def __writeInteger__(self, channel, value):
-        d = bytearray(2)
-        d[0]  = 0
-        d[0] |= (channel & 0x01) << 7
-        d[0] |= (self.buffered & 0x01) << 6
-        d[0] |= (not self.gain & 0x01) << 5
-        d[0] |= (not self.shutdown & 0x01) << 4
-        d[0] |= (value >> 8) & 0x0F
-        d[1]  = value & 0xFF
-        self.writeBytes(d)
-        self.values[channel] = value
-
-class MCP4921(MCP492X):
-    def __init__(self, chip=0):
-        MCP492X.__init__(self, chip, 1)
-
-class MCP4922(MCP492X):
-    def __init__(self, chip=0):
-        MCP492X.__init__(self, chip, 2)
-
-
-class PCA9685(PWM, I2C):
-    MODE1    = 0x00
-    PWM_BASE = 0x06
-    PRESCALE = 0xFE
-    
-    M1_SLEEP    = 1<<4
-    M1_AI       = 1<<5
-    M1_RESTART  = 1<<7
-    
-    def __init__(self, slave=0x40, frequency=50):
-        I2C.__init__(self, toint(slave), "PCA9685")
-        PWM.__init__(self, 16, 12, toint(frequency))
-        self.prescale = int(25000000.0/((2**12)*self.frequency))
-        self.mode1 = self.M1_RESTART | self.M1_AI
-        
-        self.writeRegister(self.MODE1, self.M1_SLEEP)
-        self.writeRegister(self.PRESCALE, self.prescale)
-        time.sleep(0.01)
-
-        self.writeRegister(self.MODE1, self.mode1)
-
-    def getChannelAddress(self, channel):
-        return int(channel * 4 + self.PWM_BASE) 
-
-    def __readInteger__(self, channel, diff=False):
-        addr = self.getChannelAddress(channel)
-        d = self.readRegisters(addr, 4)
-        start = d[1] << 8 | d[0]
-        end   = d[3] << 8 | d[2]
-        return end-start
-    
-    def __writeInteger__(self, channel, value):
-        addr = self.getChannelAddress(channel)
-        d = bytearray(4)
-        d[0] = 0
-        d[1] = 0
-        d[2] = (value & 0x0FF)
-        d[3] = (value & 0xF00) >> 8
-        self.writeRegisters(addr, d)
+from webiopi.devices.analog.mcp3x0x import MCP3004, MCP3008, MCP3204, MCP3208
+from webiopi.devices.analog.mcp492X import MCP4921, MCP4922
+from webiopi.devices.analog.pca9685 import PCA9685
