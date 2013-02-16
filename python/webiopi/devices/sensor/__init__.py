@@ -57,6 +57,20 @@ class Temperature():
     def getFahrenheit(self):
         return self.__getFahrenheit__()
     
+class Luminosity():
+    def __family__(self):
+        return "Luminosity"
+    
+    def __getLux__(self):
+        raise NotImplementedError
+
+    @request("GET", "luminosity/lx")
+    @response("%.02f")
+    def getLux(self):
+        return self.__getLux__()
+    
+
 from webiopi.devices.sensor.bmp085 import BMP085
 from webiopi.devices.sensor.onewiretemp import DS1822, DS1825, DS18B20, DS18S20, DS28EA00
 from webiopi.devices.sensor.tmpXXX import TMP75, TMP102, TMP275
+from webiopi.devices.sensor.tsl2561 import TSL2561
