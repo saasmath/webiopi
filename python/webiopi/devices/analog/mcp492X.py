@@ -29,7 +29,7 @@ class MCP492X(SPI, DAC):
         return "%s(chip=%d)" % (self.name, self.chip)
 
     def __readInteger__(self, channel, diff=False):
-        return self.values[0]
+        return self.values[channel]
         
     def __writeInteger__(self, channel, value):
         d = bytearray(2)
