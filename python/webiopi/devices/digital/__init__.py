@@ -39,7 +39,7 @@ class GPIOPort(Port):
         Port.__init__(self, channelCount)
     
     def __family__(self):
-        return "GPIO"
+        return "GPIOPort"
     
     def __getFunction__(self, channel):
         raise NotImplementedError
