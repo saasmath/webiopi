@@ -68,9 +68,46 @@ class Luminosity():
     @response("%.02f")
     def getLux(self):
         return self.__getLux__()
+
+class Distance():
+    def __family__(self):
+        return "Distance"
+    
+    def __getMillimeter__(self):
+        raise NotImplementedError
+
+    @request("GET", "distance/mm")
+    @response("%.02f")
+    def getMillimeter(self):
+        return self.__getMillimeter__()
+    
+    @request("GET", "distance/cm")
+    @response("%.02f")
+    def getCentimeter(self):
+        return self.getMillimeter() / 10
+    
+    @request("GET", "distance/m")
+    @response("%.02f")
+    def getMeter(self):
+        return self.getMillimeter() / 1000
+    
+    @request("GET", "distance/in")
+    @response("%.02f")
+    def getInch(self):
+        return self.getMillimeter() / 0.254
+    
+    @request("GET", "distance/ft")
+    @response("%.02f")
+    def getFoot(self):
+        return self.getInch() / 12
+    
+    @request("GET", "distance/yd")
+    @response("%.02f")
+    def getYard(self):
+        return self.getInch() / 36
     
 
 from webiopi.devices.sensor.bmp085 import BMP085
 from webiopi.devices.sensor.onewiretemp import DS1822, DS1825, DS18B20, DS18S20, DS28EA00
 from webiopi.devices.sensor.tmpXXX import TMP75, TMP102, TMP275
-from webiopi.devices.sensor.tsl2561 import TSL2561
+from webiopi.devices.sensor.tslXXXX import TSL2561CS, TSL2561T
