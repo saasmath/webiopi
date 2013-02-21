@@ -3,16 +3,23 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
-	<title>WebIOPi | Control your Pi's GPIO</title>
-	<script type="text/javascript" src="/webiopi.js"></script>
-	<script type="text/javascript">
-	webiopi().ready(function() {
-		webiopi().RPiHeader().createTable("content");
-		w().refreshGPIO(true);
-	});
-	</script>
+	<title>WebIOPi | Raspberry Pi IoT Framework</title>
 </head>
 <body>
-<div id="content" align="center"></div>
+
+<h1>WebIOPi Main Menu</h1>
+
+<h2><a href="/app/header">GPIO Pi Header</a></h2>
+<p>Control and Debug the Raspberry Pi GPIO with a display which looks like the physical header.</p>
+
+<h2><a href="/app/expert">GPIO List (Expert)</a></h2>
+<p>Control and Debug the Raspberry Pi GPIO ordered in a single column.</p>
+
+<h2><a href="/app/serial-monitor">Serial Monitor</a></h2>
+<p>Use the browser to play with Serial interfaces.</p>
+
+<h2><a href="/app/devices-monitor">Devices Monitor</a></h2>
+<p>Control and Debug devices and circuits wired to your Pi.</p>
+
 </body>
 </html>

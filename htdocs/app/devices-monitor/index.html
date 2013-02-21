@@ -3,26 +3,33 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content = "height = device-height, width = 420, user-scalable = no" /> 
-	<title>WebIOPi | Expert</title>
+	<title>WebIOPi | Devices Monitor</title>
 	<script type="text/javascript" src="/webiopi.js"></script>
 	<script type="text/javascript">
 	webiopi().ready(function() {
-		webiopi().Expert().createList("content");
-		w().refreshGPIO(true);
+		$.get("/devices/*", function(data) {
+			var content = $("#content");
+			for (i in data) {
+				if (data[i].type != "Serial") {
+					var device = webiopi().newDevice(data[i].type, data[i].name);
+					if (device) {
+						device.element = $("<div>");
+						content.append(device.element);
+						device.refreshUI();
+					}
+				}
+			}
+		});
 	});
 	</script>
 	<style type="text/css">
-	input {
-		margin: 5px 5px 5px 5px;
+	button, .FunctionBasic {
 		width: 50px;
-	}
-	
-	.Description {
-		display: inline;
 	}
 	</style>
 </head>
 <body>
-<div id="content"></div>
+<div id="content">
+</div>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /*
-   Copyright 2012 Eric Ptak - trouch.com
+   Copyright 2012-2013 Eric Ptak - trouch.com
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -634,5 +634,695 @@ Serial.prototype.write = function(data) {
 
 Serial.prototype.read = function(callback) {
 	$.get(this.url, callback);
+}
+
+WebIOPi.prototype.newDevice = function(type, name) {
+	if (type == "ADC") {
+		return new ADC(name);
+	}
+	
+	if (type == "DAC") {
+		return new DAC(name);
+	}
+
+	if (type == "PWM") {
+		return new PWM(name);
+	}
+
+	if (type == "GPIOPort") {
+		return new GPIOPort(name);
+	}
+
+	if (type == "Temperature") {
+		return new Temperature(name);
+	}
+
+	if (type == "Pressure") {
+		return new Pressure(name);
+	}
+
+	if (type == "Luminosity") {
+		return new Luminosity(name);
+	}
+
+	if (type == "Distance") {
+		return new Distance(name);
+	}
+
+	return undefined;
+}
+
+function GPIOPort(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.onready = null;
+	this.channelCount = 0;
+	this.refreshTime = 1000;
+
+	var port = this;
+	$.get(this.url + "/channel-count", function(data) {
+		port.channelCount = parseInt(data);
+	});
+
+}
+
+GPIOPort.prototype.isReady = function() {
+	return (this.channelCount > 0);
+}
+
+GPIOPort.prototype.toString = function() {
+	if (this.channelCount > 0)
+		return this.name + ": GPIO Port (" + this.channelCount + "-bits)";
+	return this.name + ": GPIO Port";
+}
+
+GPIOPort.prototype.input = function(channel, callback) {
+	var name = this.name;
+	$.get(this.url + "/" + channel + "/value", function(data) {
+		callback(name, channel, data);
+	});
+}
+
+GPIOPort.prototype.output = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/value/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+GPIOPort.prototype.setup = function(channel, func, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/function/" + func, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+GPIOPort.prototype.readAll = function(callback) {
+	var name = this.name;
+	$.get(this.url+ "/*", function(data) {
+		callback(name, data);
+	});
+}
+
+GPIOPort.prototype.refreshUI = function() {
+	var port = this;
+	var element = this.element;
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	if ((element != undefined) && (element.table == undefined) && this.isReady()) {
+		element.header.text(this)
+		element.table = $("<table>");
+		element.append(element.table);
+
+		var line = $("<tr>");
+		for (var i = this.channelCount-1; i>=0; i--) {
+			var cell = $("<td>");
+			cell.text(1<<i);
+			line.append(cell);
+		}
+		element.table.append(line);
+		
+		line = $("<tr>");
+		for (var i = this.channelCount-1; i>=0; i--) {
+			var cell = $("<td>");
+			var button = webiopi().createButton(this.name + "_" + i + "_value", i, function() {
+				if ($("#" + port.name + "_" + $(this).attr("channel") + "_value").attr("class") == "LOW") {
+					value = 1;
+				}
+				else {
+					value = 0;
+				}
+				port.output($(this).attr("channel"), value, function(name, channel, data) {
+					if (data == "1") {
+						$("#" + name + "_" + channel + "_value").attr("class", "HIGH")
+					}
+					else {
+						$("#" + name + "_" + channel + "_value").attr("class", "LOW")
+					}
+				});
+			});
+			button.attr("channel", i);
+			button.attr("class", "LOW");
+			cell.append(button);
+			line.append(cell);
+		}
+		element.table.append(line);
+		
+		line = $("<tr>");
+		for (var i = this.channelCount-1; i>=0; i--) {
+			var cell = $("<td>");
+			var button = webiopi().createButton(port.name + "_" + i + "_func", "IN", function() {
+				var func = $(this).text();
+				console.log(func);
+				if (func == "IN") {
+					func = "OUT";
+				}
+				else {
+					func = "IN";
+				}
+				port.setup($(this).attr("channel"), func, function(name, channel, func) {
+					$("#" + port.name + "_" + channel + "_func").text(func);
+				});
+			});
+			button.attr("class", "FunctionBasic");
+			button.attr("channel", i);
+			cell.append(button);
+			line.append(cell);
+		}
+		element.table.append(line);
+	}
+	
+	this.readAll(function(name, data) {
+		for (i in data) {
+			$("#" + name + "_" + i + "_value").attr("class", data[i]["value"] == "1" ? "HIGH" : "LOW");
+			$("#" + name + "_" + i + "_func").text(data[i]["function"]);
+		}
+		setTimeout(function(){port.refreshUI()}, port.refreshTime);
+	});
+}
+
+function ADC(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.channelCount = 0;
+	this.maxInteger = 0;
+	this.resolution = 0;
+	this.refreshTime = 1000;
+	
+	var adc = this;
+	$.get(this.url + "/channel-count", function(data) {
+		adc.channelCount = parseInt(data);
+	});
+
+	$.get(this.url + "/max-integer", function(data) {
+		adc.maxInteger = parseInt(data);
+	});
+
+	$.get(this.url + "/resolution", function(data) {
+		adc.resolution = parseInt(data);
+	});
+}
+
+ADC.prototype.isReady = function() {
+	return (this.channelCount > 0 && this.maxInteger > 0 && this.resolution > 0 );
+}
+
+ADC.prototype.toString = function() {
+	if (this.channelCount > 0 && this.resolution> 0)
+		return this.name + ": ADC (" + this.resolution + "-bits, " + this.channelCount  + "-channels)";
+	return this.name + ": ADC";
+}
+
+ADC.prototype.readInteger = function(channel, callback) {
+	var name = this.name;
+	$.get(this.url + "/" + channel + "/integer", function(data) {
+		callback(name, channel, data);
+	});
+}
+
+ADC.prototype.readFloat = function(channel, callback) {
+	var name = this.name;
+	$.get(this.url + "/" + channel + "/float", function(data) {
+		callback(name, channel, data);
+	});
+}
+
+ADC.prototype.readAllInteger = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/integer", function(data) {
+		callback(name, data);
+	});
+}
+
+ADC.prototype.readAllFloat = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/float", function(data) {
+		callback(name, data);
+	});
+}
+
+ADC.prototype.refreshUI = function () {
+	var adc = this;
+	var element = this.element;
+	
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	if ((element != undefined) && (element.channels == undefined) && this.isReady()) {
+		element.header.text(this);
+		element.channels = Array();
+		for (i = 0; i<this.channelCount; i++) {
+			var div = $("<div>");
+			div.text("Channel-" + i);
+			element.append(div);
+			element.channels[i] = div;
+			
+		}
+	}
+	this.readAllFloat(function(name, data) {
+		for (i in data) {
+			if ((element != undefined) && (element.channels != undefined)) {
+				var div = element.channels[i];
+				div.text("Channel-" + i + ": " + (parseFloat(data[i])*3.3).toFixed(2) + "V - " + (parseFloat(data[i])*100).toFixed(0) + "%")
+			}
+		}
+		setTimeout(function(){adc.refreshUI()}, adc.refreshTime);
+	});
+}
+
+
+function DAC(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.channelCount = 0;
+	this.maxInteger = 0;
+	this.resolution = 0;
+	
+	var dac = this;
+	$.get(this.url + "/channel-count", function(data) {
+		dac.channelCount = parseInt(data);
+	});
+
+	$.get(this.url + "/max-integer", function(data) {
+		dac.maxInteger = parseInt(data);
+	});
+
+	$.get(this.url + "/resolution", function(data) {
+		dac.resolution = parseInt(data);
+	});
+}
+
+DAC.prototype.isReady = function() {
+	return (this.channelCount > 0 && this.maxInteger > 0 && this.resolution > 0 );
+}
+
+DAC.prototype.toString = function() {
+	if (this.channelCount > 0 && this.resolution> 0)
+		return this.name + ": DAC (" + this.resolution + "-bits, " + this.channelCount  + "-channels)";
+	return this.name + ": DAC";
+}
+
+DAC.prototype.writeInteger = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/integer/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+DAC.prototype.writeFloat = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/float/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+DAC.prototype.readAllInteger = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/integer", function(data) {
+		callback(name, data);
+	});
+}
+
+DAC.prototype.readAllFloat = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/float", function(data) {
+		callback(name, data);
+	});
+}
+
+DAC.prototype.refreshUI = function() {
+	var dac = this;
+	var element = this.element;
+
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	if ((element != undefined) && (element.table == undefined) && this.isReady()) {
+		element.header.text(this);
+		element.table = $("<table>");
+		element.append(element.table);
+		for (var i = 0; i<this.channelCount; i++) {
+			var line = $("<tr>");
+			var cell
+			cell = $("<td>");
+			cell.text("Channel-" + i);
+			line.append(cell);
+			
+			cell = $("<td>");
+			var slider = $('<input type="range" min="0" max="100" step="1" value="0">')
+			slider.attr("channel", i);
+			slider.attr("id", "slider_" + this.name + "_" + i);
+			cell.append(slider);
+			line.append(cell);
+
+			cell = $("<td>");
+			var span = $('<span>');
+			span.attr("id", "span_" + this.name + "_" + i);
+			cell.append(span);
+			line.append(cell);
+
+			slider.bind("change", function() {
+				dac.writeFloat($(this).attr("channel"), $(this).val()/100, function(name, channel, data) {
+					var val = (data*100).toFixed(0);
+					var volts = (data*3.3).toFixed(2);
+					$("#span_" + name + "_" + channel).text(volts + "V - " + val + "%");
+					$("#slider_" + name + "_" + channel).val(val);
+				});
+			});
+
+			element.table.append(line);
+		}
+		this.readAllFloat(function(name, data) {
+			for (i in data) {
+				var val = (data[i]*100).toFixed(0);
+				var volts = (data[i]*3.3).toFixed(2);
+				$("#span_" + name + "_" + i).text(volts + "V - " + val + "%");
+				$("#slider_" + name + "_" + i).val(val);
+			}
+		});
+	}
+	else {
+		setTimeout(function(){dac.refreshUI()}, 1000);
+	}
+
+}
+
+function PWM(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.channelCount = 0;
+	this.maxInteger = 0;
+	this.resolution = 0;
+	this.refreshTime = 1000;
+	
+	var pwm = this;
+	$.get(this.url + "/channel-count", function(data) {
+		pwm.channelCount = parseInt(data);
+	});
+
+	$.get(this.url + "/max-integer", function(data) {
+		pwm.maxInteger = parseInt(data);
+	});
+
+	$.get(this.url + "/resolution", function(data) {
+		pwm.resolution = parseInt(data);
+	});
+}
+
+PWM.prototype.isReady = function() {
+	return (this.channelCount > 0 && this.maxInteger > 0 && this.resolution > 0 );
+}
+
+PWM.prototype.toString = function() {
+	if (this.channelCount > 0 && this.resolution> 0)
+		return this.name + ": PWM (" + this.resolution + "-bits, " + this.channelCount  + "-channels)";
+	return this.name + ": PWM";
+}
+
+PWM.prototype.writeInteger = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/integer/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+PWM.prototype.writeFloat = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/float/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+PWM.prototype.writeAngle = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/" + channel + "/angle/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+PWM.prototype.readAllInteger = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/integer", function(data) {
+		callback(name, data);
+	});
+}
+
+PWM.prototype.readAllFloat = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/float", function(data) {
+		callback(name, data);
+	});
+}
+
+PWM.prototype.readAll = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*", function(data) {
+		callback(name, data);
+	});
+}
+
+PWM.prototype.refreshUI = function() {
+	var pwm = this;
+	var element = this.element;
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	if ((element != undefined) && (element.table == undefined) && this.isReady()) {
+		element.header.text(this);
+		element.table = $("<table>");
+		element.append(element.table);
+
+		for (var i = 0; i<this.channelCount; i++) {
+			var line = $("<tr>");
+			var cell
+			cell = $("<td>");
+			cell.text("Channel-" + i);
+			line.append(cell);
+			
+			cell = $("<td>");
+			var checkbox = $('<input type="checkbox">');
+			checkbox.attr("id", "checkbox_" + this.name + "_" + i);
+			checkbox.attr("channel", i);
+			
+			var cblabel = $('<label>');
+			cblabel.append(checkbox);
+			cblabel.append("Servo");
+			cell.append(cblabel);
+			line.append(cell);
+			
+			cell = $("<td>");
+			var slider = $('<input type="range" min="0" max="100" step="1" value="0">')
+			slider.attr("channel", i);
+			slider.attr("id", "slider_" + this.name + "_" + i);
+			cell.append(slider);
+			line.append(cell);
+
+			cell = $("<td>");
+			var span = $('<span>');
+			span.attr("id", "span_" + this.name + "_" + i);
+			cell.append(span);
+			line.append(cell);
+
+			checkbox.bind("change", function() {
+				var slider = $("#slider_" + pwm.name + "_" + $(this).attr("channel"))
+				slider.attr("servo", $(this).is(":checked"));
+			});
+
+			slider.bind("change", function() {
+				if ($(this).attr("servo") == "true") {
+					pwm.writeAngle($(this).attr("channel"), $(this).val(), function(name, channel, data) {
+						var val = data;
+						$("#span_" + name + "_" + channel).text(val + "°");
+						$("#slider_" + name + "_" + channel).val(val);
+					});
+				}
+				else {
+					pwm.writeFloat($(this).attr("channel"), $(this).val()/100, function(name, channel, data) {
+						var val = (data*100).toFixed(0);
+						$("#span_" + name + "_" + channel).text(val + "%");
+						$("#slider_" + name + "_" + channel).val(val);
+					});
+				}
+			});
+
+			element.table.append(line);
+		}
+	}
+
+	this.readAll(function(name, data) {
+		for (i in data) {
+			var slider = $("#slider_" + name + "_" + i);
+			var span = $("#span_" + name + "_" + i);
+			var val = 0;
+
+			if (slider.attr("servo") == "true") {
+				slider.attr("min", -45);
+				slider.attr("max", 45);
+				val = data[i]["angle"];
+				span.text(val + "°");
+			}
+			else {
+				slider.attr("min", 0);
+				slider.attr("max", 100);
+				val = (data[i]["float"]*100).toFixed(0);
+				span.text(val + "%");
+			}
+			slider.val(val);
+			
+		}
+		setTimeout(function(){pwm.refreshUI()}, pwm.refreshTime);
+	});
+}
+
+function Temperature(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.refreshTime = 5000;
+}
+
+Temperature.prototype.toString = function() {
+	return this.name + ": Temperature";
+}
+
+Temperature.prototype.getCelsius = function(callback) {
+	$.get(this.url + "/temperature/c", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Temperature.prototype.getFahrenheit = function(callback) {
+	$.get(this.url + "/temperature/f", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Temperature.prototype.refreshUI = function() {
+	var temp = this;
+	var element = this.element;
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	this.getCelsius(function(name, data){
+		if (element != undefined) {
+			element.header.text(temp + ": " + data + "°C");
+		}
+		setTimeout(function(){temp.refreshUI()}, temp.refreshTime);
+	});
+}
+
+function Pressure(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.refreshTime = 5000;
+}
+
+Pressure.prototype.toString = function() {
+	return this.name + ": Pressure";
+}
+
+Pressure.prototype.getPascal = function(callback) {
+	$.get(this.url + "/pressure/pa", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Pressure.prototype.getHectoPascal = function(callback) {
+	$.get(this.url + "/pressure/hpa", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Pressure.prototype.refreshUI = function() {
+	var pressure = this;
+	var element = this.element;
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	pressure.getHectoPascal(function(name, data){
+		if (element != undefined) {
+			element.header.text(pressure + " = " + data + "hPa");
+		}
+		setTimeout(function(){pressure.refreshUI()}, pressure.refreshTime);
+	});
+}
+	
+
+function Luminosity(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.refreshTime = 5000;
+}
+
+Luminosity.prototype.toString = function() {
+	return this.name + ": Luminosity";
+}
+
+Luminosity.prototype.getLux = function(callback) {
+	$.get(this.url + "/luminosity/lx", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Luminosity.prototype.refreshUI = function() {
+	var lum = this;
+	var element = this.element;
+	
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	this.getLux(function(name, data){
+		if (element != undefined) {
+			element.header.text(lum + ": " + data + "lx");
+		}
+		setTimeout(function(){lum.refreshUI()}, lum.refreshTime);
+	});
+}
+
+function Distance(name) {
+	this.name = name;
+	this.url = "/devices/" + name;
+	this.refreshTime = 5000;
+}
+
+Distance.prototype.toString = function() {
+	return this.name + ": Distance";
+}
+
+Distance.prototype.getMillimeter = function(callback) {
+	$.get(this.url + "/distance/mm", function(data) {
+		callback(this.name, data);
+	});
+}
+
+Distance.prototype.refreshUI = function() {
+	var dist = this;
+	var element = this.element;
+	
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h2>" + this + "</h2>");
+		element.append(element.header);
+	}
+	
+	this.getMillimeter(function(name, data){
+		if (element != undefined) {
+			element.header.text(dist + ": " + data + "mm");
+		}
+		setTimeout(function(){dist.refreshUI()}, dist.refreshTime);
+	});
 }
 
