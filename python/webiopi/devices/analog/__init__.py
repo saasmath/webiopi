@@ -154,6 +154,18 @@ class PWM(DAC):
         self.writeFloat(channel, f)
         return self.readAngle(channel)
 
+    @request("GET", "*")
+    @response(contentType=M_JSON)
+    def readAll(self):
+        values = {}
+        for i in range(self.channelCount):
+            values[i] = {}
+            values[i]["float"] = float("%.2f" % self.readFloat(i))
+            values[i]["angle"] = float("%.2f" % self.readAngle(i))
+            
+        return jsonDumps(values)
+    
+
 from webiopi.devices.analog.mcp3x0x import MCP3004, MCP3008, MCP3204, MCP3208
 from webiopi.devices.analog.mcp492X import MCP4921, MCP4922
 from webiopi.devices.analog.pca9685 import PCA9685
