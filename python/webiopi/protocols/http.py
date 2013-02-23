@@ -49,10 +49,7 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
         else:
             self.context = "/"
 
-        if docroot:
-            self.docroot = docroot
-        else:
-            self.docroot = "."
+        self.docroot = docroot
 
         if index:
             self.index = index
@@ -129,20 +126,33 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-Type", type);
                 self.end_headers();
                 self.wfile.write(body.encode())
-            
+                
+    def findFile(self, file):
+        if os.path.exists(file):
+            if os.path.isdir(file):
+                file += "/" + self.server.index
+                if os.path.exists(file):
+                    return file
+            else:
+                return file
+        return None
+        
+                
     def serveFile(self, relativePath):
-        if relativePath == "":
-            relativePath = self.server.index
+        if self.server.docroot != None:
+            path = self.findFile(self.server.docroot + "/" + relativePath)
+            if path == None:
+                path = self.findFile("./" + relativePath)
 
-        path = self.server.docroot + os.sep + relativePath
+        else:
+            path = self.findFile("./" + relativePath)                
+            if path == None:
+                path = self.findFile(WEBIOPI_DOCROOT + "/" + relativePath)
 
-        if not os.path.exists(path):
-            path = relativePath;
-            
-        if not os.path.exists(path):
-            path = WEBIOPI_DOCROOT + os.sep + relativePath;
-            
-        if not os.path.exists(path):
+        if path == None and (relativePath.startswith("webiopi.") or relativePath.startswith("jquery")):
+            path = self.findFile(WEBIOPI_DOCROOT + "/" + relativePath)
+
+        if path == None:
             return self.sendResponse(404, "Not Found")
 
         realPath = os.path.realpath(path)
@@ -150,23 +160,18 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if realPath.endswith(".py"):
             return self.sendResponse(403, "Not Authorized")
         
-        if not (realPath.startswith(self.server.docroot) 
-                or realPath.startswith(os.getcwd())
+        if not (realPath.startswith(os.getcwd()) 
+                or (self.server.docroot and realPath.startswith(self.server.docroot))
                 or realPath.startswith(WEBIOPI_DOCROOT)):
             return self.sendResponse(403, "Not Authorized")
         
-        if os.path.isdir(realPath):
-            realPath += os.sep + self.server.index;
-            if not os.path.exists(realPath):
-                return self.sendResponse(403, "Not Authorized")
-            
-        (type, encoding) = mime.guess_type(realPath)
-        f = codecs.open(realPath, encoding=encoding)
+        (type, encoding) = mime.guess_type(path)
+        f = codecs.open(path, encoding=encoding)
         data = f.read()
         f.close()
         self.send_response(200)
         self.send_header("Content-Type", type);
-#            self.send_header("Content-length", os.path.getsize(realPath))
+        self.send_header("Content-Length", os.path.getsize(realPath))
         self.end_headers()
         self.wfile.write(data)
         
