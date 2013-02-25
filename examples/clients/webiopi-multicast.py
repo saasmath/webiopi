@@ -1,13 +1,16 @@
-from webiopi import MulticastClient, runLoop
+from webiopi import runLoop
+from webiopi.clients import *
 from time import sleep
 
 client = MulticastClient()
-client.setFunction(25, "out")
+
+gpio = NativeGPIO(client)
+gpio.setFunction(25, "out")
 state = True
 
-def loop():
-    global client, state
-    client.output(25, state)
+def loop(): 
+    global gpio, state
+    gpio.output(25, state)
     state = not state
     sleep(0.5)
 
