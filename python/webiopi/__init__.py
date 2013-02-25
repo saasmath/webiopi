@@ -19,6 +19,7 @@ import _webiopi.GPIO as GPIO
 from webiopi.utils import BOARD_REVISION, VERSION
 from webiopi.utils import setInfo, setDebug, info, debug, warn, error, exception
 from webiopi.utils import runLoop
+from webiopi.utils import deviceInstance
 
 from webiopi.protocols.rest import macro
 from webiopi.server import Server

@@ -67,6 +67,19 @@ class Server():
             
             GPIOSetup()
             
+            if config.has_section("DEVICES"):
+                devices = config.items("DEVICES")
+                for (name, params) in devices:
+                    values = params.split(" ")
+                    driver = values[0];
+                    args = {}
+                    i = 1
+                    while i < len(values):
+                        (arg, val) = values[i].split(":")
+                        args[arg] = val
+                        i+=1
+                    self.restHandler.addDevice(name, driver, args)
+                    
             if config.has_section("SCRIPTS"):
                 scripts = config.items("SCRIPTS")
                 for (name, source) in scripts:
@@ -105,19 +118,6 @@ class Server():
                 if config.has_option("COAP", "multicast"):
                     multicast = config.getboolean("COAP", "multicast")
 
-            if config.has_section("DEVICES"):
-                devices = config.items("DEVICES")
-                for (name, params) in devices:
-                    values = params.split(" ")
-                    driver = values[0];
-                    args = {}
-                    i = 1
-                    while i < len(values):
-                        (arg, val) = values[i].split(":")
-                        args[arg] = val
-                        i+=1
-                    self.restHandler.addDevice(name, driver, args)
-                    
             if config.has_section("ROUTES"):
                 routes = config.items("ROUTES")
                 for (source, destination) in routes:
