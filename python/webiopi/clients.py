@@ -59,18 +59,80 @@ class Client():
             return data
         return None
 
-    def getFunction(self, channel):
-        return self.sendRequest("GET", "/GPIO/%d/function" % channel)
-
-    def setFunction(self, channel, func):
-        return self.sendRequest("POST", "/GPIO/%d/function/%s" % (channel, func))
-        
-    def input(self, channel):
-        return int(self.sendRequest("GET", "/GPIO/%d/value" % channel))
-
-    def output(self, channel, value):
-        return self.sendRequest("POST", "/GPIO/%d/value/%d" % (channel, value))
-
 class MulticastClient(Client):
     def __init__(self, port=5683):
         Client.__init__(self, "224.0.1.123", -1, port)
+
+class Device():
+    def __init__(self, client, name):
+        self.client = client
+        self.path = "/devices/" + name
+    
+    def sendRequest(self, method, path):
+        return self.client.sendRequest(method, self.path + path)
+    
+
+class GPIO(Device):
+    def getFunction(self, channel):
+        return self.sendRequest("GET", "/%d/function" % channel)
+
+    def setFunction(self, channel, func):
+        return self.sendRequest("POST", "/%d/function/%s" % (channel, func))
+        
+    def input(self, channel):
+        return int(self.sendRequest("GET", "/%d/value" % channel))
+
+    def output(self, channel, value):
+        return int(self.sendRequest("POST", "/%d/value/%d" % (channel, value)))
+    
+    def readInteger(self):
+        return int(self.sendRequest("GET", "/integer"))
+
+    def writeInteger(self, value):
+        return int(self.sendRequest("POST", "/integer/%d" % value))
+
+class NativeGPIO(GPIO):
+    def __init__(self, client):
+        Device.__init__(self, client, "")
+        self.path = "/GPIO"
+
+class ADC(Device):
+    def readFloat(self, channel):
+        return float(self.sendRequest("GET", "/%d/float" % channel))
+
+class DAC(ADC):
+    def writeFloat(self, channel, value):
+        return float(self.sendRequest("POST", "/%d/float/%f" % (channel, value)))
+                     
+class PWM(DAC):
+    def writeAngle(self, channel, value):
+        return float(self.sendRequest("POST", "/%d/angle/%f" % (channel, value)))
+                     
+class Temperature(Device):
+    def getCelsius(self):
+        return float(self.sendRequest("GET", "/temperature/c"))
+
+    def getFahrenheit(self):
+        return float(self.sendRequest("GET", "/temperature/f"))
+    
+class Pressure(Device):
+    def getPascal(self):
+        return float(self.sendRequest("GET", "/pressure/pa"))
+
+    def getHectoPascal(self):
+        return float(self.sendRequest("GET", "/pressure/hpa"))
+    
+class Luminosity(Device):
+    def getLux(self):
+        return float(self.sendRequest("GET", "/luminosity/lux"))
+    
+class Distance(Device):
+    def getMillimeter(self):
+        return float(self.sendRequest("GET", "/distance/mm"))
+
+    def getCentimeter(self):
+        return float(self.sendRequest("GET", "/distance/cm"))
+
+    def getInch(self):
+        return float(self.sendRequest("GET", "/distance/in"))
+
