@@ -63,6 +63,9 @@ class VCNL4000(I2C, Luminosity, Distance):
         time.sleep(0.001)
         self.calibrate() # may have to be repeated from time to time or before every proximity measurement
 
+    def __family__(self):
+        return [Luminosity.__family__(self), Distance.__family__(self)]
+
     def __setProximityTiming__(self):
         self.writeRegister(self.REG_PROX_ADJUST, self.VAL_MOD_TIMING_DEF)
                                
