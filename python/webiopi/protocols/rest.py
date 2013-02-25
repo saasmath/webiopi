@@ -63,7 +63,7 @@ class RESTHandler():
         if devClass == None:
             raise Exception("Device driver not found for %s" % device)
         if len(args) > 0:
-            dev = devClass(*args)
+            dev = devClass(**args)
         else:
             dev = devClass()
         self.addDeviceInstance(name, dev, args)

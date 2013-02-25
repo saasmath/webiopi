@@ -65,34 +65,34 @@ multicast = true
 # Raspberry native UART on GPIO, uncomment to enable
 # Don't forget to remove console on ttyAMA0 in /boot/cmdline.txt
 # And also disable getty on ttyAMA0 in /etc/inittab
-#serial0 = Serial ttyAMA0 9600
+#serial0 = Serial device:ttyAMA0 baudrate:9600
 
 # USB serial adapters
-#usb0 = Serial ttyUSB0 9600
-#usb1 = Serial ttyACM0 9600
+#usb0 = Serial device:ttyUSB0 baudrate:9600
+#usb1 = Serial device:ttyACM0 baudrate:9600
 
 #temp0 = TMP102
-#temp1 = TMP102 0x49
+#temp1 = TMP102 slave:0x49
 #temp2 = DS18B20
-#temp3 = DS18B20 28-0000049bc218
+#temp3 = DS18B20 slave:28-0000049bc218
 
 #bmp = BMP085
 
 #gpio0 = PCF8574
-#gpio1 = PCF8574 0x21
+#gpio1 = PCF8574 slave:0x21
 
 #light0 = TSL2561T
-#light1 = TSL2561T 0b0101001
+#light1 = TSL2561T slave:0b0101001
 
 #gpio0 = MCP23017
-#gpio1 = MCP23017 0x21
-#gpio2 = MCP23017 0x22
+#gpio1 = MCP23017 slave:0x21
+#gpio2 = MCP23017 slave:0x22
 
 #pwm0 = PCA9685
-#pwm1 = PCA9685 0x41
+#pwm1 = PCA9685 slave:0x41
 
-#adc = MCP3208
-#dac = MCP4922 1
+#adc = MCP3008
+#dac = MCP4922 chip:1
 
 #------------------------------------------------------------------------#
 

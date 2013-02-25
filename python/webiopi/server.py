@@ -109,7 +109,14 @@ class Server():
                 devices = config.items("DEVICES")
                 for (name, params) in devices:
                     values = params.split(" ")
-                    self.restHandler.addDevice(name, values[0], values[1:])
+                    driver = values[0];
+                    args = {}
+                    i = 1
+                    while i < len(values):
+                        (arg, val) = values[i].split(":")
+                        args[arg] = val
+                        i+=1
+                    self.restHandler.addDevice(name, driver, args)
                     
             if config.has_section("ROUTES"):
                 routes = config.items("ROUTES")
