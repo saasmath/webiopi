@@ -15,9 +15,9 @@
 #
 #   Changelog
 #
-#   1.0    2013/02/24    Initial release. Luminosity is final. Proximity is beta
-#                        and just a raw estimation as the breakout I have seems to
-#                        be defect so that I can't calibrate the distance values.
+#   1.0    2013/02/24    Initial release. Luminosity is final. Proximity is good beta
+#                        and a working coarse estimation for distance value.
+#                        
 
 import time
 from webiopi.devices.i2c import *
@@ -80,6 +80,7 @@ class VCNL4000(I2C, Luminosity, Distance):
     def calibrate(self):
         self.offset = self.__measureOffset__()
         debug ("VCNL4000: offset = %d" % (self.offset))
+        return self.offset
 
         
     def setCurrent(self, current):
@@ -144,7 +145,7 @@ class VCNL4000(I2C, Luminosity, Distance):
         return self.__calculateLux__(light_word)
          
     def __calculateLux__(self, light_word):
-        return (light_word + 3) // 4 # From VISHAY application note
+        return (light_word + 3) * 0.25 # From VISHAY application note
 
     def __getMillimeter__(self):
         success = 0
@@ -166,14 +167,26 @@ class VCNL4000(I2C, Luminosity, Distance):
     def __calculateMillimeter__(self, raw_proximity_counts):
         # According to chip spec the proximity counts are strong non-linear with distance and cannot be calculated
         # with a direct formula. From experience found on web this chip is generally not suited for really exact
-        # distance calculations. This is a very rough distance estimation lookup table for now. Maybe someone can
+        # distance calculations. This is a rough distance estimation lookup table for now. Maybe someone can
         # provide a more exact approximation in the future.
-        if raw_proximity_counts >= 5000:
+
+        debug ("VCNL4000: prox real raw counts = %d" % (raw_proximity_counts))
+        if raw_proximity_counts >= 10000:
             estimated_distance = 0
-        elif raw_proximity_counts >= 1000:
-            estimated_distance = 1
-        elif raw_proximity_counts >= 200:
+        elif raw_proximity_counts >= 3000:
+            estimated_distance = 5
+        elif raw_proximity_counts >= 900:
+            estimated_distance = 10
+        elif raw_proximity_counts >= 300:
+            estimated_distance = 20
+        elif raw_proximity_counts >= 150:
+            estimated_distance = 30
+        elif raw_proximity_counts >= 75:
+            estimated_distance = 40
+        elif raw_proximity_counts >= 50:
             estimated_distance = 50
+        elif raw_proximity_counts >= 25:
+            estimated_distance = 70
         else:
             estimated_distance = 100
         return estimated_distance
