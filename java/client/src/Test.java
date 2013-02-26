@@ -20,7 +20,7 @@ public class Test {
 //		PiClient client = new PiMulticastClient(PiMulticastClient.DEFAULT_PORT);
 
 		Temperature temp0 = new Temperature(client, "temp0");
-		System.out.println(temp0.getCelsius() + "¡C");
+		System.out.println(temp0.getCelsius() + "Â°C");
 
 		NativeGPIO gpio = new NativeGPIO(client);
 		GPIO gpio0 = new GPIO(client, "gpio0");
