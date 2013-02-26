@@ -96,15 +96,8 @@ function WebIOPi() {
 			w().init();
 		};
 	}
-//	jquery.onreadystatechange = function() {
-//		alert("ready state change");
-//		if (this.readyState == 'complete') {
-//			alert("complete");
-//			w().init();
-//		}
-//	};
 	head.appendChild(jquery);
-	
+
 	if (isMobile()) {
 		console.log("load jquery mobile");
 		var mobile = document.createElement('script');
@@ -728,7 +721,7 @@ GPIOPort.prototype.refreshUI = function() {
 	var port = this;
 	var element = this.element;
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -869,7 +862,7 @@ ADC.prototype.refreshUI = function () {
 	var element = this.element;
 	
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -960,7 +953,7 @@ DAC.prototype.refreshUI = function() {
 	var element = this.element;
 
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -1092,7 +1085,7 @@ PWM.prototype.refreshUI = function() {
 	var pwm = this;
 	var element = this.element;
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -1209,7 +1202,7 @@ Temperature.prototype.refreshUI = function() {
 	var temp = this;
 	var element = this.element;
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -1247,13 +1240,13 @@ Pressure.prototype.refreshUI = function() {
 	var pressure = this;
 	var element = this.element;
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
 	pressure.getHectoPascal(function(name, data){
 		if (element != undefined) {
-			element.header.text(pressure + " = " + data + "hPa");
+			element.header.text(pressure + ": " + data + "hPa");
 		}
 		setTimeout(function(){pressure.refreshUI()}, pressure.refreshTime);
 	});
@@ -1263,7 +1256,7 @@ Pressure.prototype.refreshUI = function() {
 function Luminosity(name) {
 	this.name = name;
 	this.url = "/devices/" + name;
-	this.refreshTime = 5000;
+	this.refreshTime = 1000;
 }
 
 Luminosity.prototype.toString = function() {
@@ -1281,7 +1274,7 @@ Luminosity.prototype.refreshUI = function() {
 	var element = this.element;
 	
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
@@ -1296,7 +1289,7 @@ Luminosity.prototype.refreshUI = function() {
 function Distance(name) {
 	this.name = name;
 	this.url = "/devices/" + name;
-	this.refreshTime = 5000;
+	this.refreshTime = 1000;
 }
 
 Distance.prototype.toString = function() {
@@ -1314,7 +1307,7 @@ Distance.prototype.refreshUI = function() {
 	var element = this.element;
 	
 	if ((element != undefined) && (element.header == undefined)) {
-		element.header = $("<h2>" + this + "</h2>");
+		element.header = $("<h3>" + this + "</h3>");
 		element.append(element.header);
 	}
 	
