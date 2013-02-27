@@ -20,7 +20,7 @@ if PYTHON_MAJOR >= 3:
 else:
     import httplib
 
-class Client():
+class PiMixedClient():
     def __init__(self, host, port=8000, coap=5683):
         self.host = host
         self.coapport = coap
@@ -59,9 +59,17 @@ class Client():
             return data
         return None
 
-class MulticastClient(Client):
+class PiHttpClient(PiMixedClient):
+    def __init__(self, host, port=8000):
+        PiMixedClient.__init__(self, host, port, -1)
+
+class PiCoapClient(PiMixedClient):
+    def __init__(self, host, port=5683):
+        PiMixedClient.__init__(self, host, -1, port)
+
+class PiMulticastClient(PiMixedClient):
     def __init__(self, port=5683):
-        Client.__init__(self, "224.0.1.123", -1, port)
+        PiMixedClient.__init__(self, "224.0.1.123", -1, port)
 
 class Device():
     def __init__(self, client, name):

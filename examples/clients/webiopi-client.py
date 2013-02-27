@@ -2,7 +2,7 @@ from webiopi import runLoop
 from webiopi.clients import *
 from time import sleep
 
-client = Client("192.168.1.234")
+client = PiMixedClient("192.168.1.234")
 
 gpio = NativeGPIO(client)
 gpio.setFunction(25, "out")

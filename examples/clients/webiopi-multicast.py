@@ -2,7 +2,7 @@ from webiopi import runLoop
 from webiopi.clients import *
 from time import sleep
 
-client = MulticastClient()
+client = PiMulticastClient()
 
 gpio = NativeGPIO(client)
 gpio.setFunction(25, "out")

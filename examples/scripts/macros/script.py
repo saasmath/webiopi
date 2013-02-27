@@ -38,6 +38,9 @@ def setup():
     GPIO.pulseAngle(SERVO, 0)   # set to 0 (neutral)
     GPIO.pulseRatio(LED0, 0.5)  # set to 50% ratio
     GPIO.output(LED1, GPIO.HIGH)
+    
+    gpio0 = webiopi.deviceInstance("gpio0")
+    gpio0.output(0, 0)
 
 # -------------------------------------------------- #
 # Loop execution part - WebIOPi will call loop()     #
@@ -58,3 +61,5 @@ def destroy():
     GPIO.setup(SERVO, GPIO.IN)
     GPIO.setup(LED0, GPIO.IN)
     GPIO.setup(LED1, GPIO.IN)
+    gpio0 = webiopi.deviceInstance("gpio0")
+    gpio0.output(0, 1)

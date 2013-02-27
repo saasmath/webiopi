@@ -23,7 +23,6 @@ from webiopi.utils import deviceInstance
 
 from webiopi.protocols.rest import macro
 from webiopi.server import Server
-from webiopi.clients import Client, MulticastClient
 
 from webiopi.devices.bus import checkAllBus
 
