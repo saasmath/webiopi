@@ -110,5 +110,5 @@ class Distance():
 from webiopi.devices.sensor.bmp085 import BMP085
 from webiopi.devices.sensor.onewiretemp import DS1822, DS1825, DS18B20, DS18S20, DS28EA00
 from webiopi.devices.sensor.tmpXXX import TMP75, TMP102, TMP275
-from webiopi.devices.sensor.tslXXXX import TSL2561CS, TSL2561T
+from webiopi.devices.sensor.tslXXXX import TSL2561, TSL2561CS, TSL2561T, TSL4531, TSL45311, TSL45313, TSL45315, TSL45317
 from webiopi.devices.sensor.vcnl4000 import VCNL4000

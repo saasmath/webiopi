@@ -11,7 +11,12 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+#
+#
+#   Changelog
+#
+#   1.0    2013/02/28    Initial release
+#                        
 
 from webiopi.devices.i2c import *
 from webiopi.devices.sensor import Luminosity
@@ -23,10 +28,12 @@ class TSL_LIGHT_X(I2C, Luminosity):
 
     VAL_PWON    = 0x03
     VAL_PWOFF   = 0x00
+    VAL_INVALID = -1
 
-    def __init__(self, slave=0b0111001, name="TSL_LIGHT_X"):
+    def __init__(self, slave, time, name="TSL_LIGHT_X"):
         I2C.__init__(self, toint(slave), name)  
         self.wake() # devices are powered down after power reset, wake them
+        self.setTime(toint(time))
 
     def wake(self):
         self.__wake__()
@@ -38,13 +45,18 @@ class TSL_LIGHT_X(I2C, Luminosity):
         self.__sleep__()
         
     def __sleep__(self):
-        self.writeRegister(self.REG_CONTROL, self.VAL_PWOFF)         
-    
+        self.writeRegister(self.REG_CONTROL, self.VAL_PWOFF)
+        
+    def setTime(self, time):
+        self.__setTime__(time)
+
+    def getTime(self):
+        return self.__getTime__()
+            
 class TSL2561X(TSL_LIGHT_X):
     VAL_TIME_402_MS   = 0x02
     VAL_TIME_101_MS   = 0x01
     VAL_TIME_14_MS    = 0x00
-    VAL_INVALID       = -1
         
     REG_CHANNEL_0_LOW = 0x0C | TSL_LIGHT_X.VAL_COMMAND
     REG_CHANNEL_1_LOW = 0x0E | TSL_LIGHT_X.VAL_COMMAND
@@ -52,13 +64,9 @@ class TSL2561X(TSL_LIGHT_X):
     MASK_GAIN         = 0x10
     MASK_TIME         = 0x03
   
-    def __init__(self, slave=0b0111001, time=402, gain=1, name="TSL2561X"):
-        TSL_LIGHT_X.__init__(self, slave, name)      
-        time = toint(time)
-        self.setTime(time)
-        gain = toint(gain)
-        self.setGain(gain)
-
+    def __init__(self, slave, time, gain, name="TSL2561X"):
+        TSL_LIGHT_X.__init__(self, slave, time, name)             
+        self.setGain(toint(gain))
 
     def __getLux__(self):
         ch0_bytes = self.readRegisters(self.REG_CHANNEL_0_LOW, 2)
@@ -71,53 +79,39 @@ class TSL2561X(TSL_LIGHT_X):
             return self.__calculateLux__(ch0_word, ch1_word)
 
     def setGain(self, gain):
-        self.gain = gain
-        self.__setGain__()
-
-    def getGain(self):
-        return self.__getGain__()
-
-    def setTime(self, time):
-        self.time = time
-        self.__setTime__()
-
-    def getTime(self):
-        return self.__getTime__()
-
-    def __setGain__(self):
-        if self.gain == 1:
+        if gain == 1:
             bit_gain = 0
-        elif self.gain == 16:
+        elif gain == 16:
             bit_gain = 1
         else:
-            raise ValueError("Gain %d out of range [%d,%d]" % (self.gain, 1, 16))
+            raise ValueError("Gain %d out of range [%d,%d]" % (gain, 1, 16))
         new_byte_gain = (bit_gain << 4) & self.MASK_GAIN
         
         current_byte_config = self.readRegister(self.REG_CONFIG)
         new_byte_config = (current_byte_config & ~self.MASK_GAIN) | new_byte_gain
-        self.writeByte(new_byte_config)
+        self.writeRegister(self.REG_CONFIG, new_byte_config)
     
-    def __getGain__(self):
+    def getGain(self):
         current_byte_config = self.readRegister(self.REG_CONFIG)
         if (current_byte_config & self.MASK_GAIN):
             return 16
         else:
             return 1
 
-    def __setTime__(self):
-        if not self.time in [14, 101, 402]:
-            raise ValueError("Time %d out of range [%d,%d,%d]" % (self.time, 14, 101, 402))
-        if self.time == 402:
+    def __setTime__(self, time):
+        if not time in [14, 101, 402]:
+            raise ValueError("Time %d out of range [%d,%d,%d]" % (time, 14, 101, 402))
+        if time == 402:
             bits_time = self.VAL_TIME_402_MS
-        elif self.time == 101:
+        elif time == 101:
             bits_time = self.VAL_TIME_101_MS
-        elif self.time == 14:
+        elif time == 14:
             bits_time = self.VAL_TIME_14_MS            
         new_byte_time = bits_time & self.MASK_TIME
 
         current_byte_config = self.readRegister(self.REG_CONFIG)
         new_byte_config = (current_byte_config & ~self.MASK_TIME) | new_byte_time
-        self.writeByte(new_byte_config)
+        self.writeRegister(self.REG_CONFIG, new_byte_config)
         
     def __getTime__(self):
         current_byte_config = self.readRegister(self.REG_CONFIG)
@@ -129,12 +123,12 @@ class TSL2561X(TSL_LIGHT_X):
         elif bits_time == self.VAL_TIME_14_MS:
             t =  14
         else:
-            t = self.VAL_INVALID # indicates undefined
+            t = TSL_LIGHT_X.VAL_INVALID # indicates undefined
         return t
           
 class TSL2561CS(TSL2561X):
     # Package CS (Chipscale) chip version
-    def __init__(self, slave=0b0111001, time=402,  gain=1):
+    def __init__(self, slave=0x39, time=402,  gain=1):
         TSL2561X.__init__(self, slave, time, gain, "TSL2561CS")
 
     def __calculateLux__(self, channel0_value, channel1value):
@@ -153,7 +147,7 @@ class TSL2561CS(TSL2561X):
             
 class TSL2561T(TSL2561X):
     # Package T (TMB-6)  chip version
-    def __init__(self, slave=0b0111001, time=402, gain=1):
+    def __init__(self, slave=0x39, time=402, gain=1):
         TSL2561X.__init__(self, slave, time, gain, "TSL2561T")
         
     def __calculateLux__(self, channel0_value, channel1_value):
@@ -169,4 +163,73 @@ class TSL2561T(TSL2561X):
         else: # if channel_ratio > 1.30
             lux = 0
         return lux
+
+class TSL2561(TSL2561T):
+    # Default version for unknown packages, uses T Package class lux calculation
+    def __init__(self, slave=0x39, time=402, gain=1):
+        TSL2561X.__init__(self, slave, time, gain, "TSL2561")
+        
+        
+class TSL4531(TSL_LIGHT_X):
+    VAL_TIME_400_MS = 0x00
+    VAL_TIME_200_MS = 0x01
+    VAL_TIME_100_MS = 0x02
+
+    REG_DATA_LOW    = 0x04 | TSL_LIGHT_X.VAL_COMMAND
+    
+    MASK_TCNTRL     = 0x03
+
+    def __init__(self, slave=0x29, time=400, name="TSL4531"):
+        TSL_LIGHT_X.__init__(self, slave, time, name)
+        
+    def __setTime__(self, time):
+        if not time in [100, 200, 400]:
+            raise ValueError("Time %d out of range [%d,%d,%d]" % (time, 100, 200, 400))
+        if time == 400:
+            bits_time = self.VAL_TIME_400_MS
+            self.multiplier = 1
+        elif time == 200:
+            bits_time = self.VAL_TIME_200_MS
+            self.multiplier = 2
+        elif time == 100:
+            bits_time = self.VAL_TIME_100_MS
+            self.multiplier = 4            
+        new_byte_time = bits_time & self.MASK_TCNTRL
+
+        current_byte_config = self.readRegister(self.REG_CONFIG)
+        new_byte_config = (current_byte_config & ~self.MASK_TCNTRL) | new_byte_time
+        self.writeRegister(self.REG_CONFIG, new_byte_config)
+
+    def __getTime__(self):
+        current_byte_config =  self.readRegister(self.REG_CONFIG)
+        bits_time = (current_byte_config & self.MASK_TCNTRL)
+        if bits_time == self.VAL_TIME_400_MS:
+            t = 400
+        elif bits_time == self.VAL_TIME_200_MS:
+            t = 200
+        elif bits_time == self.VAL_TIME_100_MS:
+            t = 100
+        else:
+            t = TSL_LIGHT_X.VAL_INVALID # indicates undefined
+        return t
+
+    def __getLux__(self):
+        data_bytes = self.readRegisters(self.REG_DATA_LOW, 2)
+        return self.multiplier * (data_bytes[1] << 8 | data_bytes[0])
+
+class TSL45311(TSL4531):
+    def __init__(self, slave=0x39, time=400):
+        TSL4531.__init__(self, slave, time, "TSL45311")
+
+class TSL45313(TSL4531):
+    def __init__(self, slave=0x39, time=400):
+        TSL4531.__init__(self, slave, time, "TSL45313")
+
+class TSL45315(TSL4531):
+    def __init__(self, slave=0x29, time=400):
+        TSL4531.__init__(self, slave, time, "TSL45315")
+
+class TSL45317(TSL4531):
+    def __init__(self, slave=0x29, time=400):
+        TSL4531.__init__(self, slave, time, "TSL45317")
 
