@@ -81,9 +81,9 @@ class RESTHandler():
         
         DEVICES[name] = {'device': dev, 'functions': funcs}
         if name == "GPIO":
-            info("%s mapped to REST API /GPIO" % dev)
+            info("GPIO - Native mapped to REST API /GPIO")
         else:
-            info("%s mapped to REST API /devices/%s" % (dev, name))
+            info("%s - %s mapped to REST API /devices/%s" % (dev.__family__(), dev, name))
             
     def getDevicesJSON(self, compact=False):
         name = "name"
