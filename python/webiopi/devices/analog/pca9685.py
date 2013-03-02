@@ -28,6 +28,8 @@ class PCA9685(PWM, I2C):
     def __init__(self, slave=0x40, frequency=50):
         I2C.__init__(self, toint(slave), "PCA9685")
         PWM.__init__(self, 16, 12, toint(frequency))
+        self.VREF = 0
+        
         self.prescale = int(25000000.0/((2**12)*self.frequency))
         self.mode1 = self.M1_RESTART | self.M1_AI
         

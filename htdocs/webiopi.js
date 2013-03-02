@@ -843,6 +843,13 @@ ADC.prototype.readFloat = function(channel, callback) {
 	});
 }
 
+ADC.prototype.readVolt = function(channel, callback) {
+	var name = this.name;
+	$.get(this.url + "/" + channel + "/volt", function(data) {
+		callback(name, channel, data);
+	});
+}
+
 ADC.prototype.readAllInteger = function(callback) {
 	var name = this.name;
 	$.get(this.url + "/*/integer", function(data) {
@@ -853,6 +860,13 @@ ADC.prototype.readAllInteger = function(callback) {
 ADC.prototype.readAllFloat = function(callback) {
 	var name = this.name;
 	$.get(this.url + "/*/float", function(data) {
+		callback(name, data);
+	});
+}
+
+ADC.prototype.readAllVolt = function(callback) {
+	var name = this.name;
+	$.get(this.url + "/*/volt", function(data) {
 		callback(name, data);
 	});
 }
@@ -877,11 +891,11 @@ ADC.prototype.refreshUI = function () {
 			
 		}
 	}
-	this.readAllFloat(function(name, data) {
+	this.readAllVolt(function(name, data) {
 		for (i in data) {
 			if ((element != undefined) && (element.channels != undefined)) {
 				var div = element.channels[i];
-				div.text("Channel-" + i + ": " + (parseFloat(data[i])*3.3).toFixed(2) + "V - " + (parseFloat(data[i])*100).toFixed(0) + "%")
+				div.text("Channel-" + i + ": " + parseFloat(data[i]).toFixed(2) + "V")
 			}
 		}
 		setTimeout(function(){adc.refreshUI()}, adc.refreshTime);

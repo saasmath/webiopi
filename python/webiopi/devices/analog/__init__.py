@@ -21,6 +21,7 @@ class AnalogPort(Port):
         Port.__init__(self, channelCount)
         self.resolution = resolution
         self.MAX = 2**resolution - 1
+        self.VREF = 3.3
     
     @request("GET", "resolution")
     @response("%d")
@@ -51,7 +52,14 @@ class ADC(AnalogPort):
     @request("GET", "%(channel)d/float")
     @response("%.2f")
     def readFloat(self, channel, diff=False):
-        return self.readInteger(channel, diff) / self.MAX
+        return self.readInteger(channel, diff) / float(self.MAX)
+    
+    @request("GET", "%(channel)d/volt")
+    @response("%.2f")
+    def readVolt(self, channel, diff=False):
+        if self.VREF == 0:
+            raise NotImplementedError
+        return self.readFloat(channel, diff) * self.VREF
     
     @request("GET", "*/integer")
     @response(contentType=M_JSON)
@@ -67,6 +75,14 @@ class ADC(AnalogPort):
         values = {}
         for i in range(self.channelCount):
             values[i] = float("%.2f" % self.readFloat(i))
+        return jsonDumps(values)
+    
+    @request("GET", "*/volt")
+    @response(contentType=M_JSON)
+    def readAllFloat(self):
+        values = {}
+        for i in range(self.channelCount):
+            values[i] = float("%.2f" % self.readVolt(i))
         return jsonDumps(values)
     
 class DAC(ADC):
@@ -166,6 +182,7 @@ class PWM(DAC):
         return jsonDumps(values)
     
 
+from webiopi.devices.analog.ads1x1x import ADS1014, ADS1015, ADS1114, ADS1115
 from webiopi.devices.analog.mcp3x0x import MCP3004, MCP3008, MCP3204, MCP3208
 from webiopi.devices.analog.mcp492X import MCP4921, MCP4922
 from webiopi.devices.analog.pca9685 import PCA9685
