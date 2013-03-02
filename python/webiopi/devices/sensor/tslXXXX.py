@@ -76,13 +76,16 @@ class TSL2561X(TSL_LIGHT_X):
         if ch0_word == 0 | ch1_word == 0:
             return self.VAL_INVALID # Driver security, avoid crash in lux calculation
         else:
-            return self.__calculateLux__(ch0_word, ch1_word)
+            scaling = self.time_multiplier * self.gain_multiplier
+            return self.__calculateLux__(scaling * ch0_word, scaling * ch1_word)
 
     def setGain(self, gain):
         if gain == 1:
             bit_gain = 0
+            self.gain_multiplier = 16
         elif gain == 16:
             bit_gain = 1
+            self.gain_multiplier = 1
         else:
             raise ValueError("Gain %d out of range [%d,%d]" % (gain, 1, 16))
         new_byte_gain = (bit_gain << 4) & self.MASK_GAIN
@@ -103,10 +106,13 @@ class TSL2561X(TSL_LIGHT_X):
             raise ValueError("Time %d out of range [%d,%d,%d]" % (time, 14, 101, 402))
         if time == 402:
             bits_time = self.VAL_TIME_402_MS
+            self.time_multiplier = 1
         elif time == 101:
             bits_time = self.VAL_TIME_101_MS
+            self.time_multiplier = 322 / 81
         elif time == 14:
-            bits_time = self.VAL_TIME_14_MS            
+            bits_time = self.VAL_TIME_14_MS
+            self.time_multiplier = 322 / 11
         new_byte_time = bits_time & self.MASK_TIME
 
         current_byte_config = self.readRegister(self.REG_CONFIG)
@@ -171,6 +177,7 @@ class TSL2561(TSL2561T):
         
         
 class TSL4531(TSL_LIGHT_X):
+    # Default version for unknown subtypes, uses 0x29 as slave address
     VAL_TIME_400_MS = 0x00
     VAL_TIME_200_MS = 0x01
     VAL_TIME_100_MS = 0x02
@@ -187,13 +194,13 @@ class TSL4531(TSL_LIGHT_X):
             raise ValueError("Time %d out of range [%d,%d,%d]" % (time, 100, 200, 400))
         if time == 400:
             bits_time = self.VAL_TIME_400_MS
-            self.multiplier = 1
+            self.time_multiplier = 1
         elif time == 200:
             bits_time = self.VAL_TIME_200_MS
-            self.multiplier = 2
+            self.time_multiplier = 2
         elif time == 100:
             bits_time = self.VAL_TIME_100_MS
-            self.multiplier = 4            
+            self.time_multiplier = 4            
         new_byte_time = bits_time & self.MASK_TCNTRL
 
         current_byte_config = self.readRegister(self.REG_CONFIG)
@@ -215,21 +222,21 @@ class TSL4531(TSL_LIGHT_X):
 
     def __getLux__(self):
         data_bytes = self.readRegisters(self.REG_DATA_LOW, 2)
-        return self.multiplier * (data_bytes[1] << 8 | data_bytes[0])
+        return self.time_multiplier * (data_bytes[1] << 8 | data_bytes[0])
 
 class TSL45311(TSL4531):
     def __init__(self, slave=0x39, time=400):
-        TSL4531.__init__(self, slave, time, "TSL45311")
+        TSL4531X.__init__(self, slave, time, "TSL45311")
 
 class TSL45313(TSL4531):
     def __init__(self, slave=0x39, time=400):
-        TSL4531.__init__(self, slave, time, "TSL45313")
+        TSL4531X.__init__(self, slave, time, "TSL45313")
 
 class TSL45315(TSL4531):
     def __init__(self, slave=0x29, time=400):
-        TSL4531.__init__(self, slave, time, "TSL45315")
+        TSL4531X.__init__(self, slave, time, "TSL45315")
 
 class TSL45317(TSL4531):
     def __init__(self, slave=0x29, time=400):
-        TSL4531.__init__(self, slave, time, "TSL45317")
+        TSL4531X.__init__(self, slave, time, "TSL45317")
 

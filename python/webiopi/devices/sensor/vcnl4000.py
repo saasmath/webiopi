@@ -51,7 +51,7 @@ class VCNL4000(I2C, Luminosity, Distance):
     MASK_PROX_READY      = 0b00100000
     MASK_AMB_READY       = 0b01000000
     
-    def __init__(self, slave=0b0010011, current=20, frequency=781, prox_threshold=10, prox_cycles=10, cal_cycles= 5, name="VCNL4000"):
+    def __init__(self, slave=0b0010011, current=20, frequency=781, prox_threshold=15, prox_cycles=10, cal_cycles= 5, name="VCNL4000"):
         I2C.__init__(self, toint(slave), name)
         self.setCurrent(toint(current))
         self.setFrequency(toint(frequency))
