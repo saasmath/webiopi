@@ -184,5 +184,6 @@ class PWM(DAC):
 
 from webiopi.devices.analog.ads1x1x import ADS1014, ADS1015, ADS1114, ADS1115
 from webiopi.devices.analog.mcp3x0x import MCP3004, MCP3008, MCP3204, MCP3208
+from webiopi.devices.analog.mcp4725 import MCP4725
 from webiopi.devices.analog.mcp492X import MCP4921, MCP4922
 from webiopi.devices.analog.pca9685 import PCA9685
