@@ -17,8 +17,8 @@ from webiopi.devices.spi import SPI
 from webiopi.devices.analog import ADC
 
 class MCP3X0X(SPI, ADC):
-    def __init__(self, chip, channelCount, resolution):
-        SPI.__init__(self, toint(chip), 0, 8, 10000, "MCP3%d0%d" % (resolution-10, channelCount))
+    def __init__(self, chip, channelCount, resolution, name):
+        SPI.__init__(self, toint(chip), 0, 8, 10000, name)
         ADC.__init__(self, channelCount, resolution)
         self.MSB_MASK = 2**(resolution-8) - 1
 
@@ -31,8 +31,8 @@ class MCP3X0X(SPI, ADC):
         return ((r[1] & self.MSB_MASK) << 8) | r[2]
     
 class MCP300X(MCP3X0X):
-    def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, channelCount, 10)
+    def __init__(self, chip, channelCount, name):
+        MCP3X0X.__init__(self, chip, channelCount, 10, name)
 
     def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
@@ -45,15 +45,15 @@ class MCP300X(MCP3X0X):
         
 class MCP3004(MCP300X):
     def __init__(self, chip=0):
-        MCP300X.__init__(self, chip, 4)
+        MCP300X.__init__(self, chip, 4, "MCP3004")
         
 class MCP3008(MCP300X):
     def __init__(self, chip=0):
-        MCP300X.__init__(self, chip, 8)
+        MCP300X.__init__(self, chip, 8, "MCP3008")
         
 class MCP320X(MCP3X0X):
-    def __init__(self, chip, channelCount):
-        MCP3X0X.__init__(self, chip, channelCount, 12)
+    def __init__(self, chip, channelCount, name):
+        MCP3X0X.__init__(self, chip, channelCount, 12, name)
 
     def __command__(self, channel, diff):
         d = [0x00, 0x00, 0x00]
@@ -66,9 +66,9 @@ class MCP320X(MCP3X0X):
     
 class MCP3204(MCP320X):
     def __init__(self, chip=0):
-        MCP320X.__init__(self, chip, 4)
+        MCP320X.__init__(self, chip, 4, "MCP3204")
         
 class MCP3208(MCP320X):
     def __init__(self, chip=0):
-        MCP320X.__init__(self, chip, 8)
+        MCP320X.__init__(self, chip, 8, "MCP3208")
         
