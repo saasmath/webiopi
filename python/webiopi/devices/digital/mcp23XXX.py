@@ -35,7 +35,7 @@ class MCP23XXX(GPIOPort):
         self.banks = int(self.channelCount / 8)
         
     def getAddress(self, register, channel=0):
-        return register * self.banks + int(channel / 8) 
+        return register * self.banks + int(channel / 8)
 
     def getChannel(self, register, channel):
         self.checkChannel(channel)
@@ -106,20 +106,21 @@ class MCP23018(MCP230XX):
         MCP230XX.__init__(self, slave, 16, "MCP23018")
 
 class MCP23SXX(MCP23XXX, SPI):
+    SLAVE = 0x20
+    
     WRITE = 0x00
     READ  = 0x01
     
     def __init__(self, chip, slave, channelCount, name):
         SPI.__init__(self, toint(chip), 0, 8, 10000, name)
         MCP23XXX.__init__(self, channelCount)
-        self.slave = 0x20
+        self.slave = self.SLAVE
         slave = toint(slave)
-        if self.slave != slave:
-            addr   = self.getAddress(self.IOCON)
-            iocon  = self.readRegister(addr)
-            iocon |= 0x08 # Hardware Address Enable
-            self.writeRegister(addr, iocon)
-            self.slave = slave
+        addr   = self.getAddress(self.IOCON)
+        iocon  = self.readRegister(addr)
+        iocon |= 0x08 # Hardware Address Enable
+        self.writeRegister(addr, iocon)
+        self.slave = slave
     
     def __str__(self):
         return "%s(chip=%d, slave=0x%02X)" % (self.name, self.chip, self.slave)
