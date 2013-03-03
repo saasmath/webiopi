@@ -137,5 +137,6 @@ class GPIOPort(Port):
         self.__writeInteger__(value)
         return self.readInteger()
     
-from webiopi.devices.digital.mcp230XX import MCP23008, MCP23009, MCP23017, MCP23018
+from webiopi.devices.digital.mcp23XXX import MCP23008, MCP23009, MCP23017, MCP23018
+from webiopi.devices.digital.mcp23XXX import MCP23S08, MCP23S09, MCP23S17, MCP23S18
 from webiopi.devices.digital.pcf8574 import PCF8574, PCF8574A

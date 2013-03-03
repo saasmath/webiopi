@@ -14,9 +14,10 @@
 
 from webiopi.utils import *
 from webiopi.devices.i2c import I2C
+from webiopi.devices.spi import SPI
 from webiopi.devices.digital import GPIOPort
 
-class MCP230XX(GPIOPort, I2C):
+class MCP23XXX(GPIOPort):
     IODIR   = 0x00
     IPOL    = 0x01
     GPINTEN = 0x02
@@ -29,16 +30,16 @@ class MCP230XX(GPIOPort, I2C):
     GPIO    = 0x09
     OLAT    = 0x0A
     
-    BANK0_IOCON = 0x0A
-    
-    def __init__(self, slave, channelCount, name="MCP230XX"):
-        I2C.__init__(self, toint(slave), name)
+    def __init__(self, channelCount):
         GPIOPort.__init__(self, channelCount)
         self.banks = int(self.channelCount / 8)
         
+    def getAddress(self, register, channel=0):
+        return register * self.banks + int(channel / 8) 
+
     def getChannel(self, register, channel):
         self.checkChannel(channel)
-        addr = register * self.banks + int(channel / 8) 
+        addr = self.getAddress(register, channel) 
         mask = 1 << (channel % 8)
         return (addr, mask)
     
@@ -83,6 +84,11 @@ class MCP230XX(GPIOPort, I2C):
         for i in range(self.banks):
             self.writeRegister(self.banks*self.GPIO+i,  (value >> 8*i) & 0xFF)
 
+class MCP230XX(MCP23XXX, I2C):
+    def __init__(self, slave, channelCount, name):
+        I2C.__init__(self, toint(slave), name)
+        MCP23XXX.__init__(self, channelCount)
+
 class MCP23008(MCP230XX):
     def __init__(self, slave=0x20):
         MCP230XX.__init__(self, slave, 8, "MCP23008")
@@ -98,4 +104,46 @@ class MCP23017(MCP230XX):
 class MCP23018(MCP230XX):
     def __init__(self, slave=0x20):
         MCP230XX.__init__(self, slave, 16, "MCP23018")
+
+class MCP23SXX(MCP23XXX, SPI):
+    WRITE = 0x00
+    READ  = 0x01
+    
+    def __init__(self, chip, slave, channelCount, name):
+        SPI.__init__(self, toint(chip), 0, 8, 10000, name)
+        MCP23XXX.__init__(self, channelCount)
+        self.slave = 0x20
+        slave = toint(slave)
+        if self.slave != slave:
+            addr   = self.getAddress(self.IOCON)
+            iocon  = self.readRegister(addr)
+            iocon |= 0x08 # Hardware Address Enable
+            self.writeRegister(addr, iocon)
+            self.slave = slave
+    
+    def __str__(self):
+        return "%s(chip=%d, slave=0x%02X)" % (self.name, self.chip, self.slave)
+
+    def readRegister(self, addr):
+        d = self.xfer([(self.slave << 1) | self.READ, addr, 0x00])
+        return d[2]
+
+    def writeRegister(self, addr, value):
+        self.xfer([(self.slave << 1) | self.WRITE, addr, value])
+    
+class MCP23S08(MCP23SXX):
+    def __init__(self, chip=0, slave=0x20):
+        MCP23SXX.__init__(self, chip, slave, 8, "MCP23S08")
+
+class MCP23S09(MCP23SXX):
+    def __init__(self, chip=0, slave=0x20):
+        MCP23SXX.__init__(self, chip, slave, 8, "MCP23S09")
+
+class MCP23S17(MCP23SXX):
+    def __init__(self, chip=0, slave=0x20):
+        MCP23SXX.__init__(self, chip, slave, 16, "MCP23S17")
+
+class MCP23S18(MCP23SXX):
+    def __init__(self, chip=0, slave=0x20):
+        MCP23SXX.__init__(self, chip, slave, 16, "MCP23S18")
 
