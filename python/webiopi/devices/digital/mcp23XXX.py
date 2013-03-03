@@ -112,7 +112,7 @@ class MCP23SXX(MCP23XXX, SPI):
     READ  = 0x01
     
     def __init__(self, chip, slave, channelCount, name):
-        SPI.__init__(self, toint(chip), 0, 8, 10000, name)
+        SPI.__init__(self, toint(chip), 0, 8, 10000000, name)
         MCP23XXX.__init__(self, channelCount)
         self.slave = self.SLAVE
         slave = toint(slave)
