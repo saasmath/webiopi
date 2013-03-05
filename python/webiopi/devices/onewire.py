@@ -16,7 +16,9 @@ import os
 from webiopi.devices.bus import *
 
 EXTRAS = {
-    "TEMP": {"loaded": False, "module": "w1-therm"}
+    "TEMP": {"loaded": False, "module": "w1-therm"},
+    "2408": {"loaded": False, "module": "w1_ds2408"}
+
 }
 
 def loadExtraModule(type):
