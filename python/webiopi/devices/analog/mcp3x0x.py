@@ -19,13 +19,13 @@ from webiopi.devices.analog import ADC
 class MCP3X0X(SPI, ADC):
     def __init__(self, chip, channelCount, resolution, name):
         SPI.__init__(self, toint(chip), 0, 8, 10000, name)
-        ADC.__init__(self, channelCount, resolution)
+        ADC.__init__(self, channelCount, resolution, 3.3)
         self.MSB_MASK = 2**(resolution-8) - 1
 
     def __str__(self):
         return "%s(chip=%d)" % (self.name, self.chip)
 
-    def __readInteger__(self, channel, diff):
+    def __analogRead__(self, channel, diff):
         data = self.__command__(channel, diff)
         r = self.xfer(data)
         return ((r[1] & self.MSB_MASK) << 8) | r[2]

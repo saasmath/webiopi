@@ -673,7 +673,7 @@ function GPIOPort(name) {
 	this.refreshTime = 1000;
 
 	var port = this;
-	$.get(this.url + "/channel-count", function(data) {
+	$.get(this.url + "/count", function(data) {
 		port.channelCount = parseInt(data);
 	});
 
@@ -799,18 +799,18 @@ GPIOPort.prototype.refreshUI = function() {
 
 function ADC(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/analog";
 	this.channelCount = 0;
 	this.maxInteger = 0;
 	this.resolution = 0;
 	this.refreshTime = 1000;
 	
 	var adc = this;
-	$.get(this.url + "/channel-count", function(data) {
+	$.get(this.url + "/count", function(data) {
 		adc.channelCount = parseInt(data);
 	});
 
-	$.get(this.url + "/max-integer", function(data) {
+	$.get(this.url + "/max", function(data) {
 		adc.maxInteger = parseInt(data);
 	});
 
@@ -905,17 +905,17 @@ ADC.prototype.refreshUI = function () {
 
 function DAC(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/analog";
 	this.channelCount = 0;
 	this.maxInteger = 0;
 	this.resolution = 0;
 	
 	var dac = this;
-	$.get(this.url + "/channel-count", function(data) {
+	$.get(this.url + "/count", function(data) {
 		dac.channelCount = parseInt(data);
 	});
 
-	$.get(this.url + "/max-integer", function(data) {
+	$.get(this.url + "/max", function(data) {
 		dac.maxInteger = parseInt(data);
 	});
 
@@ -1023,18 +1023,18 @@ DAC.prototype.refreshUI = function() {
 
 function PWM(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/pwm";
 	this.channelCount = 0;
 	this.maxInteger = 0;
 	this.resolution = 0;
 	this.refreshTime = 1000;
 	
 	var pwm = this;
-	$.get(this.url + "/channel-count", function(data) {
+	$.get(this.url + "/count", function(data) {
 		pwm.channelCount = parseInt(data);
 	});
 
-	$.get(this.url + "/max-integer", function(data) {
+	$.get(this.url + "/max", function(data) {
 		pwm.maxInteger = parseInt(data);
 	});
 
@@ -1192,7 +1192,7 @@ PWM.prototype.refreshUI = function() {
 
 function Temperature(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/sensor";
 	this.refreshTime = 5000;
 }
 
@@ -1230,7 +1230,7 @@ Temperature.prototype.refreshUI = function() {
 
 function Pressure(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/sensor";
 	this.refreshTime = 5000;
 }
 
@@ -1269,7 +1269,7 @@ Pressure.prototype.refreshUI = function() {
 
 function Luminosity(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/sensor";
 	this.refreshTime = 1000;
 }
 
@@ -1302,7 +1302,7 @@ Luminosity.prototype.refreshUI = function() {
 
 function Distance(name) {
 	this.name = name;
-	this.url = "/devices/" + name;
+	this.url = "/devices/" + name + "/sensor";
 	this.refreshTime = 1000;
 }
 

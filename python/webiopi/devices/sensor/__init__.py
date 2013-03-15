@@ -21,12 +21,12 @@ class Pressure():
     def __getPascal__(self):
         raise NotImplementedError
     
-    @request("GET", "pressure/pa")
+    @request("GET", "sensor/pressure/pa")
     @response("%d")
     def getPascal(self):
         return self.__getPascal__()
     
-    @request("GET", "pressure/hpa")
+    @request("GET", "sensor/pressure/hpa")
     @response("%.2f")
     def getHectoPascal(self):
         return float(self.getPascal()) / 100.0
@@ -47,12 +47,12 @@ class Temperature():
     def Fahrenheit2Celsius(self):
         return (self.getFahrenheit() - 32)/1.8
 
-    @request("GET", "temperature/c")
+    @request("GET", "sensor/temperature/c")
     @response("%.02f")
     def getCelsius(self):
         return self.__getCelsius__()
     
-    @request("GET", "temperature/f")
+    @request("GET", "sensor/temperature/f")
     @response("%.02f")
     def getFahrenheit(self):
         return self.__getFahrenheit__()
@@ -64,7 +64,7 @@ class Luminosity():
     def __getLux__(self):
         raise NotImplementedError
 
-    @request("GET", "luminosity/lx")
+    @request("GET", "sensor/luminosity/lx")
     @response("%.02f")
     def getLux(self):
         return self.__getLux__()
@@ -76,32 +76,32 @@ class Distance():
     def __getMillimeter__(self):
         raise NotImplementedError
 
-    @request("GET", "distance/mm")
+    @request("GET", "sensor/distance/mm")
     @response("%.02f")
     def getMillimeter(self):
         return self.__getMillimeter__()
     
-    @request("GET", "distance/cm")
+    @request("GET", "sensor/distance/cm")
     @response("%.02f")
     def getCentimeter(self):
         return self.getMillimeter() / 10
     
-    @request("GET", "distance/m")
+    @request("GET", "sensor/distance/m")
     @response("%.02f")
     def getMeter(self):
         return self.getMillimeter() / 1000
     
-    @request("GET", "distance/in")
+    @request("GET", "sensor/distance/in")
     @response("%.02f")
     def getInch(self):
         return self.getMillimeter() / 0.254
     
-    @request("GET", "distance/ft")
+    @request("GET", "sensor/distance/ft")
     @response("%.02f")
     def getFoot(self):
         return self.getInch() / 12
     
-    @request("GET", "distance/yd")
+    @request("GET", "sensor/distance/yd")
     @response("%.02f")
     def getYard(self):
         return self.getInch() / 36

@@ -32,23 +32,23 @@ class MCP23XXX(GPIOPort):
     
     def __init__(self, channelCount):
         GPIOPort.__init__(self, channelCount)
-        self.banks = int(self.channelCount / 8)
+        self.banks = int(channelCount / 8)
         
     def getAddress(self, register, channel=0):
         return register * self.banks + int(channel / 8)
 
     def getChannel(self, register, channel):
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         addr = self.getAddress(register, channel) 
         mask = 1 << (channel % 8)
         return (addr, mask)
     
-    def __input__(self, channel):
+    def __digitalRead__(self, channel):
         (addr, mask) = self.getChannel(self.GPIO, channel) 
         d = self.readRegister(addr)
         return (d & mask) == mask
 
-    def __output__(self, channel, value):
+    def __digitalWrite__(self, channel, value):
         (addr, mask) = self.getChannel(self.GPIO, channel) 
         d = self.readRegister(addr)
         if value:
@@ -74,13 +74,13 @@ class MCP23XXX(GPIOPort):
             d &= ~mask
         self.writeRegister(addr, d)
 
-    def __readInteger__(self):
+    def __portRead__(self):
         value = 0
         for i in range(self.banks):
             value |= self.readRegister(self.banks*self.GPIO+i) << 8*i
         return value
     
-    def __writeInteger__(self, value):
+    def __portWrite__(self, value):
         for i in range(self.banks):
             self.writeRegister(self.banks*self.GPIO+i,  (value >> 8*i) & 0xFF)
 

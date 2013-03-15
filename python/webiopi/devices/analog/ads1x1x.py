@@ -31,22 +31,21 @@ class ADS1X1X(ADC, I2C):
     
     def __init__(self, slave, channelCount, resolution, name):
         I2C.__init__(self, toint(slave), name)
-        ADC.__init__(self, channelCount, resolution)
-        self.MAX = 2**(resolution-1)
+        ADC.__init__(self, channelCount, resolution, 4.096)
+        self._analogMax = 2**(resolution-1)
         config = self.readRegisters(self.CONFIG, 2)
         
         mode = 0 # continuous
         config[0] &= ~self.CONFIG_MODE_MASK
         config[0] |= mode
         
-        self.VREF = 4.096
         gain = 0x1 # FS = +/- 4.096V
         config[0] &= ~self.CONFIG_GAIN_MASK
         config[0] |= gain << 1
         
         self.writeRegisters(self.CONFIG, config)
         
-    def __readInteger__(self, channel, diff=False):
+    def __analogRead__(self, channel, diff=False):
         config = self.readRegisters(self.CONFIG, 2)
         config[0] &= ~self.CONFIG_CHANNEL_MASK
         if diff:
@@ -56,8 +55,8 @@ class ADS1X1X(ADC, I2C):
         self.writeRegisters(self.CONFIG, config)
         sleep(0.001)
         d = self.readRegisters(self.VALUE, 2)
-        value = (d[0] << 8 | d[1]) >> (16-self.resolution)
-        return signInteger(value, self.resolution)
+        value = (d[0] << 8 | d[1]) >> (16-self._analogResolution)
+        return signInteger(value, self._analogResolution)
 
 
 class ADS1014(ADS1X1X):

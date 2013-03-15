@@ -30,8 +30,8 @@ class PCF8574(I2C, GPIOPort):
         
         I2C.__init__(self, slave, name)
         GPIOPort.__init__(self, 8)
-        self.writeInteger(0xFF)
-        self.readInteger()
+        self.portWrite(0xFF)
+        self.portRead()
         
     def __getFunction__(self, channel):
         return self.FUNCTIONS[channel]
@@ -41,15 +41,15 @@ class PCF8574(I2C, GPIOPort):
             raise ValueError("Requested function not supported")
         self.FUNCTIONS[channel] = value
         
-    def __input__(self, channel):
+    def __digitalRead__(self, channel):
         mask = 1 << channel
         d = self.readByte()
         return (d & mask) == mask 
 
-    def __readInteger__(self):
+    def __portRead__(self):
         return self.readByte()
     
-    def __output__(self, channel, value):
+    def __digitalWrite__(self, channel, value):
         mask = 1 << channel
         b = self.readByte()
         if value:
@@ -58,7 +58,7 @@ class PCF8574(I2C, GPIOPort):
             b &= ~mask
         self.writeByte(b)
 
-    def __writeInteger__(self, value):
+    def __portWrite__(self, value):
         self.writeByte(value)
         
 class PCF8574A(PCF8574):

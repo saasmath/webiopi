@@ -42,14 +42,14 @@ class PCA9685(PWM, I2C):
     def getChannelAddress(self, channel):
         return int(channel * 4 + self.PWM_BASE) 
 
-    def __readInteger__(self, channel, diff=False):
+    def __pwmRead__(self, channel):
         addr = self.getChannelAddress(channel)
         d = self.readRegisters(addr, 4)
         start = d[1] << 8 | d[0]
         end   = d[3] << 8 | d[2]
         return end-start
     
-    def __writeInteger__(self, channel, value):
+    def __pwmWrite__(self, channel, value):
         addr = self.getChannelAddress(channel)
         d = bytearray(4)
         d[0] = 0

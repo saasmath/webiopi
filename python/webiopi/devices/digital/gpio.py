@@ -38,11 +38,11 @@ class NativeGPIO(GPIOPort):
         if not self.post_value:
             raise ValueError("POSTing value to native GPIO not allowed")
     
-    def __input__(self, channel):
+    def __digitalRead__(self, channel):
         self.checkChannelExported(channel)
         return GPIO.input(channel)
     
-    def __output__(self, channel, value):
+    def __digitalWrite__(self, channel, value):
         self.checkChannelExported(channel)
         self.checkPostingValueAllowed()
         GPIO.output(channel, value)
@@ -56,13 +56,13 @@ class NativeGPIO(GPIOPort):
         self.checkPostingFunctionAllowed()
         GPIO.setFunction(channel, value)
         
-    def __readInteger__(self):
+    def __portRead__(self):
         value = 0
         for i in self.export:
             value |= GPIO.input(i) << i
         return value 
             
-    def __writeInteger__(self, value):
+    def __portWrite__(self, value):
         if len(self.export) < 54:
             for i in self.export:
                 if GPIO.getFunction(i) == GPIO.OUT:

@@ -35,16 +35,14 @@ class DS2408(OneWire, GPIOPort):
         if value == GPIO.IN:
             self.__output__(channel, 0)
 
-    def __input__(self, channel):
-
+    def __digitalRead__(self, channel):
         mask = 1 << channel
         d = self.readState()
         if d != None:
             return (d & mask) == mask
 
         
-    def __output__(self, channel, value):
-
+    def __digitalWrite__(self, channel, value):
         mask = 1 << channel
         b = self.readByte()
         if value:
@@ -53,10 +51,10 @@ class DS2408(OneWire, GPIOPort):
             b &= ~mask
         self.writeByte(b)
         
-    def __writeInteger__(self, value):
+    def __portWrite__(self, value):
         self.writeByte(value)
         
-    def __readInteger__(self):
+    def __portRead__(self):
         return self.readByte()
         
     def readState(self):

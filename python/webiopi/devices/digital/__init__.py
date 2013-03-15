@@ -15,29 +15,24 @@
 from webiopi.utils import *
 from webiopi.protocols.rest import *
 
-class Port():
+class GPIOPort():
     def __init__(self, channelCount):
-        self.channelCount = channelCount
-        self.MAX = 1
+        self.digitalChannelCount = channelCount
         
-    def checkChannel(self, channel):
-        if not channel in range(self.channelCount):
-            raise ValueError("Channel %d out of range [%d..%d]" % (channel, 0, self.channelCount-1))
+    def checkDigitalChannel(self, channel):
+        if not 0 <= channel < self.digitalChannelCount:
+            raise ValueError("Channel %d out of range [%d..%d]" % (channel, 0, self.digitalChannelCount-1))
 
-    def checkValue(self, value):
-        if not value in range(self.MAX+1):
-            raise ValueError("Value %d out of range [%d..%d]" % (value, 0, self.MAX))
+    def checkDigitalValue(self, value):
+        if not (value == 0 or value == 1):
+            raise ValueError("Value %d not in {0, 1}")
     
 
-    @request("GET", "channel-count")
+    @request("GET", "count")
     @response("%d")
-    def getChannelCount(self):
-        return self.channelCount
+    def digitalCount(self):
+        return self.digitalChannelCount
 
-class GPIOPort(Port):
-    def __init__(self, channelCount):
-        Port.__init__(self, channelCount)
-    
     def __family__(self):
         return "GPIOPort"
     
@@ -47,20 +42,20 @@ class GPIOPort(Port):
     def __setFunction__(self, channel, func):
         raise NotImplementedError
     
-    def __input__(self, chanel):
+    def __digitalRead__(self, chanel):
         raise NotImplementedError
         
-    def __readInteger__(self):
+    def __portRead__(self):
         raise NotImplementedError
     
-    def __output__(self, chanel, value):
+    def __digitalWrite__(self, chanel, value):
         raise NotImplementedError
         
-    def __writeInteger__(self, value):
+    def __portWrite__(self, value):
         raise NotImplementedError
     
     def getFunction(self, channel):
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         return self.__getFunction__(channel)  
     
     @request("GET", "%(channel)d/function")
@@ -76,7 +71,7 @@ class GPIOPort(Port):
             return "UNKNOWN"
         
     def setFunction(self, channel, value):
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         self.__setFunction__(channel, value)
         return self.getFunction(channel)
 
@@ -95,13 +90,13 @@ class GPIOPort(Port):
 
     @request("GET", "%(channel)d/value")
     @response("%d")
-    def input(self, channel):
-        self.checkChannel(channel)
-        return self.__input__(channel)
+    def digitalRead(self, channel):
+        self.checkDigitalChannel(channel)
+        return self.__digitalRead__(channel)
 
     @request("GET", "*")
     @response(contentType=M_JSON)
-    def readAll(self, compact=False):
+    def wildcard(self, compact=False):
         if compact:
             f = "f"
             v = "v"
@@ -110,32 +105,32 @@ class GPIOPort(Port):
             v = "value"
             
         values = {}
-        for i in range(self.channelCount):
+        for i in range(self.digitalChannelCount):
             if compact:
                 func = self.getFunction(i)
             else:
                 func = self.getFunctionString(i)
-            values[i] = {f: func, v: int(self.input(i))}
+            values[i] = {f: func, v: int(self.digitalRead(i))}
         return jsonDumps(values)
 
-    @request("GET", "integer")
+    @request("GET", "*/integer")
     @response("%d")
-    def readInteger(self):
-        return self.__readInteger__()
+    def portRead(self):
+        return self.__portRead__()
     
     @request("POST", "%(channel)d/value/%(value)d")
     @response("%d")
-    def output(self, channel, value):
-        self.checkChannel(channel)
-        self.checkValue(value)
-        self.__output__(channel, value)
-        return self.input(channel)  
+    def digitalWrite(self, channel, value):
+        self.checkDigitalChannel(channel)
+        self.checkDigitalValue(value)
+        self.__digitalWrite__(channel, value)
+        return self.digitalRead(channel)  
 
-    @request("POST", "integer/%(value)d")
+    @request("POST", "*/integer/%(value)d")
     @response("%d")
-    def writeInteger(self, value):
-        self.__writeInteger__(value)
-        return self.readInteger()
+    def portWrite(self, value):
+        self.__portWrite__(value)
+        return self.portRead()
     
 from webiopi.devices.digital.mcp23XXX import MCP23008, MCP23009, MCP23017, MCP23018
 from webiopi.devices.digital.mcp23XXX import MCP23S08, MCP23S09, MCP23S17, MCP23S18
