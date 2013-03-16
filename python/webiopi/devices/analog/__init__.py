@@ -210,15 +210,27 @@ class PWM():
         self.reverse[channel] = value
         return value
     
-    @request("GET", "pwm/%(channel)d/angle")
-    @response("%.2f")
-    def pwmReadAngle(self, channel):
-        f = self.pwmReadFloat(channel)
+    def RatioToAngle(self, value):
+        f = value
         f *= self.period
         f -= self.servo_neutral
         f *= self.servo_travel_angle
         f /= self.servo_travel_time
+        return f
 
+    def AngleToRatio(self, value):
+        f = value
+        f *= self.servo_travel_time
+        f /= self.servo_travel_angle
+        f += self.servo_neutral
+        f /= self.period
+        return f
+    
+    @request("GET", "pwm/%(channel)d/angle")
+    @response("%.2f")
+    def pwmReadAngle(self, channel):
+        f = self.pwmReadFloat(channel)
+        f = self.RatioToAngle(f)
         if self.reverse[channel]:
             f = -f
         else:
@@ -232,12 +244,7 @@ class PWM():
             f = -value
         else:
             f = value
-        
-        f *= self.servo_travel_time
-        f /= self.servo_travel_angle
-        f += self.servo_neutral
-        f /= self.period
-        
+        f = self.AngleToRatio(f)
         self.pwmWriteFloat(channel, f)
         return self.pwmReadAngle(channel)
 
@@ -246,9 +253,10 @@ class PWM():
     def pwmWildcard(self):
         values = {}
         for i in range(self._pwmCount):
+            val = self.pwmReadFloat(i)
             values[i] = {}
-            values[i]["float"] = float("%.2f" % self.pwmReadFloat(i))
-            values[i]["angle"] = float("%.2f" % self.pwmReadAngle(i))
+            values[i]["float"] = float("%.2f" % val)
+            values[i]["angle"] = float("%.2f" % self.RatioToAngle(val))
         return values
     
 

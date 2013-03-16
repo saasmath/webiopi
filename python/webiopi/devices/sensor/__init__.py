@@ -41,11 +41,15 @@ class Temperature():
     def __getFahrenheit__(self):
         raise NotImplementedError
     
-    def Celsius2Fahrenheit(self):
-        return 1.8*self.getCelsius() + 32
+    def Celsius2Fahrenheit(self, value=None):
+        if value == None:
+            value = self.getCelsius()
+        return 1.8*value + 32
 
-    def Fahrenheit2Celsius(self):
-        return (self.getFahrenheit() - 32)/1.8
+    def Fahrenheit2Celsius(self, value=None):
+        if value == None:
+            value = self.getFahrenheit()
+        return (value - 32)/1.8
 
     @request("GET", "sensor/temperature/c")
     @response("%.02f")
