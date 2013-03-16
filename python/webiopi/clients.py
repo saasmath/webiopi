@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import LOGGER, PYTHON_MAJOR
+from webiopi.utils import LOGGER, PYTHON_MAJOR, encodeCredentials
 from webiopi.protocols.coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
 
 if PYTHON_MAJOR >= 3:
@@ -23,8 +23,11 @@ else:
 class PiMixedClient():
     def __init__(self, host, port=8000, coap=5683):
         self.host = host
-        self.coapport = coap
-        self.coapclient = COAPClient()
+        if coap > 0:
+            self.coapport = coap
+            self.coapclient = COAPClient()
+        else:
+            self.coapclient = None
         if port > 0:
             self.httpclient = httplib.HTTPConnection(host, port)
         else:
@@ -32,9 +35,13 @@ class PiMixedClient():
         self.forceHttp = False
         self.coapfailure = 0
         self.maxfailure = 2
+        self.auth= None;
+    
+    def setCredentials(self, login, password):
+        self.auth = "Basic " + encodeCredentials(login, password)
         
     def sendRequest(self, method, uri):
-        if not self.forceHttp or self.httpclient == None:
+        if self.coapclient != None and (not (self.forceHttp or self.httpclient == None)):
             if method == "GET":
                 response = self.coapclient.sendRequest(COAPGet("coap://%s:%d%s" % (self.host, self.coapport, uri)))
             elif method == "POST":
@@ -51,12 +58,19 @@ class PiMixedClient():
                     print("Too many CoAP failure forcing HTTP")
             else:
                 return None
-
-        self.httpclient.request(method, uri)
+        headers = {}
+        if self.auth != None:
+            headers["Authorization"] = self.auth
+        
+        self.httpclient.request(method, uri, None, headers)
         response = self.httpclient.getresponse()
-        if response:
+        if response.status == 200:
             data = response.read()
             return data
+        elif response.status == 401:
+            raise Exception("Missing credentials")
+        else:
+            raise Exception("Unhandled HTTP Response %d %s" % (response.status, response.reason))
         return None
 
 class PiHttpClient(PiMixedClient):

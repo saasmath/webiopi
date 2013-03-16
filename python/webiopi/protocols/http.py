@@ -105,9 +105,9 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         auth = authHeader.replace("Basic ", "")
         if PYTHON_MAJOR >= 3:
-            hash = hashlib.sha256(auth.encode()).hexdigest()
+            hash = encrypt(auth.encode())
         else:
-            hash = hashlib.sha256(auth).hexdigest()
+            hash = encrypt(auth)
             
         if hash == self.server.auth:
             return True

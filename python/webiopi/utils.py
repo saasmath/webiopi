@@ -174,13 +174,19 @@ def loadScript(name, source, handler = None):
     if hasattr(script, "loop"):
         runLoop(script.loop, True)
 
-def encodeAuth(login, password):
+def encodeCredentials(login, password):
     abcd = "%s:%s" % (login, password)
     if PYTHON_MAJOR >= 3:
         b = base64.b64encode(abcd.encode())
     else:
         b = base64.b64encode(abcd)
-    return hashlib.sha256(b).hexdigest()
+    return b
+
+def encrypt(value):
+    return hashlib.sha256(value).hexdigest()
+
+def encryptCredentials(login, password):
+    return encrypt(encodeCredentials(login, password))
 
 def getLocalIP():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
