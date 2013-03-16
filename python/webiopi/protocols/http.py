@@ -181,6 +181,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(data)
         
     def processRequest(self):
+        self.request.settimeout(None)
         if not self.checkAuthentication():
             return self.requestAuthentication()
         
