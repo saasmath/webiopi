@@ -197,13 +197,14 @@ class RESTHandler():
         response = None
         contentType = None
         if result != None:
-            if hasattr(func, "format"):
-                response = func.format % result
-            else:
-                response = result
-                
             if hasattr(func, "contentType"):
                 contentType = func.contentType
+                if contentType == M_JSON:
+                    response = jsonDumps(result)
+                else:
+                    response = func.format % result
+            else:
+                response = result
         
         return (200, response, contentType)
         

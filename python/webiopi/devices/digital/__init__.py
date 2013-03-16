@@ -111,7 +111,7 @@ class GPIOPort():
             else:
                 func = self.getFunctionString(i)
             values[i] = {f: func, v: int(self.digitalRead(i))}
-        return jsonDumps(values)
+        return values
 
     @request("GET", "*/integer")
     @response("%d")

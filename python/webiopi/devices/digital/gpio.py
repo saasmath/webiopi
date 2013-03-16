@@ -72,7 +72,7 @@ class NativeGPIO(GPIOPort):
             
     @request("GET", "*")
     @response(contentType=M_JSON)
-    def readAll(self, compact=False):
+    def wildcard(self, compact=False):
         if compact:
             f = "f"
             v = "v"
@@ -87,7 +87,7 @@ class NativeGPIO(GPIOPort):
             else:
                 func = GPIO.getFunctionString(i)
             values[i] = {f: func, v: int(GPIO.input(i))}
-        return jsonDumps(values)
+        return values
 
     
     @request("GET", "%(channel)d/pulse", "%s")

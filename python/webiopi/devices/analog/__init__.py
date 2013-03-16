@@ -80,7 +80,7 @@ class ADC():
         values = {}
         for i in range(self._analogCount):
             values[i] = self.analogRead(i)
-        return jsonDumps(values)
+        return values
             
     @request("GET", "analog/*/float")
     @response(contentType=M_JSON)
@@ -88,7 +88,7 @@ class ADC():
         values = {}
         for i in range(self._analogCount):
             values[i] = float("%.2f" % self.analogReadFloat(i))
-        return jsonDumps(values)
+        return values
     
     @request("GET", "analog/*/volt")
     @response(contentType=M_JSON)
@@ -96,7 +96,7 @@ class ADC():
         values = {}
         for i in range(self._analogCount):
             values[i] = float("%.2f" % self.analogReadVolt(i))
-        return jsonDumps(values)
+        return values
     
 class DAC(ADC):
     def __init__(self, channelCount, resolution, vref):
@@ -249,8 +249,7 @@ class PWM():
             values[i] = {}
             values[i]["float"] = float("%.2f" % self.pwmReadFloat(i))
             values[i]["angle"] = float("%.2f" % self.pwmReadAngle(i))
-            
-        return jsonDumps(values)
+        return values
     
 
 from webiopi.devices.analog.ads1x1x import ADS1014, ADS1015, ADS1114, ADS1115
