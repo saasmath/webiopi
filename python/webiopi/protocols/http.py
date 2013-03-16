@@ -62,6 +62,11 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
         self.running = True
         self.start()
             
+    def get_request(self):
+        sock, addr = self.socket.accept()
+        sock.settimeout(10.0)
+        return (sock, addr)
+
     def run(self):
         info("HTTP Server binded on http://%s:%s%s" % (self.host, self.port, self.context))
         try:
