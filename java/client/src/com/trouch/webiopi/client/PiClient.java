@@ -14,12 +14,23 @@
 
 package com.trouch.webiopi.client;
 
+import org.apache.commons.codec.binary.Base64;
+
 public abstract class PiClient {
 	
 	protected String urlBase;
+	protected String auth;
+
+	public static String encodeCredentials(String login, String password) {
+		return Base64.encodeBase64String((login + ":" + password).getBytes());
+	}
 
 	public PiClient(String protocol, String host, int port) {
 		this.urlBase = protocol + "://" + host + ":" + port; 
+	}
+	
+	public void setCredentials(String login, String password) {
+		this.auth = "Basic " + encodeCredentials(login, password);
 	}
 	
 	public abstract String sendRequest(String method, String path) throws Exception;

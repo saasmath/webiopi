@@ -23,7 +23,7 @@ public class GPIO extends Device {
 	public final static String IN = "IN";
 
 	public GPIO(PiClient client, String deviceName) {
-		super(client, deviceName);
+		super(client, deviceName, null);
 	}
 	
 	public String getFunction(int channel) {

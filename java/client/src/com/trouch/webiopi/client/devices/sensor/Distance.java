@@ -20,7 +20,7 @@ import com.trouch.webiopi.client.devices.Device;
 public class Distance extends Device {
 
 	public Distance(PiClient client, String deviceName) {
-		super(client, deviceName);
+		super(client, deviceName, "sensor");
 	}
 
 	public float getMillimeter() {

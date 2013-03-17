@@ -19,7 +19,7 @@ import com.trouch.webiopi.client.PiClient;
 public class PWM extends DAC {
 
 	public PWM(PiClient client, String deviceName) {
-		super(client, deviceName);
+		super(client, deviceName, "pwm");
 	}
 
 	public float readAngle(int channel) {

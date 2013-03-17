@@ -38,6 +38,9 @@ public class PiHttpClient extends PiClient {
 			URL url = new URL(this.urlBase + path);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(method);
+			if (this.auth != null) {
+				connection.setRequestProperty("Authorization", this.auth);
+			}
 
 			// read the output from the server
 			reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

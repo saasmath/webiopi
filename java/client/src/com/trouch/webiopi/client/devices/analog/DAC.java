@@ -22,6 +22,10 @@ public class DAC extends ADC {
 		super(client, deviceName);
 	}
 
+	public DAC(PiClient client, String deviceName, String type) {
+		super(client, deviceName, type);
+	}
+
 	public float writeFloat(int channel, float value) {
 		return Float.parseFloat(this.sendRequest("POST", "/" + channel + "/float/" + value));
 	}

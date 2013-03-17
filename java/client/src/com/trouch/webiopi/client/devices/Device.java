@@ -21,9 +21,14 @@ public class Device {
 	private PiClient client;
 	protected String path;
 
-	public Device(PiClient client, String deviceName) {
+	public Device(PiClient client, String deviceName, String type) {
 		this.client = client;
-		this.path = "/devices/" + deviceName;
+		if (type != null) {
+			this.path = "/devices/" + deviceName + "/" + type;
+		}
+		else {
+			this.path = "/devices/" + deviceName;
+		}
 	}
 	
 	public String sendRequest(String method, String subPath) {

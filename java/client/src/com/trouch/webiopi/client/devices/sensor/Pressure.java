@@ -20,7 +20,7 @@ import com.trouch.webiopi.client.devices.Device;
 public class Pressure extends Device {
 
 	public Pressure(PiClient client, String deviceName) {
-		super(client, deviceName);
+		super(client, deviceName, "sensor");
 	}
 
 	public float getHectoPascal() {

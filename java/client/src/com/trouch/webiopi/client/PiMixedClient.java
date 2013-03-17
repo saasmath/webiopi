@@ -23,16 +23,22 @@ public class PiMixedClient extends PiClient {
 	
 	public PiMixedClient(String host) {
 		super("", "", 0);
-		this.http = new PiHttpClient(host);
-		this.coap = new PiCoapClient(host);
+		http = new PiHttpClient(host);
+		coap = new PiCoapClient(host);
 	}
 	
 	public PiMixedClient(String host, int httpPort, int coapPort) {
 		super("", "", 0);
-		this.http = new PiHttpClient(host, httpPort);
-		this.coap = new PiCoapClient(host, coapPort);
+		http = new PiHttpClient(host, httpPort);
+		coap = new PiCoapClient(host, coapPort);
 	}
 	
+	@Override
+	public void setCredentials(String login, String password) {
+		http.setCredentials(login, password);
+		coap.setCredentials(login, password);
+	}
+
 	@Override
 	public String sendRequest(String method, String path) throws Exception {
 		if (tries < maxTries) {

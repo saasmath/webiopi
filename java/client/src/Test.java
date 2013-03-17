@@ -14,11 +14,13 @@ public class Test {
 
 	public static void main(String[] args) {
 		String host = "192.168.1.234";
-//		PiClient client = new PiHttpClient(host, PiHttpClient.DEFAULT_PORT);
+		PiClient client = new PiHttpClient(host, PiHttpClient.DEFAULT_PORT);
 //		PiClient client = new PiCoapClient(host, PiCoapClient.DEFAULT_PORT);
-		PiClient client = new PiMixedClient(host, PiHttpClient.DEFAULT_PORT, PiCoapClient.DEFAULT_PORT);
+//		PiClient client = new PiMixedClient(host, PiHttpClient.DEFAULT_PORT, PiCoapClient.DEFAULT_PORT);
 //		PiClient client = new PiMulticastClient(PiMulticastClient.DEFAULT_PORT);
 
+		client.setCredentials("webiopi", "raspberry");
+		
 		Temperature temp0 = new Temperature(client, "temp0");
 		System.out.println(temp0.getCelsius() + "°C");
 
@@ -30,8 +32,8 @@ public class Test {
 		gpio0.setFunction(0, GPIO.OUT);
 		gpio2.setFunction(12, GPIO.OUT);
 
-		DAC dac = new DAC(client, "dac");
-		ADC adc = new ADC(client, "adc");
+		DAC dac = new DAC(client, "dac1");
+		ADC adc = new ADC(client, "adc0");
 		PWM pwm = new PWM(client, "pwm0");
 
 		boolean value = true;
