@@ -5,7 +5,13 @@ SEARCH="python python3"
 FOUND=""
 INSTALLED=""
 
-echo "Installing WebIOPi...\n"
+echo
+echo "Installing WebIOPi..."
+echo 
+echo "Updating apt package list..."
+apt-get update
+echo
+
 
 # Install Python library
 cd python
@@ -19,12 +25,9 @@ for python in $SEARCH; do
 		include=`$python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
 		echo "Found $version... "
 
-		# Install required dev header if not present
-		if [ ! -f "$include/Python.h" ]; then
-			echo "Trying to install $python-dev using apt-get"
-			apt-get update
-			apt-get install -y "$python-dev"
-		fi
+		# Install required dev header and setuptools
+		echo "Trying to install $python-dev using apt-get"
+		apt-get install -y $python-dev $python-setuptools
 
 		# Try to compile and install for the current python
 		if [ -f "$include/Python.h" ]; then
@@ -104,9 +107,9 @@ chmod 0755 /usr/bin/webiopi-passwd
 # Display WebIOPi usages
 echo
 echo "WebIOPi successfully installed"
-echo "* To start WebIOPi foreground\t: sudo webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]"
+echo "* To start WebIOPi foreground\t: sudo webiopi [-h] [-c config] [-l log] [-s script] [-d] [port]"
 echo
-echo "* To start WebIOPi service\t: sudo /etc/init.d/webiopi start"
+echo "* To start WebIOPi background\t: sudo /etc/init.d/webiopi start"
 echo "* To start WebIOPi at boot\t: sudo update-rc.d webiopi defaults"
 echo
 echo "* Look in `pwd`/examples for Python library usage examples"

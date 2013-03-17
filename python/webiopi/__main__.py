@@ -18,7 +18,17 @@ from webiopi.server import Server
 
 def displayHelp():
     print("WebIOPi command-line usage")
-    print("webiopi [-d] [-h] [-c config] [-l log] [-s script] [port]")
+    print("webiopi [-h] [-c config] [-l log] [-s script] [-d] [port]")
+    print("")
+    print("Options:")
+    print("  -h, --help           Display this help")
+    print("  -c, --config file    Load config from file")
+    print("  -l, --log file       Log to file")
+    print("  -s, --script file    Load script from file")
+    print("  -d, --debug          Enable DEBUG")
+    print("")
+    print("Arguments:")
+    print("  port                 Port to bind the HTTP Server")
     exit()
 
 def main(argv):
