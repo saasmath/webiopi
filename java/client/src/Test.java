@@ -38,9 +38,9 @@ public class Test {
 
 		boolean value = true;
 		for (int i = 0; i <= 100; i++) {
-			gpio.output(25, value);
-			gpio0.output(0, value);
-			gpio2.output(12, value);
+			gpio.digitalWrite(25, value);
+			gpio0.digitalWrite(0, value);
+			gpio2.digitalWrite(12, value);
 
 			dac.writeFloat(0, (float) (i / 100.0));
 			System.out.println("" + (adc.readFloat(1) * 3.3) + "V");

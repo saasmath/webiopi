@@ -30,4 +30,8 @@ public class DAC extends ADC {
 		return Float.parseFloat(this.sendRequest("POST", "/" + channel + "/float/" + value));
 	}
 
+	public float writeVolt(int channel, float value) {
+		return Float.parseFloat(this.sendRequest("POST", "/" + channel + "/volt/" + value));
+	}
+
 }

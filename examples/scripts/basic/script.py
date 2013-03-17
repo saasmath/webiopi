@@ -17,14 +17,14 @@ LED1   = 25
 def setup():
     webiopi.debug("Basic script Setup")
     # Setup GPIOs
-    GPIO.setup(SWITCH, GPIO.IN)
-    GPIO.setup(SERVO, GPIO.PWM)
-    GPIO.setup(LED0, GPIO.PWM)
-    GPIO.setup(LED1, GPIO.OUT)
+    GPIO.setFunction(SWITCH, GPIO.IN)
+    GPIO.setFunction(SERVO, GPIO.PWM)
+    GPIO.setFunction(LED0, GPIO.PWM)
+    GPIO.setFunction(LED1, GPIO.OUT)
     
-    GPIO.pulseAngle(SERVO, 0)   # set to 0 (neutral)
-    GPIO.pulseRatio(LED0, 0.5)  # set to 50% ratio
-    GPIO.output(LED1, GPIO.HIGH)
+    GPIO.pwmWrite(LED0, 0.5)        # set to 50% ratio
+    GPIO.pwmWriteAngle(SERVO, 0)    # set to 0 (neutral)
+    GPIO.digitalWrite(LED1, GPIO.HIGH)
 
 # -------------------------------------------------- #
 # Termination part - WebIOPi will call destroy()     #
@@ -32,7 +32,7 @@ def setup():
 def destroy():
     webiopi.debug("Basic script Destroy")
     # Reset GPIO functions
-    GPIO.setup(SWITCH, GPIO.IN)
-    GPIO.setup(SERVO, GPIO.IN)
-    GPIO.setup(LED0, GPIO.IN)
-    GPIO.setup(LED1, GPIO.IN)
+    GPIO.setFunction(SWITCH, GPIO.IN)
+    GPIO.setFunction(SERVO, GPIO.IN)
+    GPIO.setFunction(LED0, GPIO.IN)
+    GPIO.setFunction(LED1, GPIO.IN)

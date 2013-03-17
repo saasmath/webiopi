@@ -563,24 +563,41 @@ static PyObject *py_isPWMEnabled(PyObject *self, PyObject *args)
 PyMethodDef python_methods[] = {
 	{"getFunction", py_get_function, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0)"},
 	{"getSetup", py_get_function, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0)"},
+
 	{"getFunctionString", py_get_function_string, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0) as string"},
 	{"getSetupString", py_get_function_string, METH_VARARGS, "Return the current GPIO setup (IN, OUT, ALT0) as string"},
+
 	{"setFunction", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Setup the GPIO channel, direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
 	{"setup", (PyCFunction)py_set_function, METH_VARARGS | METH_KEYWORDS, "Setup the GPIO channel, direction and (optional) pull/up down control\nchannel   - BCM GPIO number\ndirection - IN or OUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN"},
-	{"input", py_input, METH_VARARGS, "Input from a GPIO channel"},
-	{"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel"},
+
+	{"input", py_input, METH_VARARGS, "Input from a GPIO channel - Deprecated, use digitalRead instead"},
+	{"digitalRead", py_input, METH_VARARGS, "Read a GPIO channel"},
+
+	{"output", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Output to a GPIO channel - Deprecated, use digitalWrite instead"},
+	{"digitalWrite", (PyCFunction)py_output, METH_VARARGS | METH_KEYWORDS, "Write to a GPIO channel"},
+
 	{"outputSequence", (PyCFunction)py_output_sequence, METH_VARARGS | METH_KEYWORDS, "Output a sequence to a GPIO channel"},
-	{"getPulse", py_getPulse, METH_VARARGS, "Output a PWM to a GPIO channel using a 50% ratio (duty cycle) with the default 50Hz signal"},
+
+	{"getPulse", py_getPulse, METH_VARARGS, "Read current PWM output"},
+	{"pwmRead", py_getPulse, METH_VARARGS, "Read current PWM output"},
+
 	{"pulseMilli", (PyCFunction)py_pulseMilli, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using milliseconds for both HIGH and LOW state widths"},
 	{"pulseMilliRatio", (PyCFunction)py_pulseMilliRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using millisecond for the total width and a ratio (duty cycle) for the HIGH state width"},
 	{"pulseMicro", (PyCFunction)py_pulseMicro, METH_VARARGS | METH_KEYWORDS, "Output a PWM pulse to a GPIO channel using microseconds for both HIGH and LOW state widths"},
 	{"pulseMicroRatio", (PyCFunction)py_pulseMicroRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using microseconds for the total width and a ratio (duty cycle) for the HIGH state width"},
-	{"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using an angle"},
-	{"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using a ratio (duty cycle) with the default 50Hz signal"},
+
+	{"pulseAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using an angle - Deprecated, use pwmWriteAngle instead"},
+	{"pwmWriteAngle", (PyCFunction)py_pulseAngle, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using an angle"},
+
+	{"pulseRatio", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using a ratio (duty cycle) with the default 50Hz signal - Deprecated, use pwmWrite instead"},
+	{"pwmWrite", (PyCFunction)py_pulseRatio, METH_VARARGS | METH_KEYWORDS, "Output a PWM to a GPIO channel using a ratio (duty cycle) with the default 50Hz signal"},
+
 	{"pulse", py_pulse, METH_VARARGS, "Output a PWM to a GPIO channel using a 50% ratio (duty cycle) with the default 50Hz signal"},
+
 	{"enablePWM", py_enablePWM, METH_VARARGS, "Enable software PWM loop for a GPIO channel"},
 	{"disablePWM", py_disablePWM, METH_VARARGS, "Disable software PWM loop of a GPIO channel"},
 	{"isPWMEnabled", py_isPWMEnabled, METH_VARARGS, "Returns software PWM state"},
+
 	{NULL, NULL, 0, NULL}
 };
 

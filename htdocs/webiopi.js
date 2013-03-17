@@ -295,7 +295,7 @@ WebIOPi.prototype.checkVersion = function () {
 	});
 }
 
-WebIOPi.prototype.getValue = function (gpio, callback) {
+WebIOPi.prototype.digitalRead = function (gpio, callback) {
 	if (callback != undefined) {
 		$.get(w().context + 'GPIO/' + gpio + "/value", function(data) {
 			w().updateValue(gpio, data);
@@ -305,7 +305,7 @@ WebIOPi.prototype.getValue = function (gpio, callback) {
 	return w().GPIO[gpio].value;
 }
 
-WebIOPi.prototype.setValue = function (gpio, value, callback) {
+WebIOPi.prototype.digitalWrite = function (gpio, value, callback) {
 	if (w().GPIO[gpio].func.toUpperCase()=="OUT") {
 		$.post(w().context + 'GPIO/' + gpio + "/value/" + value, function(data) {
 			w().updateValue(gpio, data);
@@ -339,7 +339,7 @@ WebIOPi.prototype.setFunction = function (gpio, func, callback) {
 
 WebIOPi.prototype.toggleValue = function (gpio) {
 	var value = (w().GPIO[gpio].value == 1) ? 0 : 1;
-	w().setValue(gpio, value);
+	w().digitalWrite(gpio, value);
 }
 
 WebIOPi.prototype.toggleFunction = function (gpio) {
@@ -410,6 +410,10 @@ WebIOPi.prototype.pulseAngle = function(gpio, angle, callback) {
 WebIOPi.prototype.setLabel = function (id, label) {
 	$("#" + id).val(label);
 	$("#" + id).text(label);
+}
+
+WebIOPi.prototype.setClass = function (id, cssClass) {
+	$("#" + id).attr("class", cssClass);
 }
 
 WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
@@ -689,21 +693,21 @@ GPIOPort.prototype.toString = function() {
 	return this.name + ": GPIO Port";
 }
 
-GPIOPort.prototype.input = function(channel, callback) {
+GPIOPort.prototype.digitalRead = function(channel, callback) {
 	var name = this.name;
 	$.get(this.url + "/" + channel + "/value", function(data) {
 		callback(name, channel, data);
 	});
 }
 
-GPIOPort.prototype.output = function(channel, value, callback) {
+GPIOPort.prototype.digitalWrite = function(channel, value, callback) {
 	var name = this.name;
 	$.post(this.url + "/" + channel + "/value/" + value, function(data) {
 		callback(name, channel, data);
 	});
 }
 
-GPIOPort.prototype.setup = function(channel, func, callback) {
+GPIOPort.prototype.setFunction = function(channel, func, callback) {
 	var name = this.name;
 	$.post(this.url + "/" + channel + "/function/" + func, function(data) {
 		callback(name, channel, data);
@@ -748,7 +752,7 @@ GPIOPort.prototype.refreshUI = function() {
 				else {
 					value = 0;
 				}
-				port.output($(this).attr("channel"), value, function(name, channel, data) {
+				port.digitalWrite($(this).attr("channel"), value, function(name, channel, data) {
 					if (data == "1") {
 						$("#" + name + "_" + channel + "_value").attr("class", "HIGH")
 					}
@@ -776,7 +780,7 @@ GPIOPort.prototype.refreshUI = function() {
 				else {
 					func = "IN";
 				}
-				port.setup($(this).attr("channel"), func, function(name, channel, func) {
+				port.setFunction($(this).attr("channel"), func, function(name, channel, func) {
 					$("#" + port.name + "_" + channel + "_func").text(func);
 				});
 			});

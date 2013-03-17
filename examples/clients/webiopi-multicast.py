@@ -10,7 +10,7 @@ state = True
 
 def loop(): 
     global gpio, state
-    gpio.output(25, state)
+    gpio.digitalWrite(25, state)
     state = not state
     sleep(0.5)
 

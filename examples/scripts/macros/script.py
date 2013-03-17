@@ -30,25 +30,25 @@ def myMacroWithoutArgs():
 def setup():
     webiopi.debug("Script with macros Setup")
     # Setup GPIOs
-    GPIO.setup(SWITCH, GPIO.IN)
-    GPIO.setup(SERVO, GPIO.PWM)
-    GPIO.setup(LED0, GPIO.PWM)
-    GPIO.setup(LED1, GPIO.OUT)
+    GPIO.setFunction(SWITCH, GPIO.IN)
+    GPIO.setFunction(SERVO, GPIO.PWM)
+    GPIO.setFunction(LED0, GPIO.PWM)
+    GPIO.setFunction(LED1, GPIO.OUT)
     
-    GPIO.pulseAngle(SERVO, 0)   # set to 0 (neutral)
-    GPIO.pulseRatio(LED0, 0.5)  # set to 50% ratio
-    GPIO.output(LED1, GPIO.HIGH)
+    GPIO.pwmWrite(LED0, 0.5)        # set to 50% ratio
+    GPIO.pwmWriteAngle(SERVO, 0)    # set to 0 (neutral)
+    GPIO.digitalWrite(LED1, GPIO.HIGH)
     
     gpio0 = webiopi.deviceInstance("gpio0")
-    gpio0.output(0, 0)
+    gpio0.digitalWrite(0, 0)
 
 # -------------------------------------------------- #
 # Loop execution part - WebIOPi will call loop()     #
 # -------------------------------------------------- #
 # Example loop which toggle LED each 5 seconds
 def loop():
-    value = not GPIO.input(LED1)
-    GPIO.output(LED1, value)
+    value = not GPIO.digitalRead(LED1)
+    GPIO.digitalWrite(LED1, value)
     webiopi.sleep(5)        
 
 # -------------------------------------------------- #
@@ -57,9 +57,9 @@ def loop():
 def destroy():
     webiopi.debug("Script with macros Destroy")
     # Reset GPIO functions
-    GPIO.setup(SWITCH, GPIO.IN)
-    GPIO.setup(SERVO, GPIO.IN)
-    GPIO.setup(LED0, GPIO.IN)
-    GPIO.setup(LED1, GPIO.IN)
+    GPIO.setFunction(SWITCH, GPIO.IN)
+    GPIO.setFunction(SERVO, GPIO.IN)
+    GPIO.setFunction(LED0, GPIO.IN)
+    GPIO.setFunction(LED1, GPIO.IN)
     gpio0 = webiopi.deviceInstance("gpio0")
-    gpio0.output(0, 1)
+    gpio0.digitalWrite(0, 1)

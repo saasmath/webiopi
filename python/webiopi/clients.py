@@ -101,16 +101,16 @@ class GPIO(Device):
     def setFunction(self, channel, func):
         return self.sendRequest("POST", "/%d/function/%s" % (channel, func))
         
-    def input(self, channel):
+    def digitalRead(self, channel):
         return int(self.sendRequest("GET", "/%d/value" % channel))
 
-    def output(self, channel, value):
+    def digitalWrite(self, channel, value):
         return int(self.sendRequest("POST", "/%d/value/%d" % (channel, value)))
     
-    def readInteger(self):
+    def portRead(self):
         return int(self.sendRequest("GET", "/integer"))
 
-    def writeInteger(self, value):
+    def portWrite(self, value):
         return int(self.sendRequest("POST", "/integer/%d" % value))
 
 class NativeGPIO(GPIO):

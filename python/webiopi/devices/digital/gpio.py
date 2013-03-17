@@ -26,7 +26,7 @@ class NativeGPIO(GPIOPort):
     def __str__(self):
         return "GPIO"
     
-    def checkChannelExported(self, channel):
+    def checkDigitalChannelExported(self, channel):
         if not channel in self.export:
             raise GPIO.InvalidChannelException("Channel %d is not allowed" % channel)
         
@@ -39,34 +39,34 @@ class NativeGPIO(GPIOPort):
             raise ValueError("POSTing value to native GPIO not allowed")
     
     def __digitalRead__(self, channel):
-        self.checkChannelExported(channel)
-        return GPIO.input(channel)
+        self.checkDigitalChannelExported(channel)
+        return GPIO.digitalRead(channel)
     
     def __digitalWrite__(self, channel, value):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingValueAllowed()
-        GPIO.output(channel, value)
+        GPIO.digitalWrite(channel, value)
 
     def __getFunction__(self, channel):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         return GPIO.getFunction(channel)
     
     def __setFunction__(self, channel, value):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingFunctionAllowed()
         GPIO.setFunction(channel, value)
         
     def __portRead__(self):
         value = 0
         for i in self.export:
-            value |= GPIO.input(i) << i
+            value |= GPIO.digitalRead(i) << i
         return value 
             
     def __portWrite__(self, value):
         if len(self.export) < 54:
             for i in self.export:
                 if GPIO.getFunction(i) == GPIO.OUT:
-                    GPIO.output(i, (value >> i) & 1)
+                    GPIO.digitalWrite(i, (value >> i) & 1)
         else:
             raise Exception("Please limit exported GPIO to write integers")
             
@@ -86,22 +86,22 @@ class NativeGPIO(GPIOPort):
                 func = GPIO.getFunction(i)
             else:
                 func = GPIO.getFunctionString(i)
-            values[i] = {f: func, v: int(GPIO.input(i))}
+            values[i] = {f: func, v: int(GPIO.digitalRead(i))}
         return values
 
     
     @request("GET", "%(channel)d/pulse", "%s")
     def getPulse(self, channel):
-        self.checkChannelExported(channel)
-        self.checkChannel(channel)
+        self.checkDigitalChannelExported(channel)
+        self.checkDigitalChannel(channel)
         return GPIO.getPulse(channel)
     
     @request("POST", "%(channel)d/sequence/%(args)s")
     @response("%d")
     def outputSequence(self, channel, args):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingValueAllowed()
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         (period, sequence) = args.split(",")
         period = int(period)
         GPIO.outputSequence(channel, period, sequence)
@@ -109,25 +109,25 @@ class NativeGPIO(GPIOPort):
         
     @request("POST", "%(channel)d/pulse/")
     def pulse(self, channel):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingValueAllowed()
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         GPIO.pulse(channel)
         return "OK"
         
     @request("POST", "%(channel)d/pulseRatio/%(value)f")
     def pulseRatio(self, channel, value):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingValueAllowed()
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         GPIO.pulseRatio(channel, value)
         return GPIO.getPulse(channel)
         
     @request("POST", "%(channel)d/pulseAngle/%(value)f")
     def pulseAngle(self, channel, value):
-        self.checkChannelExported(channel)
+        self.checkDigitalChannelExported(channel)
         self.checkPostingValueAllowed()
-        self.checkChannel(channel)
+        self.checkDigitalChannel(channel)
         GPIO.pulseAngle(channel, value)
         return GPIO.getPulse(channel)
         
