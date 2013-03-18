@@ -136,7 +136,7 @@ class Server():
                 error("Passwd file %s not found" % passwdfile)
             
         elif login != None or password != None:
-            auth = encodeAuth(login, password)
+            auth = encryptCredentials(login, password)
             info("Access protected using login/password")
             
         if auth == None or len(auth) == 0:
