@@ -19,6 +19,9 @@ import struct
 import logging
 import threading
 
+M_PLAIN = "text/plain"
+M_JSON  = "application/json"
+
 if PYTHON_MAJOR >= 3:
     from urllib.parse import urlparse
 else:
@@ -132,12 +135,11 @@ class COAPMessage():
         result.append("Code: %s" % self.CODES[self.code])
         result.append("Id: %s" % self.id)
         result.append("Token: %s" % self.token)
-        result.append("Options: %s" % len(self.options))
-        for option in self.options:
-            result.append("+ %d: %s" % (option["number"], option["value"]))
-        
+        #result.append("Options: %s" % len(self.options))
+        #for option in self.options:
+        #    result.append("+ %d: %s" % (option["number"], option["value"]))
         result.append("Uri-Path: %s" % self.uri_path)
-        result.append("Content-Format: %s" % COAPContentFormat.toString(self.content_format))
+        result.append("Content-Format: %s" % (COAPContentFormat.toString(self.content_format) if self.content_format else M_PLAIN))
         result.append("Payload: %s" % self.payload)
         result.append("")
         return '\n'.join(result)
@@ -301,6 +303,8 @@ class COAPMessage():
         
         if len(bytes) > index:
             self.payload = bytes[index:]
+        else:
+            self.payload = ""
         
         for option in self.options:
             (number, value) = option.values()

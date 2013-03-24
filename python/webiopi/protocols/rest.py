@@ -286,7 +286,13 @@ class RESTHandler():
             return self.callDeviceFunction("POST", relativePath)
                 
         elif relativePath.startswith("macros/"):
-            (mode, mname, value) = relativePath.split("/")
+            paths = relativePath.split("/")
+            mname = paths[1]
+            if len(paths) > 2:
+                value = paths[2]
+            else:
+                value = ""
+
             if mname in MACROS:
                 macro = MACROS[mname]
 
