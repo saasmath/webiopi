@@ -15,10 +15,16 @@
 from webiopi.protocols.rest import *
 
 class Pressure():
+    def __init__(self, altitude=0):
+        self.altitude = altitude
+    
     def __family__(self):
         return "Pressure"
 
     def __getPascal__(self):
+        raise NotImplementedError
+    
+    def __getPascalAtSea__(self):
         raise NotImplementedError
     
     @request("GET", "sensor/pressure/pa")
@@ -29,8 +35,18 @@ class Pressure():
     @request("GET", "sensor/pressure/hpa")
     @response("%.2f")
     def getHectoPascal(self):
-        return float(self.getPascal()) / 100.0
+        return float(self.__getPascal__()) / 100.0
+    
+    @request("GET", "sensor/pressure/sea/pa")
+    @response("%d")
+    def getPascalAtSea(self):
+        return self.__getPascalAtSea__(self)
 
+    @request("GET", "sensor/pressure/sea/hpa")
+    @response("%.2f")
+    def getHectoPascalAtSea(self):
+        return float(self.__getPascalAtSea__()) / 100.0
+    
 class Temperature():
     def __family__(self):
         return "Temperature"
