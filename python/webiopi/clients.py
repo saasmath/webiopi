@@ -41,37 +41,38 @@ class PiMixedClient():
         self.auth = "Basic " + encodeCredentials(login, password)
         
     def sendRequest(self, method, uri):
-        if self.coapclient != None and (not (self.forceHttp or self.httpclient == None)):
+        if self.coapclient != None and not self.forceHttp:
             if method == "GET":
                 response = self.coapclient.sendRequest(COAPGet("coap://%s:%d%s" % (self.host, self.coapport, uri)))
             elif method == "POST":
                 response = self.coapclient.sendRequest(COAPPost("coap://%s:%d%s" % (self.host, self.coapport, uri)))
 
             if response:
-                return response.payload
-            elif self.httpclient:
+                return str(response.payload)
+            elif self.httpclient != None:
                 self.coapfailure += 1
                 print("No CoAP response, fall-back to HTTP")
                 if (self.coapfailure > self.maxfailure):
                     self.forceHttp = True
                     self.coapfailure = 0
                     print("Too many CoAP failure forcing HTTP")
-            else:
-                return None
-        headers = {}
-        if self.auth != None:
-            headers["Authorization"] = self.auth
         
-        self.httpclient.request(method, uri, None, headers)
-        response = self.httpclient.getresponse()
-        if response.status == 200:
-            data = response.read()
-            return data
-        elif response.status == 401:
-            raise Exception("Missing credentials")
-        else:
-            raise Exception("Unhandled HTTP Response %d %s" % (response.status, response.reason))
-        return None
+        if self.httpclient != None:
+            headers = {}
+            if self.auth != None:
+                headers["Authorization"] = self.auth
+            
+            self.httpclient.request(method, uri, None, headers)
+            response = self.httpclient.getresponse()
+            if response.status == 200:
+                data = response.read()
+                return data
+            elif response.status == 401:
+                raise Exception("Missing credentials")
+            else:
+                raise Exception("Unhandled HTTP Response %d %s" % (response.status, response.reason))
+
+        raise Exception("No data received")
 
 class PiHttpClient(PiMixedClient):
     def __init__(self, host, port=8000):
@@ -85,16 +86,32 @@ class PiMulticastClient(PiMixedClient):
     def __init__(self, port=5683):
         PiMixedClient.__init__(self, "224.0.1.123", -1, port)
 
-class Device():
-    def __init__(self, client, name):
+class RESTAPI():
+    def __init__(self, client, path):
         self.client = client
-        self.path = "/devices/" + name
-    
+        self.path = path
+        
     def sendRequest(self, method, path):
         return self.client.sendRequest(method, self.path + path)
-    
+        
+class Macro(RESTAPI):
+    def __init__(self, client, name):
+        RESTAPI.__init__(self, client, "/macros/" + name + "/")
+        
+    def call(self, *args):
+        values = ",".join(["%s" % i for i in args])
+        if values == None:
+            values = ""
+        return self.sendRequest("POST", values)
+
+class Device(RESTAPI):
+    def __init__(self, client, name, type):
+        RESTAPI.__init__(self, client, "/devices/" + name + "/" + type)
 
 class GPIO(Device):
+    def __init__(self, client, name):
+        Device.__init__(self, client, name, "digital")
+        
     def getFunction(self, channel):
         return self.sendRequest("GET", "/%d/function" % channel)
 
@@ -115,40 +132,70 @@ class GPIO(Device):
 
 class NativeGPIO(GPIO):
     def __init__(self, client):
-        Device.__init__(self, client, "")
-        self.path = "/GPIO"
+        RESTAPI.__init__(self, client, "/GPIO")
 
 class ADC(Device):
+    def __init__(self, client, name):
+        Device.__init__(self, client, name, "analog")
+        
+    def read(self, channel):
+        return float(self.sendRequest("GET", "/%d/integer" % channel))
+
     def readFloat(self, channel):
         return float(self.sendRequest("GET", "/%d/float" % channel))
 
+    def readVolt(self, channel):
+        return float(self.sendRequest("GET", "/%d/volt" % channel))
+
 class DAC(ADC):
+    def __init__(self, client, name):
+        Device.__init__(self, client, name, "analog")
+        
+    def write(self, channel, value):
+        return float(self.sendRequest("POST", "/%d/integer/%d" % (channel, value)))
+                     
     def writeFloat(self, channel, value):
         return float(self.sendRequest("POST", "/%d/float/%f" % (channel, value)))
                      
+    def writeVolt(self, channel, value):
+        return float(self.sendRequest("POST", "/%d/volt/%f" % (channel, value)))
+                     
 class PWM(DAC):
+    def __init__(self, client, name):
+        Device.__init__(self, client, name, "pwm")
+        
+    def readAngle(self, channel, value):
+        return float(self.sendRequest("GET", "/%d/angle" % (channel)))
+                     
     def writeAngle(self, channel, value):
         return float(self.sendRequest("POST", "/%d/angle/%f" % (channel, value)))
                      
-class Temperature(Device):
+class Sensor(Device):
+    def __init__(self, client, name):
+        Device.__init__(self, client, name, "sensor")
+        
+class Temperature(Sensor):
+    def getKelvin(self):
+        return float(self.sendRequest("GET", "/temperature/k"))
+
     def getCelsius(self):
         return float(self.sendRequest("GET", "/temperature/c"))
 
     def getFahrenheit(self):
         return float(self.sendRequest("GET", "/temperature/f"))
     
-class Pressure(Device):
+class Pressure(Sensor):
     def getPascal(self):
         return float(self.sendRequest("GET", "/pressure/pa"))
 
     def getHectoPascal(self):
         return float(self.sendRequest("GET", "/pressure/hpa"))
     
-class Luminosity(Device):
+class Luminosity(Sensor):
     def getLux(self):
         return float(self.sendRequest("GET", "/luminosity/lux"))
     
-class Distance(Device):
+class Distance(Sensor):
     def getMillimeter(self):
         return float(self.sendRequest("GET", "/distance/mm"))
 
