@@ -1,5 +1,5 @@
 from webiopi import runLoop
-from webiopi.coap import COAPClient, COAPPost
+from webiopi.protocols.coap import COAPClient, COAPPost
 from time import sleep
 
 client = COAPClient()
