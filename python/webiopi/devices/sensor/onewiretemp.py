@@ -19,6 +19,9 @@ class OneWireTemp(OneWire, Temperature):
     def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
         OneWire.__init__(self, slave, family, "TEMP", name)
         
+    def __getKelvin__(self):
+        return self.Celsius2Kelvin()
+
     def __getCelsius__(self):
         data = self.read()
         lines = data.split("\n")

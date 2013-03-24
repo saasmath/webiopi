@@ -58,6 +58,9 @@ class BMP085(I2C, Temperature, Pressure):
         x2 = (self.mc * 2**11) / (x1 + self.md)
         return x1 + x2
     
+    def __getKelvin__(self):
+        return self.Celsius2Kelvin()
+
     def __getCelsius__(self):
         t = (self.getB5() + 8) / 2**4
         return float(t) / 10.0

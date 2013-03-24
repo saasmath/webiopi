@@ -19,6 +19,9 @@ class TMP102(I2C, Temperature):
     def __init__(self, slave=0b1001000, name="TMP102"):
         I2C.__init__(self, toint(slave), name)
         
+    def __getKelvin__(self):
+        return self.Celsius2Kelvin()
+
     def __getCelsius__(self):
         d = self.readBytes(2)
         count = ((d[0] << 4) | (d[1] >> 4)) & 0xFFF
