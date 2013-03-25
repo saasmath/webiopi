@@ -15,9 +15,16 @@
 from webiopi.protocols.rest import *
 
 class Pressure():
-    def __init__(self, altitude=0):
-        self.altitude = altitude
-    
+    def __init__(self, altitude=0, external=None):
+        self.altitude = toint(altitude)
+        if isinstance(external, str):
+            self.external = deviceInstance(external)
+        else:
+            self.external = external
+        
+        if self.external != None and not isinstance(self.external, Temperature):
+            raise Exception("external must be a Temperature sensor")
+
     def __family__(self):
         return "Pressure"
 
@@ -40,12 +47,16 @@ class Pressure():
     @request("GET", "sensor/pressure/sea/pa")
     @response("%d")
     def getPascalAtSea(self):
-        return self.__getPascalAtSea__(self)
+        pressure = self.__getPascal__()
+        if self.external != None:
+            k = self.external.getKelvin()
+            return float(pressure) / (1.0 / (1.0 + 0.0065 / k * self.altitude)**5.255)
+        return float(pressure) / (1.0 - self.altitude / 44330.0)**5.255
 
     @request("GET", "sensor/pressure/sea/hpa")
     @response("%.2f")
     def getHectoPascalAtSea(self):
-        return float(self.__getPascalAtSea__()) / 100.0
+        return self.getPascalAtSea() / 100.0
     
 class Temperature():
     def __family__(self):

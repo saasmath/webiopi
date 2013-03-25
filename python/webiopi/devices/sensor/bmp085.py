@@ -17,9 +17,10 @@ from webiopi.devices.i2c import *
 from webiopi.devices.sensor import Temperature, Pressure
 
 class BMP085(I2C, Temperature, Pressure):
-    def __init__(self, slave=0b1110111, altitude=0, name="BMP085"):
-        I2C.__init__(self, toint(slave), name)
-        Pressure.__init__(self, toint(altitude))
+    def __init__(self, altitude=0, external=None, name="BMP085"):
+        I2C.__init__(self, 0x77, name)
+        Pressure.__init__(self, altitude, external)
+        
         self.ac1 = self.readSignedInteger(0xAA)
         self.ac2 = self.readSignedInteger(0xAC)
         self.ac3 = self.readSignedInteger(0xAE)
@@ -93,6 +94,3 @@ class BMP085(I2C, Temperature, Pressure):
         x2 = (-7357*p) /  2**16
         p = p + (x1 + x2 + 3791) / 2**4
         return int(p)
-    
-    def __getPascalAtSea__(self):
-        return float(self.__getPascal__()) / (1.0 - self.altitude / 44330.0)**5.255
