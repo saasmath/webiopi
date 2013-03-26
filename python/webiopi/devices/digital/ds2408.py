@@ -23,7 +23,7 @@ class DS2408(OneWire, GPIOPort):
 
         OneWire.__init__(self, slave, 0x29, "2408", "DS2408")
         GPIOPort.__init__(self, 8)
-        self.writeInteger(0x00)
+        self.portWrite(0x00)
         
     def __getFunction__(self, channel):
         return self.FUNCTIONS[channel]
