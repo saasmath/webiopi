@@ -31,17 +31,17 @@
 		button = webiopi().createButton("sos2", "S.O.S 2", outputSequence);
 		content.append(button); // append button to content div
 		
-		// create a button which call myMacroWithoutArgs
-		button = webiopi().createMacroButton("macro", "Macro 1", "myMacroWithoutArgs");
+		// create a button which call PrintTime
+		button = webiopi().createMacroButton("macro", "Print Time", "PrintTime");
 		content.append(button); // append button to content div
 		
-		// create a button which call myMacroWithArgs with "1,2,3" as argument
-		button = webiopi().createMacroButton("macro", "Macro 2", "myMacroWithArgs", [1,2,3]);
+		// create a button which call HelloWorld with "User,Name" argument
+		button = webiopi().createMacroButton("macro", "Hello ?", "HelloWorld", ["User", "Name"]);
 		content.append(button); // append button to content div
 		
-		// the previous button will always call myMacroWithArgs with the same "1,2,3" argument
+		// the previous button will always call HelloWorld with "User,Name" argument
 		// you can also create a simple button with your own function 
-		button = webiopi().createButton("macro2", "Macro 3", callMacro);
+		button = webiopi().createButton("macro2", "Hello !", callMacro);
 		content.append(button); // append button to content div
 		
 		// you can also create a button which calls a different function for mouse down and up events
@@ -78,13 +78,13 @@
 	}
 	
 	function callMacro() {
-		var args = [1,2,3] // or whatever you want
-		// call myMacroWithArgs(arg)
-		webiopi().callMacro("myMacroWithArgs", args, macroCallback);
+		var args = ["User","Name"] // or whatever you want
+		// call HelloWorld(args)
+		webiopi().callMacro("HelloWorld", args, macroCallback);
 	}
 	
 	function macroCallback(macro, args, data) {
-		alert(macro + " returned with " + data);
+		alert(data);
 	}
 	
 	</script>

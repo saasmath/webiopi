@@ -64,7 +64,6 @@ def right_backward():
 # -------------------------------------------------- #
 # Macro definition part                              #
 # -------------------------------------------------- #
-
 @webiopi.macro
 def go_forward():
     left_forward()
@@ -90,9 +89,7 @@ def stop():
     left_stop()
     right_stop()
     
-# -------------------------------------------------- #
-# Initialization part                                #
-# -------------------------------------------------- #
+# Called by WebIOPi at script loading
 def setup():
     # Setup GPIOs
     GPIO.setFunction(LS, GPIO.PWM)
@@ -107,9 +104,7 @@ def setup():
     stop()
 
 
-# -------------------------------------------------- #
-# Termination part                                   #
-# -------------------------------------------------- #
+# Called by WebIOPi at server shutdown
 def destroy():
     # Reset GPIO functions
     GPIO.setFunction(LS, GPIO.IN)
