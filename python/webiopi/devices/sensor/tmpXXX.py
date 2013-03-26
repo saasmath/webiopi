@@ -16,7 +16,7 @@ from webiopi.devices.i2c import *
 from webiopi.devices.sensor import Temperature
 
 class TMP102(I2C, Temperature):
-    def __init__(self, slave=0b1001000, name="TMP102"):
+    def __init__(self, slave=0x48, name="TMP102"):
         I2C.__init__(self, toint(slave), name)
         
     def __getKelvin__(self):
@@ -31,7 +31,7 @@ class TMP102(I2C, Temperature):
         return self.Celsius2Fahrenheit()
 
 class TMP75(TMP102):
-    def __init__(self, slave=0b1001000, resolution=12, name="TMP75"):
+    def __init__(self, slave=0x48, resolution=12, name="TMP75"):
         TMP102.__init__(self, slave, name)
         resolution = toint(resolution)
         if not resolution in range(9,13):
@@ -45,5 +45,5 @@ class TMP75(TMP102):
         self.readRegisters(0x00, 2)
 
 class TMP275(TMP75):
-    def __init__(self, slave=0b1001000, resolution=12, name="TMP275"):
+    def __init__(self, slave=0x48, resolution=12, name="TMP275"):
         TMP75.__init__(self, slave, resolution, name)
