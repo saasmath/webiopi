@@ -1204,6 +1204,12 @@ Temperature.prototype.toString = function() {
 	return this.name + ": Temperature";
 }
 
+Temperature.prototype.getKelvin = function(callback) {
+	$.get(this.url + "/temperature/k", function(data) {
+		callback(this.name, data);
+	});
+}
+
 Temperature.prototype.getCelsius = function(callback) {
 	$.get(this.url + "/temperature/c", function(data) {
 		callback(this.name, data);
