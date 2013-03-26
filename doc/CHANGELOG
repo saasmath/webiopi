@@ -1,6 +1,4 @@
-=Current version : 0.5.3 (01/07/13)=
-
-==trunk==
+==0.6 (27/03/13)==
    Added CoAP ([http://tools.ietf.org/html/draft-ietf-core-coap-14 draft-14]) implementation (Server and Client)
    Added Python WebIOPi Client class (HTTP or CoAP with HTTP fallback)
    Added Python WebIOPi MulticastClient class (CoAP)
