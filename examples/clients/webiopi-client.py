@@ -1,7 +1,7 @@
-from webiopi import runLoop
 from webiopi.clients import *
 from time import sleep
 
+# Create a WebIOPi client
 client = PiHttpClient("192.168.1.234")
 #client = PiMixedClient("192.168.1.234")
 #client = PiCoapClient("192.168.1.234")
