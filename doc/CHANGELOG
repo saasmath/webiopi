@@ -1,35 +1,22 @@
 =Current version : 0.5.3 (01/07/13)=
 
 ==trunk==
-   Added CoAP ([http://tools.ietf.org/html/draft-ietf-core-coap-13 draft-13]) implementation (Server and Client)
+   Added CoAP ([http://tools.ietf.org/html/draft-ietf-core-coap-14 draft-14]) implementation (Server and Client)
    Added Python WebIOPi Client class (HTTP or CoAP with HTTP fallback)
    Added Python WebIOPi MulticastClient class (CoAP)
    Added Serial, I2C, SPI and 1-Wire  support
      Python lightweight drivers with no dependency
      Automatically load required linux modules
-   Added device drivers :
-     webiopi.devices.sensor.TMP075 - I2C Temperature sensor
-     webiopi.devices.sensor.TMP102 - I2C Temperature sensor
-     webiopi.devices.sensor.TMP275 - I2C Temperature sensor
-     webiopi.devices.sensor.DS18B20 - 1-Wire Temperature sensor
-     webiopi.devices.digital.PCF8574 - I2C 8-bits I/O Expander
-     webiopi.devices.analog.MCP3004 - SPI 10-bits 4-channels ADC
-     webiopi.devices.analog.MCP3008 - SPI 10-bits 8-channels ADC
-     webiopi.devices.analog.MCP3204 - SPI 12-bits 4-channels ADC
-     webiopi.devices.analog.MCP3208 - SPI 12-bits 8-channels ADC
-     webiopi.devices.analog.MCP4921 - SPI 12-bits 1-channel DAC
-     webiopi.devices.analog.MCP4922 - SPI 12-bits 2-channels DAC
-   Added /etc/webiopi/config file
-     GPIO setup
-     Script loading facility
-     REST API export config
-     HTTP server config
-     CoAP server config
-     Serial lines config
-     Devices config
+     Added many device drivers, see [DEVICES device support page]
+   Added [Configuration] file
    Added Serial monitor web app
-   Added Javascript GPIO getValue and getFunction methods
+   Added Devices monitor web app
+   Added Devices abstractions Javascript class
+   Added GPIO digitalRead/Write and getFunction methods
+   Added Cache-Control REST response header
    Added Server logging facility
+   Added jQuery-mobile
+   Improved button up/down handling on mobile devices
    Fixed error fetching python-dev package during setup
    Fixed webiopi-passwd missing execution flag when installing with PiStore
    Fixed binary file serving
