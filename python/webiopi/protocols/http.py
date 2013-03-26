@@ -83,10 +83,10 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     logger = logging.getLogger("HTTP")
 
-    def log_message(self, format, *args):
-        self.logger.debug(format % args)
+    def log_message(self, fmt, *args):
+        self.logger.debug(fmt % args)
     
-    def log_error(self, format, *args):
+    def log_error(self, fmt, *args):
         pass
         
     def version_string(self):
@@ -105,11 +105,11 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         auth = authHeader.replace("Basic ", "")
         if PYTHON_MAJOR >= 3:
-            hash = encrypt(auth.encode())
+            auth_hash = encrypt(auth.encode())
         else:
-            hash = encrypt(auth)
+            auth_hash = encrypt(auth)
             
-        if hash == self.server.auth:
+        if auth_hash == self.server.auth:
             return True
         return False
 
@@ -132,14 +132,14 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers();
                 self.wfile.write(body.encode())
                 
-    def findFile(self, file):
-        if os.path.exists(file):
-            if os.path.isdir(file):
-                file += "/" + self.server.index
-                if os.path.exists(file):
-                    return file
+    def findFile(self, filepath):
+        if os.path.exists(filepath):
+            if os.path.isdir(filepath):
+                filepath += "/" + self.server.index
+                if os.path.exists(filepath):
+                    return filepath
             else:
-                return file
+                return filepath
         return None
         
                 

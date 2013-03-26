@@ -45,14 +45,16 @@ class COAPContentFormat():
                50: "application/json"
                }
 
-    def getCode(format):
-        if format == None:
+    @staticmethod
+    def getCode(fmt):
+        if fmt == None:
             return None
         for code in COAPContentFormat.FORMATS:
-            if COAPContentFormat.FORMATS[code] == format:
+            if COAPContentFormat.FORMATS[code] == fmt:
                 return code
         return None
     
+    @staticmethod
     def toString(code):
         if code == None:
             return None
@@ -223,10 +225,10 @@ class COAPMessage():
 
         if self.content_format != None:
             data = bytearray()
-            format = self.content_format
-            if format > 0xFF:
-                data.append((format & 0xFF00) >> 8)
-            data.append(format & 0x00FF)
+            fmt_code = self.content_format
+            if fmt_code > 0xFF:
+                data.append((fmt_code & 0xFF00) >> 8)
+            data.append(fmt_code & 0x00FF)
             lastnumber = self.appendOption(buff, lastnumber, COAPOption.CONTENT_FORMAT, data)
             
         buff.append(0xFF)
@@ -241,46 +243,46 @@ class COAPMessage():
         
         return buff
     
-    def parseByteArray(self, bytes):
-        self.version = (bytes[0] & 0xC0) >> 6
-        self.type    = (bytes[0] & 0x30) >> 4
-        token_length = bytes[0] & 0x0F
+    def parseByteArray(self, buff):
+        self.version = (buff[0] & 0xC0) >> 6
+        self.type    = (buff[0] & 0x30) >> 4
+        token_length = buff[0] & 0x0F
         index = 4
         if token_length > 0:
-            self.token = bytes[index:index+token_length]
+            self.token = buff[index:index+token_length]
 
         index += token_length
-        self.code    = bytes[1]
-        self.id      = (bytes[2] << 8) | bytes[3]
+        self.code    = buff[1]
+        self.id      = (buff[2] << 8) | buff[3]
         
         number = 0
 
         # process options
-        while index < len(bytes) and bytes[index] != 0xFF:
-            (delta, length) = self.__getOptionHeader__(bytes[index])
+        while index < len(buff) and buff[index] != 0xFF:
+            (delta, length) = self.__getOptionHeader__(buff[index])
             offset = 1
 
             # delta extended with 1 byte
             if delta == 13:
-                delta += bytes[index+offset]
+                delta += buff[index+offset]
                 offset += 1
-            # delta extended with 2 bytes
+            # delta extended with 2 buff
             elif delta == 14:
-                delta += 255 + ((bytes[index+offset] << 8) | bytes[index+offset+1])
+                delta += 255 + ((buff[index+offset] << 8) | buff[index+offset+1])
                 offset += 2
             
             # length extended with 1 byte
             if length == 13:
-                length += bytes[index+offset]
+                length += buff[index+offset]
                 offset += 1
                 
-            # length extended with 2 bytes
+            # length extended with 2 buff
             elif length == 14:
-                length += 255 + ((bytes[index+offset] << 8) | bytes[index+offset+1])
+                length += 255 + ((buff[index+offset] << 8) | buff[index+offset+1])
                 offset += 2
 
             number += delta
-            valueBytes = bytes[index+offset:index+offset+length]
+            valueBytes = buff[index+offset:index+offset+length]
             # opaque option value
             if number in [COAPOption.IF_MATCH, COAPOption.ETAG]:
                 value = valueBytes
@@ -301,8 +303,8 @@ class COAPMessage():
 
         index += 1 # skip 0xFF / end-of-options
         
-        if len(bytes) > index:
-            self.payload = bytes[index:]
+        if len(buff) > index:
+            self.payload = buff[index:]
         else:
             self.payload = ""
         
@@ -378,7 +380,7 @@ class COAPResponse(COAPMessage):
     CHANGED = 68
     CONTENT = 69
     
-     # 4.XX
+    # 4.XX
     BAD_REQUEST         = 128
     UNAUTHORIZED        = 129
     BAD_OPTION          = 130

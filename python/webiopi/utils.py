@@ -115,7 +115,7 @@ def runLoop(func=None, async=False):
             time.sleep(1)
 
 
-def addGPIO(list, gpio, params):
+def addGPIO(lst, gpio, params):
     gpio = int(gpio)
     params = params.split(" ")
     func = params[0].lower()
@@ -129,7 +129,7 @@ def addGPIO(list, gpio, params):
     value = -1
     if len(params) > 1:
         value = int(params[1])
-    list.append({"gpio": gpio, "func": func, "value": value})
+    lst.append({"gpio": gpio, "func": func, "value": value})
 
 def addGPIOSetup(gpio, params):
     addGPIO(GPIO_SETUP, gpio, params)
@@ -192,7 +192,7 @@ def getLocalIP():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             s.connect(('8.8.8.8', 53))
-            (host, p) = s.getsockname()
+            host = s.getsockname()[0]
             s.close()
             return host 
         except socket.error:
@@ -224,9 +224,9 @@ def error(message):
 def exception(message):
     LOGGER.exception(message)
 
-def printBytes(bytes):
-    for i in range(0, len(bytes)):
-        print("%03d: 0x%02X %03d %c" % (i, bytes[i], bytes[i], bytes[i]))
+def printBytes(buff):
+    for i in range(0, len(buff)):
+        print("%03d: 0x%02X %03d %c" % (i, buff[i], buff[i], buff[i]))
         
 def jsonDumps(obj):
     if ROOT_LOGGER.level == logging.DEBUG:

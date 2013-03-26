@@ -66,7 +66,7 @@ SPI_MODE_3      = (SPI_CPOL|SPI_CPHA)
 SPI_IOC_MAGIC   = ord('k')
 
 def SPI_IOC_MESSAGE(count):
-     return _IOW(SPI_IOC_MAGIC, 0, count)
+    return _IOW(SPI_IOC_MAGIC, 0, count)
 
 # Read / Write of SPI mode (SPI_MODE_0..SPI_MODE_3)
 SPI_IOC_RD_MODE             = _IOR(SPI_IOC_MAGIC, 1, 1)

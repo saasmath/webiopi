@@ -40,7 +40,7 @@ class Serial(Bus):
         Bus.__init__(self, "UART", device, os.O_RDWR | os.O_NOCTTY)
         fcntl.fcntl(self.fd, fcntl.F_SETFL, os.O_NDELAY)
         
-        backup  = termios.tcgetattr(self.fd)
+        #backup  = termios.tcgetattr(self.fd)
         options = termios.tcgetattr(self.fd)
         # iflag
         options[0] = 0

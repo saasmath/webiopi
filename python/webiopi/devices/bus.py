@@ -106,8 +106,8 @@ class Bus():
             return os.write(self.fd, string)
         raise Exception("Device %s not open" % self.device)
     
-    def writeBytes(self, bytes):
-        return self.write(bytearray(bytes))
+    def writeBytes(self, data):
+        return self.write(bytearray(data))
 
     def writeByte(self, value):
         self.writeBytes([value])

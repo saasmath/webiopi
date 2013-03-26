@@ -105,8 +105,8 @@ class Macro(RESTAPI):
         return self.sendRequest("POST", values)
 
 class Device(RESTAPI):
-    def __init__(self, client, name, type):
-        RESTAPI.__init__(self, client, "/devices/" + name + "/" + type)
+    def __init__(self, client, name, category):
+        RESTAPI.__init__(self, client, "/devices/" + name + "/" + category)
 
 class GPIO(Device):
     def __init__(self, client, name):

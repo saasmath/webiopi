@@ -71,8 +71,8 @@ class I2C(Bus):
     def writeRegister(self, addr, byte):
         self.writeBytes([addr, byte])
     
-    def writeRegisters(self, addr, bytes):
-        d = bytearray(len(bytes)+1)
+    def writeRegisters(self, addr, buff):
+        d = bytearray(len(buff)+1)
         d[0] = addr
-        d[1:] = bytes
+        d[1:] = buff
         self.writeBytes(d)

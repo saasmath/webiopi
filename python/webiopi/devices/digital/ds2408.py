@@ -59,24 +59,24 @@ class DS2408(OneWire, GPIOPort):
         
     def readState(self):
         try:
-            with open("/sys/bus/w1/devices/%s/state" % self.slave, "rb") as file:
-                data = file.read(1)
+            with open("/sys/bus/w1/devices/%s/state" % self.slave, "rb") as f:
+                data = f.read(1)
             return ord(data)
         except IOError:
             return -1
 
     def readByte(self):
         try:
-            with open("/sys/bus/w1/devices/%s/output" % self.slave, "rb") as file:
-                data = file.read(1)
+            with open("/sys/bus/w1/devices/%s/output" % self.slave, "rb") as f:
+                data = f.read(1)
             return bytearray(data)[0]
         except IOError:
             return -1
       
     def writeByte(self, value):
         try:
-            with open("/sys/bus/w1/devices/%s/output" % self.slave, "wb") as file:
-                file.write(bytearray([value]))
+            with open("/sys/bus/w1/devices/%s/output" % self.slave, "wb") as f:
+                f.write(bytearray([value]))
         except IOError:
                 pass
             

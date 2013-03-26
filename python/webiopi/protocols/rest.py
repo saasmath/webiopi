@@ -28,9 +28,9 @@ def request(method="GET", path="", data=None):
         return func
     return wrapper
 
-def response(format="%s", contentType=M_PLAIN):
+def response(fmt="%s", contentType=M_PLAIN):
     def wrapper(func):
-        func.format = format
+        func.format = fmt
         func.contentType = contentType
         return func
     return wrapper

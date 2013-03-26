@@ -21,10 +21,10 @@ EXTRAS = {
 
 }
 
-def loadExtraModule(type):
-    if EXTRAS[type]["loaded"] == False:
-        loadModule(EXTRAS[type]["module"])
-        EXTRAS[type]["loaded"] = True
+def loadExtraModule(name):
+    if EXTRAS[name]["loaded"] == False:
+        loadModule(EXTRAS[name]["module"])
+        EXTRAS[name]["loaded"] = True
 
 class OneWire(Bus):
     def __init__(self, slave=None, family=0, extra=None, name="1-Wire"):
@@ -69,7 +69,7 @@ class OneWire(Bus):
         return devices;
     
     def read(self):
-        with open("/sys/bus/w1/devices/%s/w1_slave" % self.slave) as file:
-            data = file.read()
+        with open("/sys/bus/w1/devices/%s/w1_slave" % self.slave) as f:
+            data = f.read()
         return data
 
