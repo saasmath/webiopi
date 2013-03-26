@@ -226,17 +226,17 @@ class TSL4531(TSL_LIGHT_X):
 
 class TSL45311(TSL4531):
     def __init__(self, slave=0x39, time=400):
-        TSL4531X.__init__(self, slave, time, "TSL45311")
+        TSL4531.__init__(self, slave, time, "TSL45311")
 
 class TSL45313(TSL4531):
     def __init__(self, slave=0x39, time=400):
-        TSL4531X.__init__(self, slave, time, "TSL45313")
+        TSL4531.__init__(self, slave, time, "TSL45313")
 
 class TSL45315(TSL4531):
     def __init__(self, slave=0x29, time=400):
-        TSL4531X.__init__(self, slave, time, "TSL45315")
+        TSL4531.__init__(self, slave, time, "TSL45315")
 
 class TSL45317(TSL4531):
     def __init__(self, slave=0x29, time=400):
-        TSL4531X.__init__(self, slave, time, "TSL45317")
+        TSL4531.__init__(self, slave, time, "TSL45317")
 
