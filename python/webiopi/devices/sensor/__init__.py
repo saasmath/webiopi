@@ -50,7 +50,8 @@ class Pressure():
         pressure = self.__getPascal__()
         if self.external != None:
             k = self.external.getKelvin()
-            return float(pressure) / (1.0 / (1.0 + 0.0065 / k * self.altitude)**5.255)
+            if k != 0:
+                return float(pressure) / (1.0 / (1.0 + 0.0065 / k * self.altitude)**5.255)
         return float(pressure) / (1.0 - self.altitude / 44330.0)**5.255
 
     @request("GET", "sensor/pressure/sea/hpa")
