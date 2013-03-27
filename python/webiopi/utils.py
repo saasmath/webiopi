@@ -29,7 +29,7 @@ BOARD_REVISION = GPIO.BOARD_REVISION
 
 PYTHON_MAJOR = sys.version_info.major
 
-VERSION = '0.5.4'
+VERSION = '0.6.0'
 VERSION_STRING = "WebIOPi/%s/Python%d.%d" % (VERSION, sys.version_info.major, sys.version_info.minor)
 
 MAPPING = [[], [], []]
