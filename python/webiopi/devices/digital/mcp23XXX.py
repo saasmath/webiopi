@@ -115,12 +115,10 @@ class MCP23SXX(MCP23XXX, SPI):
         SPI.__init__(self, toint(chip), 0, 8, 10000000, name)
         MCP23XXX.__init__(self, channelCount)
         self.slave = self.SLAVE
-        slave = toint(slave)
-        addr   = self.getAddress(self.IOCON)
-        iocon  = self.readRegister(addr)
-        iocon |= 0x08 # Hardware Address Enable
-        self.writeRegister(addr, iocon)
-        self.slave = slave
+        iocon_value = 0x08 # Hardware Address Enable
+        iocon_addr  = self.getAddress(self.IOCON)
+        self.writeRegister(iocon_addr, iocon_value)
+        self.slave = toint(slave)
     
     def __str__(self):
         return "%s(chip=%d, slave=0x%02X)" % (self.name, self.chip, self.slave)
@@ -130,7 +128,7 @@ class MCP23SXX(MCP23XXX, SPI):
         return d[2]
 
     def writeRegister(self, addr, value):
-        self.xfer([(self.slave << 1) | self.WRITE, addr, value])
+        self.writeBytes([(self.slave << 1) | self.WRITE, addr, value])
     
 class MCP23S08(MCP23SXX):
     def __init__(self, chip=0, slave=0x20):
