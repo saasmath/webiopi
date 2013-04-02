@@ -5,13 +5,21 @@ SEARCH="python python3"
 FOUND=""
 INSTALLED=""
 
+if [ "$#" = "1" ]; then
+	command="$1"
+else
+	command="none"
+fi
+
 echo
 echo "Installing WebIOPi..."
-echo 
-echo "Updating apt package list..."
-apt-get update
 echo
 
+if [ "$command" != "skip-apt" ]; then
+	echo "Updating apt package list..."
+	apt-get update
+	echo
+fi
 
 # Install Python library
 cd python
@@ -25,9 +33,11 @@ for python in $SEARCH; do
 		include=`$python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
 		echo "Found $version... "
 
-		# Install required dev header and setuptools
-		echo "Trying to install $python-dev using apt-get"
-		apt-get install -y $python-dev $python-setuptools
+		if [ "$command" != "skip-apt" ]; then
+			# Install required dev header and setuptools
+			echo "Trying to install $python-dev using apt-get"
+			apt-get install -y $python-dev $python-setuptools
+		fi
 
 		# Try to compile and install for the current python
 		if [ -f "$include/Python.h" ]; then
