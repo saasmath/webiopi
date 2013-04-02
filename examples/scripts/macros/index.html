@@ -60,11 +60,11 @@
 	});
 		
 	function mousedown() {
-		webiopi().setValue(25, 1);
+		webiopi().digitalWrite(25, 1);
 	}
 	
 	function mouseup() {
-		webiopi().setValue(25, 0);
+		webiopi().digitalWrite(25, 0);
 	}
 	
 	function outputSequence() {
