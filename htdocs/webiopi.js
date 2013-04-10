@@ -665,6 +665,10 @@ WebIOPi.prototype.newDevice = function(type, name) {
 	if (type == "Distance") {
 		return new Distance(name);
 	}
+	
+	if (type == "PiFaceDigital") {
+		return new PiFaceDigital(name);
+	}
 
 	return undefined;
 }
@@ -1340,6 +1344,105 @@ Distance.prototype.refreshUI = function() {
 			element.header.text(dist + ": " + data + "mm");
 		}
 		setTimeout(function(){dist.refreshUI()}, dist.refreshTime);
+	});
+}
+
+function PiFaceDigital(name) {
+	this.name = name;
+	this.url = "/devices/" + name + "/digital";
+	this.onready = null;
+	this.refreshTime = 1000;
+}
+
+PiFaceDigital.prototype.toString = function() {
+	return "PiFaceDigital";
+}
+
+PiFaceDigital.prototype.input = function(channel, callback) {
+	var name = this.name;
+	$.get(this.url + "/input/" + channel, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+PiFaceDigital.prototype.output = function(channel, value, callback) {
+	var name = this.name;
+	$.post(this.url + "/output/" + channel + "/" + value, function(data) {
+		callback(name, channel, data);
+	});
+}
+
+PiFaceDigital.prototype.readAll = function(callback) {
+	var name = this.name;
+	$.get(this.url+ "/*", function(data) {
+		callback(name, data);
+	});
+}
+
+PiFaceDigital.prototype.refreshUI = function() {
+	var port = this;
+	var element = this.element;
+	if ((element != undefined) && (element.header == undefined)) {
+		element.header = $("<h3>" + this + "</h3>");
+		element.append(element.header);
+	}
+	
+	if ((element != undefined) && (element.table == undefined)) {
+		element.header.text(this)
+		element.table = $("<table>");
+		element.append(element.table);
+
+		var line = $("<tr>");
+		line.append($("<td><b>Outputs</b></td>"))
+		for (var i = 7; i>=0; i--) {
+			var cell = $("<td>");
+			var button = webiopi().createButton(this.name + "_output_" + i, i, function() {
+				if ($("#" + port.name + "_output_" + $(this).attr("channel")).attr("class") == "LOW") {
+					value = 1;
+				}
+				else {
+					value = 0;
+				}
+				port.output($(this).attr("channel"), value, function(name, channel, data) {
+					var button = $("#" + name + "_output_" + channel);
+					if (data == "1") {
+						button.attr("class", "HIGH")
+					}
+					else {
+						button.attr("class", "LOW")
+					}
+				});
+			});
+			button.attr("channel", i);
+			button.attr("class", "LOW");
+			cell.append(button);
+			line.append(cell);
+		}
+		element.table.append(line);
+
+		line = $("<tr>");
+		line.append($("<td><b>Inputs</b></td>"))
+		for (var i = 7; i>=0; i--) {
+			var cell = $("<td>");
+			var button = webiopi().createButton(this.name + "_input_" + i, i, function() {
+			});
+			button.attr("channel", i);
+			button.attr("class", "LOW");
+			cell.append(button);
+			line.append(cell);
+		}
+		element.table.append(line);
+
+	}
+	
+	this.readAll(function(name, data) {
+		for (i in data["input"]) {
+			$("#" + name + "_input_" + i).attr("class", data["input"][i] == "1" ? "HIGH" : "LOW");
+		}
+		for (i in data["output"]) {
+			$("#" + name + "_output_" + i).attr("class", data["output"][i] == "1" ? "HIGH" : "LOW");
+		}
+		setTimeout(function(){port.refreshUI()}, port.refreshTime);
 	});
 }
 

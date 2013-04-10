@@ -94,7 +94,8 @@ def stop(signum=0, frame=None):
         
         for name in DEVICES:
             device = DEVICES[name]["device"]
-            device.close()
+            if hasattr(device, "close"):
+                device.close()
                 
         GPIOReset()
 

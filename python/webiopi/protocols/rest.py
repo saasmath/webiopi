@@ -325,5 +325,6 @@ from webiopi.devices import serial
 from webiopi.devices import digital
 from webiopi.devices import analog
 from webiopi.devices import sensor
+from webiopi.devices import shield
 
-PACKAGES = [serial, digital, analog, sensor]
+PACKAGES = [serial, digital, analog, sensor, shield]
