@@ -26,7 +26,7 @@ class PCA9685(PWM, I2C):
     M1_RESTART  = 1<<7
     
     def __init__(self, slave=0x40, frequency=50):
-        I2C.__init__(self, toint(slave), "PCA9685")
+        I2C.__init__(self, toint(slave))
         PWM.__init__(self, 16, 12, toint(frequency))
         self.VREF = 0
         
@@ -38,6 +38,9 @@ class PCA9685(PWM, I2C):
         time.sleep(0.01)
 
         self.writeRegister(self.MODE1, self.mode1)
+        
+    def __str__(self):
+        return "PCA9685(slave=0x%02X)" % self.slave
 
     def getChannelAddress(self, channel):
         return int(channel * 4 + self.PWM_BASE) 

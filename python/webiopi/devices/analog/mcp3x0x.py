@@ -18,8 +18,9 @@ from webiopi.devices.analog import ADC
 
 class MCP3X0X(SPI, ADC):
     def __init__(self, chip, channelCount, resolution, name):
-        SPI.__init__(self, toint(chip), 0, 8, 10000, name)
+        SPI.__init__(self, toint(chip), 0, 8, 10000)
         ADC.__init__(self, channelCount, resolution, 3.3)
+        self.name = name
         self.MSB_MASK = 2**(resolution-8) - 1
 
     def __str__(self):

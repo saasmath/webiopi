@@ -18,7 +18,7 @@ from webiopi.devices.analog import DAC
 
 class MCP492X(SPI, DAC):
     def __init__(self, chip, channelCount):
-        SPI.__init__(self, toint(chip), 0, 8, 10000000, "MCP492%d" % channelCount)
+        SPI.__init__(self, toint(chip), 0, 8, 10000000)
         DAC.__init__(self, channelCount, 12, 3.3)
         self.buffered=False
         self.gain=False
@@ -26,7 +26,7 @@ class MCP492X(SPI, DAC):
         self.values = [0 for i in range(channelCount)]
 
     def __str__(self):
-        return "%s(chip=%d)" % (self.name, self.chip)
+        return "MCP492%d(chip=%d)" % (self._analogCount, self.chip)
 
     def __analogRead__(self, channel, diff=False):
         return self.values[channel]

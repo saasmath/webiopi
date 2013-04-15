@@ -30,9 +30,11 @@ class ADS1X1X(ADC, I2C):
     CONFIG_MODE_MASK    = 0x01
     
     def __init__(self, slave, channelCount, resolution, name):
-        I2C.__init__(self, toint(slave), name)
+        I2C.__init__(self, toint(slave))
         ADC.__init__(self, channelCount, resolution, 4.096)
         self._analogMax = 2**(resolution-1)
+        self.name = name
+        
         config = self.readRegisters(self.CONFIG, 2)
         
         mode = 0 # continuous
@@ -44,6 +46,9 @@ class ADS1X1X(ADC, I2C):
         config[0] |= gain << 1
         
         self.writeRegisters(self.CONFIG, config)
+    
+    def __str__(self):
+        return "%s(slave=0x%02X)" % (self.name, self.slave)
         
     def __analogRead__(self, channel, diff=False):
         config = self.readRegisters(self.CONFIG, 2)

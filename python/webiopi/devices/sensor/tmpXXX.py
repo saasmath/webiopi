@@ -16,8 +16,11 @@ from webiopi.devices.i2c import *
 from webiopi.devices.sensor import Temperature
 
 class TMP102(I2C, Temperature):
-    def __init__(self, slave=0x48, name="TMP102"):
-        I2C.__init__(self, toint(slave), name)
+    def __init__(self, slave=0x48):
+        I2C.__init__(self, toint(slave))
+        
+    def __str__(self):
+        return "TMP102(slave=0x%02X)" % self.slave
         
     def __getKelvin__(self):
         return self.Celsius2Kelvin()
@@ -31,8 +34,8 @@ class TMP102(I2C, Temperature):
         return self.Celsius2Fahrenheit()
 
 class TMP75(TMP102):
-    def __init__(self, slave=0x48, resolution=12, name="TMP75"):
-        TMP102.__init__(self, slave, name)
+    def __init__(self, slave=0x48, resolution=12):
+        TMP102.__init__(self, slave)
         resolution = toint(resolution)
         if not resolution in range(9,13):
             raise ValueError("%dbits resolution out of range [%d..%d]bits" % (resolution, 9, 12))
@@ -44,6 +47,13 @@ class TMP75(TMP102):
         self.writeRegister(0x01, config)
         self.readRegisters(0x00, 2)
 
+    def __str__(self):
+        return "TMP75(slave=0x%02X, resolution=%d-bits)" % (self.slave, self.resolution)
+        
 class TMP275(TMP75):
-    def __init__(self, slave=0x48, resolution=12, name="TMP275"):
-        TMP75.__init__(self, slave, resolution, name)
+    def __init__(self, slave=0x48, resolution=12):
+        TMP75.__init__(self, slave, resolution)
+
+    def __str__(self):
+        return "TMP275(slave=0x%02X, resolution=%d-bits)" % (self.slave, self.resolution)
+        

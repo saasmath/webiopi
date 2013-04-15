@@ -86,7 +86,7 @@ SPI_IOC_RD_MAX_SPEED_HZ     = _IOR(SPI_IOC_MAGIC, 4, 4)
 SPI_IOC_WR_MAX_SPEED_HZ     = _IOW(SPI_IOC_MAGIC, 4, 4)
 
 class SPI(Bus):
-    def __init__(self, chip=0, mode=0, bits=8, speed=0, name="SPI"):
+    def __init__(self, chip=0, mode=0, bits=8, speed=0):
         Bus.__init__(self, "SPI", "/dev/spidev0.%d" % chip)
         self.chip = chip
 
@@ -116,11 +116,9 @@ class SPI(Bus):
             raise Exception("Cannot read SPI Max speed")
         self.speed = struct.unpack('I', val32)[0]
         assert((self.speed == speed) or (speed == 0))
-        
-        self.name = name
     
     def __str__(self):
-        return "%s(chip=%d, mode=%d, speed=%dHz)" % (self.name, self.chip, self.mode, self.speed)
+        return "SPI(chip=%d, mode=%d, speed=%dHz)" % (self.chip, self.mode, self.speed)
         
     def xfer(self, txbuff=None):
         length = len(txbuff)

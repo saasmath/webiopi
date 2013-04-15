@@ -51,8 +51,8 @@ class VCNL4000(I2C, Luminosity, Distance):
     MASK_PROX_READY      = 0b00100000
     MASK_AMB_READY       = 0b01000000
     
-    def __init__(self, slave=0b0010011, current=20, frequency=781, prox_threshold=15, prox_cycles=10, cal_cycles= 5, name="VCNL4000"):
-        I2C.__init__(self, toint(slave), name)
+    def __init__(self, slave=0b0010011, current=20, frequency=781, prox_threshold=15, prox_cycles=10, cal_cycles= 5):
+        I2C.__init__(self, toint(slave))
         self.setCurrent(toint(current))
         self.setFrequency(toint(frequency))
         self.prox_threshold = toint(prox_threshold)
@@ -62,6 +62,9 @@ class VCNL4000(I2C, Luminosity, Distance):
         self.__setAmbientMeasuringMode__()
         time.sleep(0.001)
         self.calibrate() # may have to be repeated from time to time or before every proximity measurement
+
+    def __str__(self):
+        return "VCNL4000(slave=0x%02X)" % self.slave
 
     def __family__(self):
         return [Luminosity.__family__(self), Distance.__family__(self)]

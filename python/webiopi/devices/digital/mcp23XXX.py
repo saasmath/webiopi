@@ -86,8 +86,12 @@ class MCP23XXX(GPIOPort):
 
 class MCP230XX(MCP23XXX, I2C):
     def __init__(self, slave, channelCount, name):
-        I2C.__init__(self, toint(slave), name)
+        I2C.__init__(self, toint(slave))
         MCP23XXX.__init__(self, channelCount)
+        self.name = name
+        
+    def __str__(self):
+        return "%s(slave=0x%02X)" % (self.name, self.slave)
 
 class MCP23008(MCP230XX):
     def __init__(self, slave=0x20):
@@ -112,14 +116,15 @@ class MCP23SXX(MCP23XXX, SPI):
     READ  = 0x01
     
     def __init__(self, chip, slave, channelCount, name):
-        SPI.__init__(self, toint(chip), 0, 8, 10000000, name)
+        SPI.__init__(self, toint(chip), 0, 8, 10000000)
         MCP23XXX.__init__(self, channelCount)
         self.slave = self.SLAVE
         iocon_value = 0x08 # Hardware Address Enable
         iocon_addr  = self.getAddress(self.IOCON)
         self.writeRegister(iocon_addr, iocon_value)
         self.slave = toint(slave)
-    
+        self.name = name
+
     def __str__(self):
         return "%s(chip=%d, slave=0x%02X)" % (self.name, self.chip, self.slave)
 

@@ -22,16 +22,19 @@ class PCF8574(I2C, GPIOPort):
     def __init__(self, slave=0x20):
         slave = toint(slave)
         if slave in range(0x20, 0x28):
-            name = "PCF8574"
+            self.name = "PCF8574"
         elif slave in range(0x38, 0x40):
-            name = "PCF8574A"
+            self.name = "PCF8574A"
         else:
             raise ValueError("Bad slave address for PCF8574(A) : 0x%02X not in range [0x20..0x27, 0x38..0x3F]" % slave)
         
-        I2C.__init__(self, slave, name)
+        I2C.__init__(self, slave)
         GPIOPort.__init__(self, 8)
         self.portWrite(0xFF)
         self.portRead()
+    
+    def __str__(self):
+        return "%s(slave=0x%02X)" % (self.name, self.slave)
         
     def __getFunction__(self, channel):
         return self.FUNCTIONS[channel]

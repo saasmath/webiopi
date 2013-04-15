@@ -19,8 +19,11 @@ from webiopi.devices.analog import DAC
 
 class MCP4725(DAC, I2C):
     def __init__(self, slave=0x60):
-        I2C.__init__(self, toint(slave), "MCP4725")
+        I2C.__init__(self, toint(slave))
         DAC.__init__(self, 1, 12, 3.3)
+        
+    def __str__(self):
+        return "MCP4725(slave=0x%02X)" % self.slave
 
     def __analogRead__(self, channel, diff=False):
         d = self.readBytes(3)

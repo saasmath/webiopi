@@ -31,9 +31,13 @@ class TSL_LIGHT_X(I2C, Luminosity):
     VAL_INVALID = -1
 
     def __init__(self, slave, time, name="TSL_LIGHT_X"):
-        I2C.__init__(self, toint(slave), name)  
+        I2C.__init__(self, toint(slave))
+        self.name = name  
         self.wake() # devices are powered down after power reset, wake them
         self.setTime(toint(time))
+
+    def __str__(self):
+        return "%s(slave=0x%02X)" % (self.name, self.slave)
 
     def wake(self):
         self.__wake__()

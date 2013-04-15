@@ -27,7 +27,7 @@ def loadExtraModule(name):
         EXTRAS[name]["loaded"] = True
 
 class OneWire(Bus):
-    def __init__(self, slave=None, family=0, extra=None, name="1-Wire"):
+    def __init__(self, slave=None, family=0, extra=None):
         Bus.__init__(self, "ONEWIRE", "/sys/bus/w1/devices/w1_bus_master1/w1_master_slaves", os.O_RDONLY)
         if self.fd > 0:
             os.close(self.fd)
@@ -41,7 +41,7 @@ class OneWire(Bus):
             elif len(addr) == 2:
                 prefix = int(addr[0], 16)
                 if family > 0 and family != prefix:
-                    raise Exception("Slave address %s does not match family %02x" % (slave, family))
+                    raise Exception("1-Wire slave address %s does not match family %02x" % (slave, family))
                 self.slave = slave
         else:
             devices = self.deviceList()
@@ -50,10 +50,9 @@ class OneWire(Bus):
             self.slave = devices[0]
 
         loadExtraModule(extra)
-        self.name = name
         
     def __str__(self):
-        return "%s(slave=%s)" % (self.name, self.slave)
+        return "1-Wire(slave=%s)" % self.slave
     
     def deviceList(self):
         devices = []

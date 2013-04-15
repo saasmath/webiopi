@@ -16,9 +16,13 @@ from webiopi.devices.onewire import *
 from webiopi.devices.sensor import Temperature
 
 class OneWireTemp(OneWire, Temperature):
-    def __init__(self, slave=None, family=0, name="1-Wire-Temp"):
-        OneWire.__init__(self, slave, family, "TEMP", name)
+    def __init__(self, slave=None, family=0, name="1-Wire"):
+        OneWire.__init__(self, slave, family, "TEMP")
+        self.name = name
         
+    def __str__(self):
+        return "%s(slave=%s)" % (self.name, self.slave)
+    
     def __getKelvin__(self):
         return self.Celsius2Kelvin()
 

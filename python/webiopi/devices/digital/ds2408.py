@@ -20,11 +20,13 @@ class DS2408(OneWire, GPIOPort):
     FUNCTIONS = [GPIO.IN for i in range(8)]
 
     def __init__(self, slave=None):
-
-        OneWire.__init__(self, slave, 0x29, "2408", "DS2408")
+        OneWire.__init__(self, slave, 0x29, "2408")
         GPIOPort.__init__(self, 8)
         self.portWrite(0x00)
-        
+    
+    def __str__(self):
+        return "DS2408(slave=%s)" % self.slave
+    
     def __getFunction__(self, channel):
         return self.FUNCTIONS[channel]
       

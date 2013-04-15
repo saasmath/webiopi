@@ -14,7 +14,6 @@
 
 import os
 import time
-import threading
 
 from webiopi.utils import *
 
@@ -75,9 +74,6 @@ class Bus():
         self.fd = 0
         self.open()
         
-    def __str__(self):
-        return "Bus(%s, %s)" % (self.busName, self.device)
-        
     def open(self):
         self.fd = os.open(self.device, self.flag)
         if self.fd < 0:
@@ -86,9 +82,6 @@ class Bus():
     def close(self):
         if self.fd > 0:
             os.close(self.fd)
-    
-    def available(self):
-        raise NotImplementedError
     
     def read(self, size=1):
         if self.fd > 0:
