@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.types import toint
 from webiopi.devices.i2c import I2C
 from webiopi.devices.spi import SPI
 from webiopi.devices.digital import GPIOPort
@@ -60,15 +60,15 @@ class MCP23XXX(GPIOPort):
     def __getFunction__(self, channel):
         (addr, mask) = self.getChannel(self.IODIR, channel) 
         d = self.readRegister(addr)
-        return GPIO.IN if (d & mask) == mask else GPIO.OUT
+        return self.IN if (d & mask) == mask else self.OUT
         
     def __setFunction__(self, channel, value):
-        if not value in [GPIO.IN, GPIO.OUT]:
+        if not value in [self.IN, self.OUT]:
             raise ValueError("Requested function not supported")
 
         (addr, mask) = self.getChannel(self.IODIR, channel) 
         d = self.readRegister(addr)
-        if value == GPIO.IN:
+        if value == self.IN:
             d |= mask
         else:
             d &= ~mask

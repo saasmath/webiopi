@@ -20,9 +20,10 @@
 #                        
 
 import time
-from webiopi.devices.i2c import *
-from webiopi.devices.sensor import *
-from webiopi.utils import *
+from webiopi.devices.i2c import I2C
+from webiopi.devices.sensor import Luminosity, Distance
+from webiopi.utils.types import toint
+from webiopi.utils.logger import debug 
 
 class VCNL4000(I2C, Luminosity, Distance):
     REG_COMMAND           = 0x80

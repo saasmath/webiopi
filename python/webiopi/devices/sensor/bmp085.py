@@ -13,7 +13,8 @@
 #   limitations under the License.
 
 import time
-from webiopi.devices.i2c import *
+from webiopi.utils.types import signInteger
+from webiopi.devices.i2c import I2C
 from webiopi.devices.sensor import Temperature, Pressure
 
 class BMP085(I2C, Temperature, Pressure):

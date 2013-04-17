@@ -12,15 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import os
-import sys
 import fcntl
 import array
 import ctypes
 import struct
 
-from webiopi.utils import *
-from webiopi.devices.bus import *
+from webiopi.utils.version import PYTHON_MAJOR
+from webiopi.devices.bus import Bus
 
 # from spi/spidev.h
 _IOC_NRBITS   =  8
@@ -37,15 +35,15 @@ _IOC_NONE   = 0
 _IOC_WRITE  = 1
 _IOC_READ   = 2
 
-def _IOC(direction,type,nr,size):
+def _IOC(direction,t,nr,size):
     return (((direction)  << _IOC_DIRSHIFT) |
             ((size) << _IOC_SIZESHIFT) |
-            ((type) << _IOC_TYPESHIFT) |
+            ((t) << _IOC_TYPESHIFT) |
             ((nr)   << _IOC_NRSHIFT))
-def _IOR(type, number, size):
-    return _IOC(_IOC_READ, type, number, size)
-def _IOW(type, number, size):
-    return _IOC(_IOC_WRITE, type, number, size)
+def _IOR(t, number, size):
+    return _IOC(_IOC_READ, t, number, size)
+def _IOW(t, number, size):
+    return _IOC(_IOC_WRITE, t, number, size)
 
 SPI_CPHA        = 0x01
 SPI_CPOL        = 0x02

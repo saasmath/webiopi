@@ -18,7 +18,8 @@
 #   1.0    2013/02/28    Initial release
 #                        
 
-from webiopi.devices.i2c import *
+from webiopi.utils.types import toint
+from webiopi.devices.i2c import I2C
 from webiopi.devices.sensor import Luminosity
 
 class TSL_LIGHT_X(I2C, Luminosity):

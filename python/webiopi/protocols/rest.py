@@ -12,100 +12,31 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils import types
+from webiopi.utils import logger
+from webiopi.utils.types import M_JSON, M_PLAIN
+from webiopi.utils.version import BOARD_REVISION, VERSION_STRING, MAPPING
+from webiopi.devices import manager
+from webiopi.devices import instance
+from webiopi.devices.bus import BUSLIST
+
+try:
+    import _webiopi.GPIO as GPIO
+except:
+    pass
 
 MACROS = {}
-
-M_PLAIN = "text/plain"
-M_JSON  = "application/json"
-
-def request(method="GET", path="", data=None):
-    def wrapper(func):
-        func.routed = True
-        func.method = method
-        func.path = path
-        func.data = data
-        return func
-    return wrapper
-
-def response(fmt="%s", contentType=M_PLAIN):
-    def wrapper(func):
-        func.format = fmt
-        func.contentType = contentType
-        return func
-    return wrapper
-
-def macro(func):
-    func.macro = True
-    return func
-
-def findDeviceClass(name):
-    for devices in PACKAGES: 
-        for dev in dir(devices):
-            if dev.split(".")[-1] == name:
-                return getattr(devices, dev)
-    return None
 
 class RESTHandler():
     def __init__(self):
         self.device_mapping = True
+        self.export = []
         self.routes = {}
-        self.gpioExport = []
+        self.macros = {}
         
-    def stop(self):
-        pass
 
     def addMacro(self, macro):
-        MACROS[macro.__name__] = macro
-        
-    def addDevice(self, name, device, args):
-        devClass = findDeviceClass(device)
-        if devClass == None:
-            raise Exception("Device driver not found for %s" % device)
-        if len(args) > 0:
-            dev = devClass(**args)
-        else:
-            dev = devClass()
-        self.addDeviceInstance(name, dev, args)
-
-    def addDeviceInstance(self, name, dev, args):
-        funcs = {"GET": {}, "POST": {}}
-        for att in dir(dev):
-            func = getattr(dev, att)
-            if callable(func) and hasattr(func, "routed"):
-                if name == "GPIO":
-                    debug("Mapping %s.%s to REST %s /GPIO/%s" % (dev, att, func.method, func.path))
-                else:
-                    debug("Mapping %s.%s to REST %s /devices/%s/%s" % (dev, att, func.method, name, func.path))
-                funcs[func.method][func.path] = func
-        
-        DEVICES[name] = {'device': dev, 'functions': funcs}
-        if name == "GPIO":
-            info("GPIO - Native mapped to REST API /GPIO")
-        else:
-            info("%s - %s mapped to REST API /devices/%s" % (dev.__family__(), dev, name))
-            
-    def getDevicesJSON(self, compact=False):
-        name = "name"
-        type = "type"
-        
-        devices = []
-        for devName in DEVICES:
-            if devName == "GPIO":
-                continue
-            instance = DEVICES[devName]["device"]
-            if hasattr(instance, "__family__"):
-                family = instance.__family__()
-                if isinstance(family, str):
-                    devices.append({name: devName, type:family})
-                else:
-                    for fam in family:
-                        devices.append({name: devName, type:fam})
-                        
-            else:
-                devices.append({name: devName, type:instance.__str__()})
-
-        return jsonDumps(sorted(devices, key=lambda dev: dev[name]))
+        self.macros[macro.__name__] = macro
         
     def addRoute(self, source, destination):
         if source[0] == "/":
@@ -113,13 +44,13 @@ class RESTHandler():
         if destination[0] == "/":
             destination = destination[1:]
         self.routes[source] = destination
-        info("Added Route /%s => /%s" % (source, destination))
+        logger.info("Added Route /%s => /%s" % (source, destination))
         
     def findRoute(self, path):
         for source in self.routes:
             if path.startswith(source):
                 route = path.replace(source, self.routes[source])
-                info("Routing /%s => /%s" % (path, route))
+                logger.info("Routing /%s => /%s" % (path, route))
                 return route
         return path
         
@@ -135,30 +66,30 @@ class RESTHandler():
         if fmt.startswith("%"):
             
             fmt = fmt[1:]
-            type = 's'
+            t = 's'
             if fmt[0] == '(':
                 if fmt[-1] == ')':
                     name = fmt[1:-1]
                 elif fmt[-2] == ')':                                   
                     name = fmt[1:-2]
-                    type = fmt[-1]
+                    t = fmt[-1]
                 else:
                     raise Exception("Missing closing brace")
             else:
                 name = fmt
             
-            if type == 's':
+            if t == 's':
                 args[name] = path
-            elif type == 'b':
-                args[name] = str2bool(path)
-            elif type == 'd':
-                args[name] = toint(path)
-            elif type == 'x':
+            elif t == 'b':
+                args[name] = types.str2bool(path)
+            elif t == 'd':
+                args[name] = types.toint(path)
+            elif t == 'x':
                 args[name] = int(path, 16)
-            elif type == 'f':
+            elif t == 'f':
                 args[name] = float(path)
             else:
-                raise Exception("Unknown format type : %s" % type)
+                raise Exception("Unknown format type : %s" % t)
             
             return self.extract(fmtArray[1:], pathArray[1:], args)
             
@@ -167,11 +98,11 @@ class RESTHandler():
     def getDeviceRoute(self, method, path):
         pathArray = path.split("/")
         deviceName = pathArray[0]
-        if not deviceName in DEVICES:
+        device = instance.DEVICES[deviceName]
+        if device == None:
             return (None, deviceName + " Not Found")
-
         pathArray = pathArray[1:]
-        funcs = DEVICES[deviceName]["functions"][method]
+        funcs = device["functions"][method]
         functionName = "/".join(pathArray)
         if functionName in funcs:
             return (funcs[functionName], {})
@@ -200,7 +131,7 @@ class RESTHandler():
             if hasattr(func, "contentType"):
                 contentType = func.contentType
                 if contentType == M_JSON:
-                    response = jsonDumps(result)
+                    response = types.jsonDumps(result)
                 else:
                     response = func.format % result
             else:
@@ -208,39 +139,6 @@ class RESTHandler():
         
         return (200, response, contentType)
         
-    def getJSON(self, compact=False):
-        if compact:
-            f = 'f'
-            v = 'v'
-        else:
-            f = 'function'
-            v = 'value'
-        
-        json = {}
-        for (alt, value) in FUNCTIONS.items():
-            json[alt] = int(value["enabled"])
-        
-        gpios = {}
-        if len(self.gpioExport) > 0:
-            export = self.gpioExport
-        else:
-            export = range(GPIO.GPIO_COUNT)
-
-        for gpio in export:
-            gpios[gpio] = {}
-            if compact:
-                gpios[gpio][f] = GPIO.getFunction(gpio)
-            else:
-                gpios[gpio][f] = GPIO.getFunctionString(gpio)
-            gpios[gpio][v] = int(GPIO.input(gpio))
-
-            if GPIO.getFunction(gpio) == GPIO.PWM:
-                (type, value) = GPIO.getPulse(gpio).split(':')
-                gpios[gpio][type] = value
-        
-        json['GPIO'] = gpios
-        return jsonDumps(json)
-
     def do_GET(self, relativePath, compact=False):
         relativePath = self.findRoute(relativePath)
         
@@ -250,7 +148,7 @@ class RESTHandler():
             
         # RPi header map
         elif relativePath == "map":
-            json = "%s" % MAPPING[BOARD_REVISION]
+            json = "%s" % MAPPING
             json = json.replace("'", '"')
             return (200, json, M_JSON)
 
@@ -268,7 +166,7 @@ class RESTHandler():
             return self.callDeviceFunction("GET", relativePath)
         
         elif relativePath == "devices/*":
-            return (200, self.getDevicesJSON(compact), M_JSON)
+            return (200, manager.getDevicesJSON(compact), M_JSON)
         
         elif relativePath.startswith("devices/"):
             if not self.device_mapping:
@@ -293,8 +191,8 @@ class RESTHandler():
             else:
                 value = ""
 
-            if mname in MACROS:
-                macro = MACROS[mname]
+            if mname in self.macros:
+                macro = self.macros[mname]
 
                 if ',' in value:
                     args = value.split(',')
@@ -321,10 +219,36 @@ class RESTHandler():
         else: # path unknowns
             return (0, None, None)
 
-from webiopi.devices import serial
-from webiopi.devices import digital
-from webiopi.devices import analog
-from webiopi.devices import sensor
-from webiopi.devices import shield
+    def getJSON(self, compact=False):
+        if compact:
+            f = 'f'
+            v = 'v'
+        else:
+            f = 'function'
+            v = 'value'
+        
+        json = {}
+        for (bus, value) in BUSLIST.items():
+            json[bus] = int(value["enabled"])
+        
+        gpios = {}
+        if len(self.export) > 0:
+            export = self.export
+        else:
+            export = range(GPIO.GPIO_COUNT)
+    
+        for gpio in export:
+            gpios[gpio] = {}
+            if compact:
+                gpios[gpio][f] = GPIO.getFunction(gpio)
+            else:
+                gpios[gpio][f] = GPIO.getFunctionString(gpio)
+            gpios[gpio][v] = int(GPIO.input(gpio))
+    
+            if GPIO.getFunction(gpio) == GPIO.PWM:
+                (pwmType, value) = GPIO.getPulse(gpio).split(':')
+                gpios[gpio][pwmType] = value
+        
+        json['GPIO'] = gpios
+        return types.jsonDumps(json)
 
-PACKAGES = [serial, digital, analog, sensor, shield]

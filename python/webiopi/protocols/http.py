@@ -14,12 +14,14 @@
 
 import os
 import threading
-import re
 import codecs
 import mimetypes as mime
 import logging
 
-from webiopi.utils import *
+from webiopi.utils.version import VERSION_STRING, PYTHON_MAJOR
+from webiopi.utils.logger import info, exception
+from webiopi.utils.crypto import encrypt
+from webiopi.utils.types import str2bool
 
 if PYTHON_MAJOR >= 3:
     import http.server as BaseHTTPServer
@@ -118,7 +120,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
         self.end_headers();
     
-    def sendResponse(self, code, body=None, type="text/plain"):
+    def sendResponse(self, code, body=None, contentType="text/plain"):
         if code >= 400:
             if body != None:
                 self.send_error(code, body)
@@ -128,7 +130,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(code)
             self.send_header("Cache-Control", "no-cache")
             if body != None:
-                self.send_header("Content-Type", type);
+                self.send_header("Content-Type", contentType);
                 self.end_headers();
                 self.wfile.write(body.encode())
                 
@@ -170,12 +172,12 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 or realPath.startswith(WEBIOPI_DOCROOT)):
             return self.sendResponse(403, "Not Authorized")
         
-        (type, encoding) = mime.guess_type(path)
+        (contentType, encoding) = mime.guess_type(path)
         f = codecs.open(path, encoding=encoding)
         data = f.read()
         f.close()
         self.send_response(200)
-        self.send_header("Content-Type", type);
+        self.send_header("Content-Type", contentType);
         self.send_header("Content-Length", os.path.getsize(realPath))
         self.end_headers()
         self.wfile.write(data)
@@ -222,10 +224,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 result = (405, None, None)
                 
-            (code, body, type) = result
+            (code, body, contentType) = result
             
             if code > 0:
-                self.sendResponse(code, body, type)
+                self.sendResponse(code, body, contentType)
             else:
                 if self.command == "GET":
                     self.serveFile(relativePath)

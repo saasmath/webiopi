@@ -12,9 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.types import M_JSON
 from webiopi.devices.digital.mcp23XXX import MCP23S17
-from webiopi.protocols.rest import *
+from webiopi.decorators.rest import request, response
+
 
 class PiFaceDigital():
     def __init__(self, board=0):

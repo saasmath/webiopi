@@ -13,8 +13,11 @@
 #   limitations under the License.
 
 import sys
-from webiopi.utils import *
 from webiopi.server import Server
+from webiopi.utils.loader import loadScript
+from webiopi.utils.logger import exception, setDebug, info, logToFile
+from webiopi.utils.version import VERSION_STRING
+from webiopi.utils.thread import runLoop, stop
 
 def displayHelp():
     print("WebIOPi command-line usage")

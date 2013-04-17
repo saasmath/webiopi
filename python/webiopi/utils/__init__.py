@@ -13,22 +13,4 @@
 #   limitations under the License.
 
 
-from time import sleep
- 
-from webiopi.utils.version import BOARD_REVISION, VERSION
-from webiopi.utils.logger import setInfo, setDebug, info, debug, warn, error, exception
-from webiopi.utils.thread import runLoop
-from webiopi.server import Server
-from webiopi.devices.instance import deviceInstance
-from webiopi.decorators.rest import macro
 
-from webiopi.devices import bus as _bus
-
-try:
-    import _webiopi.GPIO as GPIO
-except:
-    pass
-
-
-setInfo()
-_bus.checkAllBus()

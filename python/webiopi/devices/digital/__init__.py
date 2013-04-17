@@ -12,10 +12,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
-from webiopi.protocols.rest import *
+from webiopi.decorators.rest import request, response
+from webiopi.utils.types import M_JSON
 
 class GPIOPort():
+    IN  = 0
+    OUT = 1
+    
+    LOW  = False
+    HIGH = True
+    
     def __init__(self, channelCount):
         self.digitalChannelCount = channelCount
         
@@ -61,12 +67,12 @@ class GPIOPort():
     @request("GET", "%(channel)d/function")
     def getFunctionString(self, channel):
         func = self.getFunction(channel)
-        if func == GPIO.IN:
+        if func == self.IN:
             return "IN"
-        elif func == GPIO.OUT:
+        elif func == self.OUT:
             return "OUT"
-        elif func == GPIO.PWM:
-            return "PWM"
+#        elif func == GPIO.PWM:
+#            return "PWM"
         else:
             return "UNKNOWN"
         
@@ -79,11 +85,11 @@ class GPIOPort():
     def setFunctionString(self, channel, value):
         value = value.lower()
         if value == "in":
-            self.setFunction(channel, GPIO.IN)
+            self.setFunction(channel, self.IN)
         elif value == "out":
-            self.setFunction(channel, GPIO.OUT)
-        elif value == "pwm":
-            self.setFunction(channel, GPIO.PWM)
+            self.setFunction(channel, self.OUT)
+#        elif value == "pwm":
+#            self.setFunction(channel, GPIO.PWM)
         else:
             raise ValueError("Bad Function")
         return self.getFunctionString(channel)  
@@ -131,8 +137,8 @@ class GPIOPort():
     def portWrite(self, value):
         self.__portWrite__(value)
         return self.portRead()
-    
-from webiopi.devices.digital.mcp23XXX import MCP23008, MCP23009, MCP23017, MCP23018
-from webiopi.devices.digital.mcp23XXX import MCP23S08, MCP23S09, MCP23S17, MCP23S18
-from webiopi.devices.digital.pcf8574 import PCF8574, PCF8574A
-from webiopi.devices.digital.ds2408 import DS2408
+
+DRIVERS = {}    
+DRIVERS["mcp23XXX"] = ["MCP23008", "MCP23009", "MCP23017", "MCP23018", "MCP23S08", "MCP23S09", "MCP23S17", "MCP23S18"]
+DRIVERS["pcf8574" ] = ["PCF8574", "PCF8574A"]
+DRIVERS["ds2408" ] = ["DS2408"]

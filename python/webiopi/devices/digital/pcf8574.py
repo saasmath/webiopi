@@ -12,12 +12,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.types import toint
 from webiopi.devices.i2c import I2C
 from webiopi.devices.digital import GPIOPort
 
 class PCF8574(I2C, GPIOPort):
-    FUNCTIONS = [GPIO.IN for i in range(8)]
+    FUNCTIONS = [GPIOPort.IN for i in range(8)]
     
     def __init__(self, slave=0x20):
         slave = toint(slave)
@@ -40,7 +40,7 @@ class PCF8574(I2C, GPIOPort):
         return self.FUNCTIONS[channel]
     
     def __setFunction__(self, channel, value):
-        if not value in [GPIO.IN, GPIO.OUT]:
+        if not value in [self.IN, self.OUT]:
             raise ValueError("Requested function not supported")
         self.FUNCTIONS[channel] = value
         

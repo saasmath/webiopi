@@ -12,7 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.protocols.rest import *
+from webiopi.utils.types import toint
+from webiopi.utils.types import M_JSON
+from webiopi.devices.instance import deviceInstance
+from webiopi.decorators.rest import request, response
 
 class Pressure():
     def __init__(self, altitude=0, external=None):
@@ -166,9 +169,9 @@ class Distance():
     def getYard(self):
         return self.getInch() / 36
     
-
-from webiopi.devices.sensor.bmp085 import BMP085
-from webiopi.devices.sensor.onewiretemp import DS1822, DS1825, DS18B20, DS18S20, DS28EA00
-from webiopi.devices.sensor.tmpXXX import TMP75, TMP102, TMP275
-from webiopi.devices.sensor.tslXXXX import TSL2561, TSL2561CS, TSL2561T, TSL4531, TSL45311, TSL45313, TSL45315, TSL45317
-from webiopi.devices.sensor.vcnl4000 import VCNL4000
+DRIVERS = {}
+DRIVERS["bmp085"] = ["BMP085"]
+DRIVERS["onewiretemp"] = ["DS1822", "DS1825", "DS18B20", "DS18S20", "DS28EA00"]
+DRIVERS["tmpXXX"] = ["TMP75", "TMP102", "TMP275"]
+DRIVERS["tslXXXX"] = ["TSL2561", "TSL2561CS", "TSL2561T", "TSL4531", "TSL45311", "TSL45313", "TSL45315", "TSL45317"]
+DRIVERS["vcnl4000"] = ["VCNL4000"]

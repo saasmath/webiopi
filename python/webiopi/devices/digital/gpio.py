@@ -12,9 +12,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.types import M_JSON
+from webiopi.utils.logger import debug
 from webiopi.devices.digital import GPIOPort
-from webiopi.protocols.rest import *
+from webiopi.decorators.rest import request, response
+try:
+    import _webiopi.GPIO as GPIO
+except:
+    pass
+
+EXPORT = []
 
 class NativeGPIO(GPIOPort):
     def __init__(self):
@@ -22,10 +29,58 @@ class NativeGPIO(GPIOPort):
         self.export = range(54)
         self.post_value = True
         self.post_function = True
+        self.gpio_setup = []
+        self.gpio_reset = []
         
     def __str__(self):
         return "GPIO"
     
+    def addGPIO(self, lst, gpio, params):
+        gpio = int(gpio)
+        params = params.split(" ")
+        func = params[0].lower()
+        if func == "in":
+            func = GPIO.IN
+        elif func == "out":
+            func = GPIO.OUT
+        else:
+            raise Exception("Unknown function")
+        
+        value = -1
+        if len(params) > 1:
+            value = int(params[1])
+        lst.append({"gpio": gpio, "func": func, "value": value})
+    
+    def addGPIOSetup(self, gpio, params):
+        self.addGPIO(self.gpio_setup, gpio, params)
+        
+    def addGPIOReset(self, gpio, params):
+        self.addGPIO(self.gpio_reset, gpio, params)
+        
+    def addSetups(self, gpios):
+        for (gpio, params) in gpios:
+            self.addGPIOSetup(gpio, params)
+
+    def addResets(self, gpios):
+        for (gpio, params) in gpios:
+            self.addGPIOReset(gpio, params)
+    
+    def setup(self):
+        for g in self.gpio_setup:
+            gpio = g["gpio"]
+            debug("Setup GPIO %d" % gpio)
+            GPIO.setFunction(gpio, g["func"])
+            if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
+                GPIO.digitalWrite(gpio, g["value"])
+    
+    def close(self):
+        for g in self.gpio_reset:
+            gpio = g["gpio"]
+            debug("Reset GPIO %d" % gpio)
+            GPIO.setFunction(gpio, g["func"])
+            if g["value"] >= 0 and GPIO.getFunction(gpio) == GPIO.OUT:
+                GPIO.digitalWrite(gpio, g["value"])
+        
     def checkDigitalChannelExported(self, channel):
         if not channel in self.export:
             raise GPIO.InvalidChannelException("Channel %d is not allowed" % channel)
@@ -81,6 +136,7 @@ class NativeGPIO(GPIOPort):
             v = "value"
             
         values = {}
+        print(self.export)
         for i in self.export:
             if compact:
                 func = GPIO.getFunction(i)
@@ -130,9 +186,4 @@ class NativeGPIO(GPIOPort):
         self.checkDigitalChannel(channel)
         GPIO.pulseAngle(channel, value)
         return GPIO.getPulse(channel)
-        
-    def setup(self):
-        pass
     
-    def close(self):
-        pass

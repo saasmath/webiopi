@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.types import toint
 from webiopi.devices.spi import SPI
 from webiopi.devices.analog import DAC
 

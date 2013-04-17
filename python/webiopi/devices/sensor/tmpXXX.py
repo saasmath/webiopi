@@ -12,7 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.devices.i2c import *
+from webiopi.utils.types import toint, signInteger
+from webiopi.devices.i2c import I2C
 from webiopi.devices.sensor import Temperature
 
 class TMP102(I2C, Temperature):

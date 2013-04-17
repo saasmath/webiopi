@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
-from webiopi.protocols.rest import *
+from webiopi.decorators.rest import request, response
+from webiopi.utils.types import M_JSON
 
 class ADC():
     def __init__(self, channelCount, resolution, vref):
@@ -259,9 +259,9 @@ class PWM():
             values[i]["angle"] = float("%.2f" % self.RatioToAngle(val))
         return values
     
-
-from webiopi.devices.analog.ads1x1x import ADS1014, ADS1015, ADS1114, ADS1115
-from webiopi.devices.analog.mcp3x0x import MCP3004, MCP3008, MCP3204, MCP3208
-from webiopi.devices.analog.mcp4725 import MCP4725
-from webiopi.devices.analog.mcp492X import MCP4921, MCP4922
-from webiopi.devices.analog.pca9685 import PCA9685
+DRIVERS = {}
+DRIVERS["ads1x1x"] = ["ADS1014", "ADS1015", "ADS1114", "ADS1115"]
+DRIVERS["mcp3x0x"] = ["MCP3004", "MCP3008", "MCP3204", "MCP3208"]
+DRIVERS["mcp4725"] = ["MCP4725"]
+DRIVERS["mcp492X"] = ["MCP4921", "MCP4922"]
+DRIVERS["pca9685"] = ["PCA9685"]

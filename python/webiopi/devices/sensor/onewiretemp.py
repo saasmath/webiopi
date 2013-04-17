@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.devices.onewire import *
+from webiopi.devices.onewire import OneWire
 from webiopi.devices.sensor import Temperature
 
 class OneWireTemp(OneWire, Temperature):

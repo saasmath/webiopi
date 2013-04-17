@@ -12,4 +12,5 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.devices.shield.piface import PiFaceDigital
+DRIVERS = {}
+DRIVERS["piface"] = ["PiFaceDigital"]

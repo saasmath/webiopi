@@ -12,8 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
-from webiopi.devices.i2c import *
+import time
+from webiopi.utils.types import toint
+from webiopi.devices.i2c import I2C
 from webiopi.devices.analog import PWM
 
 class PCA9685(PWM, I2C):

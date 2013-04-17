@@ -12,12 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
-from webiopi.devices.onewire import *
+from webiopi.devices.onewire import OneWire
 from webiopi.devices.digital import GPIOPort
 
 class DS2408(OneWire, GPIOPort):
-    FUNCTIONS = [GPIO.IN for i in range(8)]
+    FUNCTIONS = [GPIOPort.IN for i in range(8)]
 
     def __init__(self, slave=None):
         OneWire.__init__(self, slave, 0x29, "2408")
@@ -31,10 +30,10 @@ class DS2408(OneWire, GPIOPort):
         return self.FUNCTIONS[channel]
       
     def __setFunction__(self, channel, value):
-        if not value in [GPIO.IN, GPIO.OUT]:
+        if not value in [self.IN, self.OUT]:
             raise ValueError("Requested function not supported")
         self.FUNCTIONS[channel] = value
-        if value == GPIO.IN:
+        if value == self.IN:
             self.__output__(channel, 0)
 
     def __digitalRead__(self, channel):

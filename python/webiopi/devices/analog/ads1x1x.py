@@ -13,8 +13,8 @@
 #   limitations under the License.
 
 from time import sleep
-from webiopi.utils import *
-from webiopi.devices.i2c import *
+from webiopi.utils.types import toint, signInteger
+from webiopi.devices.i2c import I2C
 from webiopi.devices.analog import ADC
 
 

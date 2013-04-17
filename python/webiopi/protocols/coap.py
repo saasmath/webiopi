@@ -12,7 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import *
+from webiopi.utils.version import PYTHON_MAJOR
+from webiopi.utils.logger import info, exception 
 
 import socket
 import struct
@@ -105,9 +106,9 @@ class COAPMessage():
     ACK = 2
     RST = 3
 
-    def __init__(self, type=0, code=0, uri=None):
+    def __init__(self, msg_type=0, code=0, uri=None):
         self.version = 1
-        self.type    = type
+        self.type    = msg_type
         self.code    = code
         self.id      = 0
         self.token   = None
@@ -327,8 +328,8 @@ class COAPRequest(COAPMessage):
     PUT    = 3
     DELETE = 4
 
-    def __init__(self, type=0, code=0, uri=None):
-        COAPMessage.__init__(self, type, code, uri)
+    def __init__(self, msg_type=0, code=0, uri=None):
+        COAPMessage.__init__(self, msg_type, code, uri)
 
 class COAPGet(COAPRequest):
     def __init__(self, uri):
@@ -500,7 +501,7 @@ class COAPHandler():
     
     def do_GET(self, request, response):
         try:
-            (code, body, type) = self.handler.do_GET(request.uri_path[1:], True)
+            (code, body, contentType) = self.handler.do_GET(request.uri_path[1:], True)
             if code == 0:
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
@@ -508,7 +509,7 @@ class COAPHandler():
             else:
                 response.code =  HTTPCode2CoAPCode(code)
             response.payload = body
-            response.content_format = COAPContentFormat.getCode(type)
+            response.content_format = COAPContentFormat.getCode(contentType)
         except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
             response.code = COAPResponse.FORBIDDEN
             response.payload = "%s" % e
@@ -518,7 +519,7 @@ class COAPHandler():
         
     def do_POST(self, request, response):
         try:
-            (code, body, type) = self.handler.do_POST(request.uri_path[1:], request.payload, True)
+            (code, body, contentType) = self.handler.do_POST(request.uri_path[1:], request.payload, True)
             if code == 0:
                 response.code = COAPResponse.NOT_FOUND
             elif code == 200:
@@ -526,7 +527,7 @@ class COAPHandler():
             else:
                 response.code =  HTTPCode2CoAPCode(code)
             response.payload = body
-            response.content_format = COAPContentFormat.getCode(type)
+            response.content_format = COAPContentFormat.getCode(contentType)
         except (GPIO.InvalidDirectionException, GPIO.InvalidChannelException, GPIO.SetupException) as e:
             response.code = COAPResponse.FORBIDDEN
             response.payload = "%s" % e

@@ -12,7 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from webiopi.utils import LOGGER, PYTHON_MAJOR, encodeCredentials
+from webiopi.utils.logger import LOGGER
+from webiopi.utils.version import PYTHON_MAJOR
+from webiopi.utils.crypto import encodeCredentials
 from webiopi.protocols.coap import COAPClient, COAPGet, COAPPost, COAPPut, COAPDelete
 
 if PYTHON_MAJOR >= 3:

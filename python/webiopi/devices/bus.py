@@ -14,9 +14,16 @@
 
 import os
 import time
+import subprocess
 
-from webiopi.utils import *
+from webiopi.utils.logger import debug, info
 
+BUSLIST = {
+    "I2C": {"enabled": False, "gpio": {0:"SDA", 1:"SCL", 2:"SDA", 3:"SCL"}, "modules": ["i2c-bcm2708", "i2c-dev"]},
+    "SPI": {"enabled": False, "gpio": {7:"CE1", 8:"CE0", 9:"MISO", 10:"MOSI", 11:"SCLK"}, "modules": ["spi-bcm2708", "spidev"]},
+    "UART": {"enabled": False, "gpio": {14:"TX", 15:"RX"}},
+    "ONEWIRE": {"enabled": False, "gpio": {4:"DATA"}, "modules": ["w1-gpio"], "wait": 2}
+}
 
 def loadModule(module):
     debug("Loading module : %s" % module)
@@ -26,21 +33,21 @@ def unloadModule(module):
     subprocess.call(["modprobe", "-r", module])
     
 def loadModules(bus):
-    if FUNCTIONS[bus]["enabled"] == False and not modulesLoaded(bus):
+    if BUSLIST[bus]["enabled"] == False and not modulesLoaded(bus):
         info("Loading %s modules" % bus)
-        for module in FUNCTIONS[bus]["modules"]:
+        for module in BUSLIST[bus]["modules"]:
             loadModule(module)
-        if "wait" in FUNCTIONS[bus]:
-            info("Sleeping %ds to let %s modules load" % (FUNCTIONS[bus]["wait"], bus))
-            time.sleep(FUNCTIONS[bus]["wait"])
+        if "wait" in BUSLIST[bus]:
+            info("Sleeping %ds to let %s modules load" % (BUSLIST[bus]["wait"], bus))
+            time.sleep(BUSLIST[bus]["wait"])
 
-    FUNCTIONS[bus]["enabled"] = True
+    BUSLIST[bus]["enabled"] = True
 
 def unloadModules(bus):
     info("Unloading %s modules" % bus)
-    for module in FUNCTIONS[bus]["modules"]:
+    for module in BUSLIST[bus]["modules"]:
         unloadModule(module)
-    FUNCTIONS[bus]["enabled"] = False
+    BUSLIST[bus]["enabled"] = False
         
 def __modulesLoaded__(modules, lines):
     if len(modules) == 0:
@@ -51,19 +58,22 @@ def __modulesLoaded__(modules, lines):
     return False
 
 def modulesLoaded(bus):
-    if not bus in FUNCTIONS or not "modules" in FUNCTIONS[bus]:
+    if not bus in BUSLIST or not "modules" in BUSLIST[bus]:
         return True
 
-    f = open("/proc/modules")
-    c = f.read()
-    f.close()
-    lines = c.split("\n")
-    return __modulesLoaded__(FUNCTIONS[bus]["modules"], lines)
+    try:
+        with open("/proc/modules") as f:
+            c = f.read()
+            f.close()
+            lines = c.split("\n")
+            return __modulesLoaded__(BUSLIST[bus]["modules"], lines)
+    except:
+        return False
 
 def checkAllBus():
-    for bus in FUNCTIONS:
+    for bus in BUSLIST:
         if modulesLoaded(bus):
-            FUNCTIONS[bus]["enabled"] = True
+            BUSLIST[bus]["enabled"] = True
 
 class Bus():
     def __init__(self, busName, device, flag=os.O_RDWR):

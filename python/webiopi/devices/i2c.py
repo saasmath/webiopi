@@ -12,12 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import os
-import sys
 import fcntl
 
-from webiopi.utils import *
-from webiopi.devices.bus import *
+from webiopi.utils.version import BOARD_REVISION
+from webiopi.devices.bus import Bus
 
 # /dev/i2c-X ioctl commands.  The ioctl's parameter is always an
 # unsigned long, except for:
