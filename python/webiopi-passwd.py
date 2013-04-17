@@ -48,7 +48,7 @@ while password != password2:
     password = getpass.getpass(_PASSWORD)
     password2 = getpass.getpass(_CONFIRM)
 
-from webiopi.utils import encryptCredentials
+from webiopi.utils.crypto import encryptCredentials
 auth = encryptCredentials(login, password)
 print("\nHash: %s" % auth)
 if file:
