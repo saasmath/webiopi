@@ -76,11 +76,14 @@ class Serial(Bus):
         return struct.unpack('I',s)[0]
     
     @request("GET", "")
-    def read(self):
+    def readString(self):
         if self.available() > 0:
-            return Bus.read(self, self.available()).decode()
+            return self.read(self.available()).decode()
         return ""
     
     @request("POST", "", "data")
-    def write(self, data):
-        Bus.write(self, data)
+    def writeString(self, data):
+        if isinstance(data, str):
+            self.write(data.encode())
+        else:
+            self.write(data)
