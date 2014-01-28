@@ -1292,7 +1292,7 @@ Luminosity.prototype.toString = function() {
 }
 
 Luminosity.prototype.getLux = function(callback) {
-	$.get(this.url + "/luminosity/lx", function(data) {
+	$.get(this.url + "/luminosity/lux", function(data) {
 		callback(this.name, data);
 	});
 }

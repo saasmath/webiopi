@@ -127,7 +127,7 @@ class Luminosity():
     def __getLux__(self):
         raise NotImplementedError
 
-    @request("GET", "sensor/luminosity/lx")
+    @request("GET", "sensor/luminosity/lux")
     @response("%.02f")
     def getLux(self):
         return self.__getLux__()

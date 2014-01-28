@@ -24,7 +24,7 @@ public class Luminosity extends Device {
 	}
 
 	public float getLux() {
-		return Float.parseFloat(this.sendRequest("GET", "/luminosity/lx"));
+		return Float.parseFloat(this.sendRequest("GET", "/luminosity/lux"));
 	}
 
 }
