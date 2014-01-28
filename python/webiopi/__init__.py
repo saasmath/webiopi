@@ -24,6 +24,7 @@ from webiopi.decorators.rest import macro
 
 from webiopi.devices import bus as _bus
 
+
 try:
     import _webiopi.GPIO as GPIO
 except:

@@ -18,7 +18,7 @@ import struct
 import termios
 
 from webiopi.devices.bus import Bus
-from webiopi.decorators.rest import request
+from webiopi.decorators.rest import request, response
 
 TIOCINQ   = hasattr(termios, 'FIONREAD') and termios.FIONREAD or 0x541B
 TIOCM_zero_str = struct.pack('I', 0)
@@ -76,6 +76,7 @@ class Serial(Bus):
         return struct.unpack('I',s)[0]
     
     @request("GET", "")
+    @response("%s")
     def readString(self):
         if self.available() > 0:
             return self.read(self.available()).decode()
