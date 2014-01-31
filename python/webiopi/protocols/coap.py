@@ -434,6 +434,7 @@ class COAPServer(threading.Thread):
         self.port = port
         self.multicast_ip = '224.0.1.123'
         if socket.has_ipv6:
+            print("Support IPv6")
             self.address_family = socket.AF_INET6
         else:
             self.address_family = socket.AF_INET
