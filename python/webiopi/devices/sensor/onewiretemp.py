@@ -33,6 +33,7 @@ class OneWireTemp(OneWire, Temperature):
             i = lines[1].find("=")
             temp = lines[1][i+1:]
             return int(temp) / 1000.0
+        return (-sys.maxint - 1) / 1000.0
     
     def __getFahrenheit__(self):
         return self.Celsius2Fahrenheit()
