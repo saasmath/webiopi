@@ -37,6 +37,7 @@ def displayHelp():
 def main(argv):
     port = 8000
     configfile = None
+    scriptfile = None
     logfile = None
     
     i = 1
