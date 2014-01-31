@@ -36,16 +36,17 @@ except:
 
 WEBIOPI_DOCROOT = "/usr/share/webiopi/htdocs"
 
-class HTTPServer6(BaseHTTPServer.HTTPServer):
+class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
     if socket.has_ipv6:
         address_family = socket.AF_INET6
-        print("Support IPv6")
-    else:
-        address_family = socket.AF_INET
 
-class HTTPServer(HTTPServer6, threading.Thread):
     def __init__(self, host, port, handler, context, docroot, index, auth=None):
-        HTTPServer6.__init__(self, ("", port), HTTPHandler)
+        try:
+            BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
+        except:
+            self.address_family = socket.AF_INET
+            BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
+
         threading.Thread.__init__(self, name="HTTPThread")
         self.host = host
         self.port = port

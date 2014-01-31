@@ -434,12 +434,13 @@ class COAPServer(threading.Thread):
         self.port = port
         self.multicast_ip = '224.0.1.123'
         if socket.has_ipv6:
-            print("Support IPv6")
-            self.address_family = socket.AF_INET6
+            address_family = socket.AF_INET6
         else:
-            self.address_family = socket.AF_INET
-        
-        self.socket = socket.socket(self.address_family, socket.SOCK_DGRAM)
+            address_family = socket.AF_INET
+        try:
+            self.socket = socket.socket(address_family, socket.SOCK_DGRAM)
+        except:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(('', port))
         self.socket.settimeout(1)
         self.running = True
