@@ -37,7 +37,7 @@ def getLocalIP():
             return "localhost"
 
 class Server():
-    def __init__(self, port=8000, coap_port=5683, login=None, password=None, passwdfile=None, configfile=None):
+    def __init__(self, port=8000, coap_port=5683, login=None, password=None, passwdfile=None, configfile=None, scriptfile=None):
         self.host = getLocalIP()
         self.gpio = NativeGPIO()
         self.restHandler = rest.RESTHandler()
@@ -64,7 +64,12 @@ class Server():
                 args[arg] = val
                 i+=1
             manager.addDevice(name, driver, args)
-                
+        
+
+        if scriptfile != None:
+            scriptname = scriptfile.split("/")[-1].split(".")[0]
+            loader.loadScript(scriptname, scriptfile, self.restHandler)    
+        
         scripts = config.items("SCRIPTS")
         for (name, source) in scripts:
             loader.loadScript(name, source, self.restHandler)

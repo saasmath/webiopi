@@ -49,8 +49,6 @@ def main(argv):
             i+=1
         elif argv[i] in ["-s", "-S", "--script-file"]:
             scriptfile = argv[i+1]
-            scriptname = scriptfile.split("/")[-1].split(".")[0]
-            loadScript(scriptname, scriptfile)
             i+=1
         elif argv[i] in ["-h", "-H", "--help"]:
             displayHelp()
@@ -67,7 +65,7 @@ def main(argv):
         logToFile(logfile)
 
     info("Starting %s" % VERSION_STRING)
-    server = Server(port=port, configfile=configfile)
+    server = Server(port=port, configfile=configfile, scriptfile=scriptfile)
     runLoop()
     server.stop()
 
