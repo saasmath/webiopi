@@ -40,7 +40,7 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
     if socket.has_ipv6:
         address_family = socket.AF_INET6
 
-    def __init__(self, host, port, handler, context, docroot, index, auth=None):
+    def __init__(self, host, port, handler, context, docroot, index, auth=None, realm=None):
         try:
             BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
         except:
@@ -69,6 +69,10 @@ class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
             
         self.handler = handler
         self.auth = auth
+        if (realm == None):
+            self.authenticateHeader = "Basic realm=webiopi"
+        else:
+            self.authenticateHeader = "Basic realm=%s" % realm
 
         self.running = True
         self.start()
@@ -126,7 +130,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def requestAuthentication(self):
         self.send_response(401)
-        self.send_header("WWW-Authenticate", 'Basic realm="webiopi"')
+        self.send_header("WWW-Authenticate", self.server.authenticateHeader)
         self.end_headers();
     
     def sendResponse(self, code, body=None, contentType="text/plain"):

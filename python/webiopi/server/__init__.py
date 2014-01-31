@@ -117,8 +117,10 @@ class Server():
         if auth == None or len(auth) == 0:
             logger.warn("Access unprotected")
         
+        realm = config.get("HTTP", "prompt", None)
+        
         if http_enabled:
-            self.http_server = http.HTTPServer(self.host, http_port, self.restHandler, context, docroot, index, auth)
+            self.http_server = http.HTTPServer(self.host, http_port, self.restHandler, context, docroot, index, auth, realm)
         else:
             self.http_server = None
         
