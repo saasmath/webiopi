@@ -99,7 +99,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     logger = logging.getLogger("HTTP")
 
     def log_message(self, fmt, *args):
-        self.logger.debug(fmt % args)
+        pass
     
     def log_error(self, fmt, *args):
         pass
@@ -132,6 +132,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(401)
         self.send_header("WWW-Authenticate", self.server.authenticateHeader)
         self.end_headers();
+        
+    
+    def logRequest(self, code):
+        self.logger.debug('"%s %s %s" - %s %s (Client: %s <%s>)' % (self.command, self.path, self.request_version, code, self.responses[code][0], self.client_address[0], self.headers["User-Agent"]))
     
     def sendResponse(self, code, body=None, contentType="text/plain"):
         if code >= 400:
@@ -146,7 +150,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header("Content-Type", contentType);
                 self.end_headers();
                 self.wfile.write(body.encode())
-                
+        self.logRequest(code)
+
     def findFile(self, filepath):
         if os.path.exists(filepath):
             if os.path.isdir(filepath):
@@ -194,6 +199,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("Content-Length", os.path.getsize(realPath))
         self.end_headers()
         self.wfile.write(data)
+        self.logRequest(200)
         
     def processRequest(self):
         self.request.settimeout(None)

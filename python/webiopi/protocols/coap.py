@@ -460,7 +460,7 @@ class COAPServer(threading.Thread):
                 #self.logger.debug("Sending Response:\n%s" % coapResponse)
                 responseBytes = coapResponse.getBytes()
                 self.socket.sendto(responseBytes, client)
-                self.logger.debug('"%s %s CoAP/%.1f" %s -' % (coapRequest.CODES[coapRequest.code], coapRequest.uri_path, coapRequest.version, coapResponse.CODES[coapResponse.code]))
+                self.logger.debug('"%s %s CoAP/%.1f" - %s (Client: %s)' % (coapRequest.CODES[coapRequest.code], coapRequest.uri_path, coapRequest.version, coapResponse.CODES[coapResponse.code], client[0]))
                 
             except socket.timeout as e:
                 continue
