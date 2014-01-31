@@ -1,7 +1,11 @@
 @CHARSET "UTF-8";
 
+body {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+}
+
 button {
-	-webkit-appearance: none;
 	font-size: 14pt;
 	font-weight: bold;
 	color: white;
