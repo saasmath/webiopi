@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 import os
+import socket
 import threading
 import codecs
 import mimetypes as mime
@@ -35,10 +36,14 @@ except:
 
 WEBIOPI_DOCROOT = "/usr/share/webiopi/htdocs"
 
-class HTTPServer(BaseHTTPServer.HTTPServer, threading.Thread):
+class HTTPServer6(BaseHTTPServer.HTTPServer):
+    address_family = socket.AF_INET6
+
+class HTTPServer(HTTPServer6, threading.Thread):
     def __init__(self, host, port, handler, context, docroot, index, auth=None):
-        BaseHTTPServer.HTTPServer.__init__(self, ("", port), HTTPHandler)
+        HTTPServer6.__init__(self, ("", port), HTTPHandler)
         threading.Thread.__init__(self, name="HTTPThread")
+        self.address_family = socket.AF_INET6
         self.host = host
         self.port = port
 
