@@ -46,10 +46,12 @@ function isMobile() {
 }
 */
 
+var isTouchDevice = "ontouchstart" in document.documentElement ? true : false;
+var BUTTON_DOWN   = isTouchDevice ? "touchstart" : "mousedown";
+var BUTTON_UP     = isTouchDevice ? "touchend"   : "mouseup";
+
+/*
 var deviceAgent = navigator.userAgent.toLowerCase();
-var isTouchDevice = false;
-var downEvent = "mousedown";
-var upEvent = "mouseup";
 if (deviceAgent.match(/(iphone|ipod|ipad)/) ||
 		deviceAgent.match(/(android)/)  || 
 		deviceAgent.match(/(iemobile)/) ||
@@ -61,10 +63,10 @@ if (deviceAgent.match(/(iphone|ipod|ipad)/) ||
 	"ontouchstart" in document.documentElement
 	) {
         isTouchDevice = true;
-		downEvent = "touchstart";
-		upEvent = "touchend";
+		BUTTON_DOWN = "touchstart";
+		BUTTON_UP = "touchend";
 }
-
+*/
 
 
 function WebIOPi() {
@@ -450,17 +452,17 @@ WebIOPi.prototype.createButton = function (id, label, callback, callbackUp) {
 	button.attr("id", id);
 	button.text(label);
 	if (callback != undefined) {
-		button.bind(downEvent, callback);
+		button.bind(BUTTON_DOWN, callback);
 	}
 	if (callbackUp != undefined) {
-		button.bind(upEvent, callbackUp);
+		button.bind(BUTTON_UP, callbackUp);
 	}
 	return button;
 }
 
 WebIOPi.prototype.createGPIOButton = function (gpio, label) {
 	var button = w().createButton("gpio" + gpio, label);
-	button.bind(downEvent, function(event) {
+	button.bind(BUTTON_DOWN, function(event) {
 		w().toggleValue(gpio);
 	});
 	return button;
@@ -469,7 +471,7 @@ WebIOPi.prototype.createGPIOButton = function (gpio, label) {
 WebIOPi.prototype.createFunctionButton = function (gpio) {
 	var button = w().createButton("function" + gpio, " ");
 	button.attr("class", "FunctionBasic");
-	button.bind(downEvent, function(event) {
+	button.bind(BUTTON_DOWN, function(event) {
 		w().toggleFunction(gpio);
 	});
 	return button;
@@ -477,7 +479,7 @@ WebIOPi.prototype.createFunctionButton = function (gpio) {
 
 WebIOPi.prototype.createPulseButton = function (id, label, gpio) {
     var button = webiopi().createButton(id, label);
-    button.bind(downEvent, function(event) {
+    button.bind(BUTTON_DOWN, function(event) {
         webiopi().pulse(gpio);
     });
     return button;
@@ -485,7 +487,7 @@ WebIOPi.prototype.createPulseButton = function (id, label, gpio) {
 
 WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
     var button = webiopi().createButton(id, label);
-    button.bind(downEvent, function(event) {
+    button.bind(BUTTON_DOWN, function(event) {
         webiopi().callMacro(macro, args);
     });
     return button;
@@ -493,7 +495,7 @@ WebIOPi.prototype.createMacroButton = function (id, label, macro, args) {
 
 WebIOPi.prototype.createSequenceButton = function (id, label, gpio, period, sequence) {
     var button = webiopi().createButton(id, label);
-    button.bind(downEvent, function(event) {
+    button.bind(BUTTON_DOWN, function(event) {
         webiopi().outputSequence(gpio, period, sequence);
     });
     return button;
