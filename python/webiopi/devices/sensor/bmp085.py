@@ -98,3 +98,11 @@ class BMP085(I2C, Temperature, Pressure):
         x2 = (-7357*p) /  2**16
         p = p + (x1 + x2 + 3791) / 2**4
         return int(p)
+
+class BMP180(BMP085):
+    def __init__(self, altitude=0, external=None):
+        BMP085.__init__(self, altitude, external)
+
+    def __str__(self):
+        return "BMP180"
+    

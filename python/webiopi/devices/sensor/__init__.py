@@ -170,7 +170,7 @@ class Distance():
         return self.getInch() / 36
     
 DRIVERS = {}
-DRIVERS["bmp085"] = ["BMP085"]
+DRIVERS["bmp085"] = ["BMP085", "BMP180"]
 DRIVERS["onewiretemp"] = ["DS1822", "DS1825", "DS18B20", "DS18S20", "DS28EA00"]
 DRIVERS["tmpXXX"] = ["TMP75", "TMP102", "TMP275"]
 DRIVERS["tslXXXX"] = ["TSL2561", "TSL2561CS", "TSL2561T", "TSL4531", "TSL45311", "TSL45313", "TSL45315", "TSL45317"]
