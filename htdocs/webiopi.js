@@ -1332,7 +1332,7 @@ Luminosity.prototype.refreshUI = function() {
 	
 	this.getLux(function(name, data){
 		if (element != undefined) {
-			element.header.text(lum + ": " + data + "lx");
+			element.header.text(lum + ": " + data + "lux");
 		}
 		setTimeout(function(){lum.refreshUI()}, lum.refreshTime);
 	});
